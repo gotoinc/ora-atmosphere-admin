@@ -6,7 +6,9 @@
     "scripts": {
         "dev": "vite --host",
         "build": "vue-tsc && vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "lint": "eslint --ext .js,.vue,.ts --fix src --max-warnings=0",
+        "prepare": "husky"
     },
     "dependencies": {
         "@vee-validate/yup": "^4.12.6",
@@ -40,6 +42,8 @@
         "vite": "^5.2.0",
         "vite-plugin-eslint": "^1.8.1",
         "vue-eslint-parser": "^9.4.2",
-        "vue-tsc": "^2.0.6"
+        "vue-tsc": "^2.0.6",
+        "husky": "^9.0.11",
+        "lint-staged": "^15.2.2"
     }
 }

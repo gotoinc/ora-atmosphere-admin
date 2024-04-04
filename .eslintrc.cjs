@@ -28,6 +28,7 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier', 'simple-import-sort'],
     rules: {
+        '@typescript-eslint/prefer-promise-reject-errors': 'off',
         '@typescript-eslint/await-thenable': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
         '@typescript-eslint/unified-signatures': 'off',
