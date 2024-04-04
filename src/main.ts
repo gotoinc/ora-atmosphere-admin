@@ -5,6 +5,7 @@ import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
 
 // Styles
 import './assets/tailwind.css';
+import 'vuetify/styles';
 // Router
 import router from '@/router';
 
@@ -13,6 +14,7 @@ const pinia = createPinia();
 pinia.use(piniaPluginPersistedState);
 
 import App from './App.vue';
+import vuetify from './vuetify.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-createApp(App).use(router).use(pinia).mount('#app');
+createApp(App).use(router).use(pinia).use(vuetify).mount('#app');

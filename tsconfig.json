@@ -34,7 +34,8 @@
         "./tailwind.config.ts",
         "./postcss.config.js",
         "./vue-shim.d.ts",
-        "./vite.config.ts"
+        "./vite.config.ts",
+        "./src/vuetify.ts"
     ],
     "references": [{ "path": "./tsconfig.node.json" }]
 }
