@@ -15,15 +15,11 @@ module.exports = {
     overrides: [],
     parser: 'vue-eslint-parser',
     parserOptions: {
-        parser: {
-            js: '@typescript-eslint/parser',
-            ts: '@typescript-eslint/parser',
-            '<template>': 'espree',
-        },
+        parser: '@typescript-eslint/parser',
         ecmaVersion: 2015,
         sourceType: 'module',
         allowImportExportEverywhere: true,
-        project: true,
+        project: './tsconfig.json',
         tsconfigRootDir: __dirname,
     },
     plugins: ['@typescript-eslint', 'prettier', 'simple-import-sort'],

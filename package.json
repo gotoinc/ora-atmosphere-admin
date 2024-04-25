@@ -24,6 +24,7 @@
         "yup": "^1.4.0"
     },
     "devDependencies": {
+        "@mdi/font": "^7.4.47",
         "@typescript-eslint/eslint-plugin": "^7.5.0",
         "@typescript-eslint/parser": "^7.5.0",
         "@vitejs/plugin-vue": "^5.0.4",
