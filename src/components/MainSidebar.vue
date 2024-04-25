@@ -8,40 +8,43 @@
 
         <v-list nav>
             <v-list-item
+                prepend-avatar="https://randomuser.me/api/portraits/women/85.jpg"
+                subtitle="sandra_a88@gmailcom"
+                title="Sandra Adams"
+                value="profile"
+                :to="{ name: 'profile' }"
+            ></v-list-item>
+
+            <v-divider></v-divider>
+
+            <v-list-item
                 :to="{ name: 'dashboard' }"
                 prepend-icon="mdi-home"
                 title="Dashboard"
-                value="myfiles"
+                value="dashboard"
             ></v-list-item>
 
             <v-list-item
                 :to="{ name: 'contents' }"
                 prepend-icon="mdi-video-vintage"
                 title="Contents"
-                value="shared"
+                value="contents"
             ></v-list-item>
 
             <v-list-item
                 :to="{ name: 'categories' }"
                 prepend-icon="mdi-shape-outline"
                 title="Categories"
-                value="starred"
+                value="categories"
             ></v-list-item>
         </v-list>
 
         <template #append>
             <v-list nav>
                 <v-list-item
-                    prepend-avatar="https://randomuser.me/api/portraits/women/85.jpg"
-                    subtitle="sandra_a88@gmailcom"
-                    title="Sandra Adams"
-                    to="#"
-                ></v-list-item>
-
-                <v-list-item
                     title="Logout"
                     prepend-icon="mdi-logout"
-                    to="#"
+                    value="logout"
                 ></v-list-item>
             </v-list>
         </template>
