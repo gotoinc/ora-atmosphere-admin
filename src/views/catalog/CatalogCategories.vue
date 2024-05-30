@@ -1,5 +1,5 @@
 <template>
-    <div class="mb-5 flex items-center gap-4">
+    <div class="mb-5 flex items-center gap-4 max-sm:flex-col">
         <v-text-field
             append-inner-icon="mdi-magnify"
             density="compact"
@@ -7,35 +7,36 @@
             variant="outlined"
             hide-details
             single-line
-            class="max-w-96"
+            class="max-w-96 max-sm:w-full max-sm:max-w-full"
         ></v-text-field>
 
-        <v-btn class="text-none" append-icon="mdi-plus" color="primary">
+        <v-btn
+            class="text-none max-sm:w-full"
+            append-icon="mdi-plus"
+            color="primary"
+        >
             Add new category
         </v-btn>
     </div>
 
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
-        <template #[`item.actions`]>
-            <v-icon class="me-2" size="small"> mdi-pencil </v-icon>
-
-            <v-icon size="small"> mdi-delete </v-icon>
-        </template>
-
-        <template #no-data>
-            <v-btn color="primary"> Reset </v-btn>
-        </template>
-    </v-data-table>
+    <catalog-table :headers="headers" :items="items" />
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
+
+    import CatalogTable from '@/components/base/CatalogTable.vue';
 
     const headers = ref([
         {
             title: 'Category',
             align: 'start',
             key: 'name',
+        },
+        {
+            title: 'Image',
+            key: 'image',
+            sortable: false,
         },
         {
             title: 'Contents amount',
@@ -58,16 +59,19 @@
             name: 'Brands & events',
             contents: 10,
             date: new Date().toDateString(),
+            image: '/public/images/example.jpg',
         },
         {
             name: 'Science',
             contents: 5,
             date: new Date().toDateString(),
+            image: '/public/images/example.jpg',
         },
         {
             name: 'Culture',
             contents: 5,
             date: new Date().toDateString(),
+            image: '/public/images/example.jpg',
         },
     ];
 </script>

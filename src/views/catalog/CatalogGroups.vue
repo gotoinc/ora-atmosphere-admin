@@ -15,21 +15,13 @@
         </v-btn>
     </div>
 
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
-        <template #[`item.actions`]>
-            <v-icon class="mr-2" size="small"> mdi-pencil </v-icon>
-
-            <v-icon size="small"> mdi-delete </v-icon>
-        </template>
-
-        <template #no-data>
-            <v-btn color="primary"> Reset </v-btn>
-        </template>
-    </v-data-table>
+    <catalog-table :headers="headers" :items="items" />
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
+
+    import CatalogTable from '@/components/base/CatalogTable.vue';
 
     const headers = ref([
         {

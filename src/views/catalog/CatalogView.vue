@@ -1,40 +1,38 @@
 <template>
     <section>
-        <div class="container">
-            <v-tabs v-model="tab" class="mb-5 border-b border-white">
-                <v-tab
-                    :to="{ name: 'categoriesView' }"
-                    rounded
-                    class="text-none"
-                    color="white"
-                    :value="1"
-                >
-                    Categories
-                </v-tab>
+        <v-tabs v-model="tab" class="mb-5 border-b border-white">
+            <v-tab
+                :to="{ name: 'categoriesView' }"
+                rounded
+                class="text-none"
+                color="white"
+                :value="1"
+            >
+                Categories
+            </v-tab>
 
-                <v-tab
-                    :to="{ name: 'groupsView' }"
-                    rounded
-                    class="text-none"
-                    color="white"
-                    :value="2"
-                >
-                    Groups
-                </v-tab>
+            <v-tab
+                :to="{ name: 'groupsView' }"
+                rounded
+                class="text-none"
+                color="white"
+                :value="2"
+            >
+                Groups
+            </v-tab>
 
-                <v-tab
-                    :to="{ name: 'themesView' }"
-                    rounded
-                    class="text-none"
-                    color="white"
-                    :value="3"
-                >
-                    Themes
-                </v-tab>
-            </v-tabs>
+            <v-tab
+                :to="{ name: 'themesView' }"
+                rounded
+                class="text-none"
+                color="white"
+                :value="3"
+            >
+                Themes
+            </v-tab>
+        </v-tabs>
 
-            <router-view></router-view>
-        </div>
+        <router-view></router-view>
     </section>
 </template>
 

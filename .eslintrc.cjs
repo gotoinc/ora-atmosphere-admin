@@ -15,7 +15,12 @@ module.exports = {
     overrides: [],
     parser: 'vue-eslint-parser',
     parserOptions: {
-        parser: '@typescript-eslint/parser',
+        parser: {
+            js: '@typescript-eslint/parser',
+            ts: '@typescript-eslint/parser',
+            '<template>': 'espree',
+        },
+        extraFileExtensions: ['.pcss', '.vue'],
         ecmaVersion: 2015,
         sourceType: 'module',
         allowImportExportEverywhere: true,
@@ -24,10 +29,10 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier', 'simple-import-sort'],
     rules: {
-        '@typescript-eslint/prefer-promise-reject-errors': 'off',
         '@typescript-eslint/await-thenable': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
         '@typescript-eslint/unified-signatures': 'off',
+        '@typescript-eslint/prefer-promise-reject-errors': 'off',
         '@typescript-eslint/no-for-in-array': 'error',
         '@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
         '@typescript-eslint/array-type': [
@@ -40,6 +45,7 @@ module.exports = {
         'no-unused-vars': 'off',
         '@typescript-eslint/no-unused-vars': 'warn',
         'require-await': 'off',
+        'no-prototype-builtins': 'off',
         '@typescript-eslint/require-await': 'error',
         'default-param-last': ['error'],
         '@typescript-eslint/consistent-type-imports': [
@@ -54,13 +60,14 @@ module.exports = {
                 patterns: ['../'],
             },
         ],
+        '@typescript-eslint/restrict-template-expressions': 'off',
         '@typescript-eslint/no-duplicate-enum-values': 'error',
         '@typescript-eslint/no-duplicate-type-constituents': 'error',
         '@typescript-eslint/no-inferrable-types': 'error',
         '@typescript-eslint/method-signature-style': ['error', 'property'],
         '@typescript-eslint/no-unsafe-member-access': 'error',
         '@typescript-eslint/naming-convention': [
-            'error',
+            'warn',
             {
                 selector: 'variable',
                 types: ['boolean'],
@@ -91,7 +98,6 @@ module.exports = {
                 leadingUnderscore: 'allow',
             },
         ],
-        'no-prototype-builtins': 'off',
         'vue/require-default-prop': 'off',
         'vue/no-v-model-argument': 'off',
         'vue/multi-word-component-names': 'off',

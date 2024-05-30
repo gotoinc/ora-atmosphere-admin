@@ -9,11 +9,18 @@
     }
 
     .container {
-        @apply px-3
+        margin: 0 auto;
+        max-width: 1536px;
+        padding: 0 12px;
+        width: 100%;
     }
 
     body {
         @apply text-white
+    }
+
+    .v-tooltip > .v-overlay__content {
+        @apply !bg-white font-semibold
     }
 }
 
