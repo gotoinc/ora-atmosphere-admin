@@ -1,44 +1,76 @@
+import { useAuthStore } from '@/stores/auth.store.ts';
+import { useSignUpStore } from '@/stores/sign-up.store.ts';
+
 export default {
     path: '/auth',
     name: 'auth',
     component: () => import('@/views/auth/AuthView.vue'),
 
-    redirect: { name: 'login' },
+    redirect: { name: 'signInView' },
 
     children: [
         {
-            path: '/login',
-            name: 'login',
-            component: () => import('@/views/auth/LoginView.vue'),
+            path: '/sign-in',
+            name: 'signInView',
+            component: () => import('@/views/auth/SignInView.vue'),
             meta: {
                 title: 'Sign in',
             },
         },
         {
-            path: '/register',
-            name: 'register',
-            component: () => import('@/views/auth/RegisterView.vue'),
+            path: '/sign-up',
+            name: 'signUpView',
+            component: () => import('@/views/auth/SignUpView.vue'),
             meta: {
-                title: 'Register',
+                title: 'Sign up',
             },
+
+            redirect: { name: 'signUpFirstStep' },
+
+            children: [
+                {
+                    path: '1',
+                    name: 'signUpFirstStep',
+                    component: () =>
+                        import('@/views/auth/SignUpFirstStepView.vue'),
+                },
+                {
+                    path: '2',
+                    name: 'signUpSecondStep',
+                    component: () =>
+                        import('@/views/auth/SignUpSecondStepView.vue'),
+
+                    beforeEnter: () => {
+                        const { firstStepValues, validateObject } =
+                            useSignUpStore();
+
+                        if (!validateObject(firstStepValues)) {
+                            return { name: 'signUpFirstStep' };
+                        }
+                    },
+                },
+            ],
         },
         {
             path: '/reset-password',
-            name: 'resetPassword',
+            name: 'resetPasswordView',
             component: () => import('@/views/auth/ResetPasswordView.vue'),
             meta: {
                 title: 'Reset password',
             },
         },
         {
-            path: '/recover-sent',
-            name: 'recoverSent',
-            component: () => import('@/views/auth/ResetSentView.vue'),
-        },
-        {
             path: '/set-new-password',
-            name: 'setNewPassword',
+            name: 'setNewPasswordView',
             component: () => import('@/views/auth/SetNewPasswordView.vue'),
+
+            beforeEnter: () => {
+                const { isEmailConfirmed } = useAuthStore();
+
+                if (!isEmailConfirmed) {
+                    return { name: 'main' };
+                }
+            },
         },
     ],
 };

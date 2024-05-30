@@ -5,10 +5,17 @@ import { defineStore } from 'pinia';
 export const useAuthStore = defineStore(
     'auth',
     () => {
-        const auth = ref('');
+        const isEmailConfirmed = ref(false);
+        const isAuthenticated = ref(true);
+
+        const logout = () => {
+            isAuthenticated.value = false;
+        };
 
         return {
-            auth,
+            isEmailConfirmed,
+            isAuthenticated,
+            logout,
         };
     },
     {

@@ -91,6 +91,7 @@ module.exports = {
                 leadingUnderscore: 'allow',
             },
         ],
+        'no-prototype-builtins': 'off',
         'vue/require-default-prop': 'off',
         'vue/no-v-model-argument': 'off',
         'vue/multi-word-component-names': 'off',
