@@ -19,6 +19,7 @@ export default createVuetify({
                     background: tailwindConfig.theme.extend.colors.dark,
                     // surface: '#fff',
                     primary: tailwindConfig.theme.extend.colors.primary['100'],
+                    red: tailwindConfig.theme.extend.colors.error,
                 },
             },
         },

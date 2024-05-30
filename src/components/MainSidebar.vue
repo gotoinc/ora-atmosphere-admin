@@ -8,13 +8,20 @@
             <v-divider></v-divider>
 
             <v-list nav>
-                <v-list-item
-                    prepend-avatar="https://randomuser.me/api/portraits/women/85.jpg"
-                    subtitle="sandra_a88@gmailcom"
-                    title="Sandra Adams"
-                    value="profile"
-                    :to="{ name: 'profile' }"
-                ></v-list-item>
+                <div class="flex items-center gap-1">
+                    <div
+                        class="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-50"
+                    >
+                        <v-icon icon="mdi-account"></v-icon>
+                    </div>
+
+                    <v-list-item
+                        subtitle="test@gmail.com"
+                        title="Philippe Walter"
+                        value="profile"
+                        :to="{ name: 'profile' }"
+                    ></v-list-item>
+                </div>
 
                 <v-divider></v-divider>
 
@@ -33,9 +40,9 @@
                 ></v-list-item>
 
                 <v-list-item
-                    :to="{ name: 'categories' }"
+                    :to="{ name: 'catalogView' }"
                     prepend-icon="mdi-shape-outline"
-                    title="Categories"
+                    title="Catalog"
                     value="categories"
                 ></v-list-item>
             </v-list>
