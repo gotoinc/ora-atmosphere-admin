@@ -33,9 +33,9 @@
                 ></v-list-item>
 
                 <v-list-item
-                    :to="{ name: 'categories' }"
+                    :to="{ name: 'catalogView' }"
                     prepend-icon="mdi-shape-outline"
-                    title="Categories"
+                    title="Catalog"
                     value="categories"
                 ></v-list-item>
             </v-list>

@@ -20,7 +20,7 @@
 
             <!-- Main view -->
             <v-main>
-                <div class="pl-10 pt-10">
+                <div class="py-10 pl-10">
                     <router-view></router-view>
                 </div>
             </v-main>
