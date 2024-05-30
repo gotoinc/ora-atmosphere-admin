@@ -3,9 +3,14 @@ export interface VideoContent {
     title: string;
     description: string;
     file: string;
+    image: string;
     languages: Language[];
     tags: string[];
     requires_auth: boolean;
+    duration: number;
+    with_sound: boolean;
+    with_narration: boolean;
+    date_created: string;
 }
 
 export interface Language {

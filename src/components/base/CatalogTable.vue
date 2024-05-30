@@ -2,7 +2,7 @@
     <v-data-table class="!rounded-lg" :headers="headers" :items="items">
         <template #[`item.actions`]="{ item }">
             <div class="flex items-center justify-end gap-2">
-                <button class="icon bg-primary-50">
+                <button class="action-icon bg-primary-50">
                     <v-icon size="small" @click="() => console.log(item)">
                         mdi-pencil
                     </v-icon>
@@ -12,7 +12,7 @@
                     </v-tooltip>
                 </button>
 
-                <button class="icon bg-red-500">
+                <button class="action-icon bg-red-500">
                     <v-icon size="small"> mdi-delete </v-icon>
 
                     <v-tooltip activator="parent" location="top">
@@ -54,14 +54,4 @@
     defineProps<Props>();
 </script>
 
-<style scoped lang="postcss">
-    .icon {
-        @apply flex h-8 w-8 items-center justify-center rounded;
-    }
-</style>
-
-<style>
-    .v-table > .v-table__wrapper > table {
-        min-width: 768px;
-    }
-</style>
+<style></style>
