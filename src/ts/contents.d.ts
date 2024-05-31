@@ -1,13 +1,10 @@
-import type { CategoryBrief } from '@/ts/catalog';
-
-export interface Content {
+export interface VideoContent {
     id: number;
-    file_url: string;
-    image_url: string;
     title: string;
-    topic: CategoryBrief;
-    description?: string;
-    language: string;
+    description: string;
+    file: string;
+    image: string;
+    languages: Language[];
     audio?: string[];
     tags: string[];
     requires_auth: boolean;
@@ -15,4 +12,9 @@ export interface Content {
     with_sound: boolean;
     with_narration: boolean;
     date_created: string;
+}
+
+export interface Language {
+    id: number;
+    name: string;
 }

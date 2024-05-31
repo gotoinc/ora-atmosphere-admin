@@ -20,23 +20,45 @@
         </v-btn>
     </div>
 
-    <catalog-table :headers="headers" :items="items" />
+    <catalog-table
+        :headers="headers"
+        :items="items"
+        @edit="handleEdit"
+        @delete="handleDelete"
+    />
 
-    <full-screen-dialog v-model="isDialogOpen" title="Create new group">
-        <create-group-form />
-    </full-screen-dialog>
+    <!--  Dialogs   -->
+    <teleport to="body">
+        <full-screen-dialog v-model="isDialogOpen" title="Create new group">
+            <create-group-form />
+        </full-screen-dialog>
+
+        <full-screen-dialog
+            v-model="isEditOpen"
+            :title="`Edit - ${selectedGroup?.name}`"
+        >
+            <create-group-form v-model:group="selectedGroup" />
+        </full-screen-dialog>
+
+        <delete-dialog v-model="isDeleteOpen" :title="selectedGroup?.name" />
+    </teleport>
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
+    import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateGroupForm from '@/components/forms/CreateGroupForm.vue';
 
+    import type { CatalogItem, Group } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isDialogOpen = ref(false);
+    const isEditOpen = ref(false);
+    const isDeleteOpen = ref(false);
+    const selectedGroup = ref<Group | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
         {
@@ -51,15 +73,15 @@
         },
         {
             title: 'Category',
-            key: 'category',
+            key: 'category.name',
         },
         {
             title: 'Contents amount',
-            key: 'contents',
+            key: 'contents_amount',
         },
         {
             title: 'Date',
-            key: 'date',
+            key: 'date_created',
         },
         {
             align: 'end',
@@ -71,41 +93,57 @@
 
     const items = [
         {
+            id: 1,
             name: 'Brands',
-            contents: 5,
-            category: 'Brands & events',
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            category: {
+                id: 2,
+                name: 'Science',
+            },
+            requires_auth: false,
+            contents_amount: 10,
+            topics: [],
+            date_created: new Date().toDateString(),
         },
         {
+            id: 2,
             name: 'Events',
-            contents: 5,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
-            category: 'Brands & events',
+            category: {
+                id: 2,
+                name: 'Brands & events',
+            },
+            requires_auth: false,
+            contents_amount: 23,
+            topics: [],
+            date_created: new Date().toDateString(),
         },
         {
-            name: 'Climate',
-            contents: 5,
-            date: new Date().toDateString(),
+            id: 3,
+            name: 'Culture',
             image: '/public/images/example.jpg',
-            category: 'Science',
-        },
-        {
-            name: 'Biodiversity',
-            contents: 5,
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
-        },
-        {
-            name: 'Space',
-            contents: 2,
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
+            category: {
+                id: 2,
+                name: 'Brands & events',
+            },
+            requires_auth: false,
+            topics: [],
+            contents_amount: 12,
+            date_created: new Date().toDateString(),
         },
     ];
+
+    const handleEdit = (group: CatalogItem) => {
+        selectedGroup.value = group as Group;
+
+        isEditOpen.value = true;
+    };
+
+    const handleDelete = (group: CatalogItem) => {
+        selectedGroup.value = group as Group;
+
+        isDeleteOpen.value = true;
+    };
 </script>
 
 <style scoped></style>

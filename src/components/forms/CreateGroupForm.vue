@@ -2,7 +2,7 @@
     <h3 class="mb-5 text-lg">Please fill out the fields below</h3>
 
     <form class="grid gap-2" @submit.prevent="onSubmit">
-        <fieldset>
+        <div>
             <p class="mb-3">Please enter a group name</p>
 
             <v-text-field
@@ -13,9 +13,9 @@
                 variant="outlined"
                 :error-messages="errors.name"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <p class="mb-3">Please select parent category</p>
 
             <v-select
@@ -23,20 +23,31 @@
                 label="Category"
                 variant="outlined"
                 clearable
-                :error-messages="errors.category"
-                :items="['Brands & events', 'Science', 'Culture']"
+                :error-messages="errors.category_id"
+                :items="categories"
+                return-object
+                item-title="name"
+                @update:model-value="selectCategoryId"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
-            <p class="mb-3">Please choose a file of background</p>
+        <catalog-image-upload
+            v-model:name="name"
+            :show-card="isFileSelected"
+            :background="image"
+            :error="!!errors.image"
+            @upload="selectFile"
+            @remove="removeFile"
+        />
 
-            <drag-and-drop
-                :error="!!errors.background"
-                @upload="selectFile"
-                @remove="removeFile"
-            />
-        </fieldset>
+        <v-checkbox
+            v-model="requiresAuth"
+            hide-details
+            color="primary"
+            class="mb-5"
+            density="comfortable"
+            label="Visible for unregistered users"
+        ></v-checkbox>
 
         <v-btn type="submit" color="primary" class="text-none w-fit">
             Save
@@ -48,40 +59,79 @@
     import { ref } from 'vue';
     import { useForm } from 'vee-validate';
 
-    import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+    import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
 
+    import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
+    import type { CategoryBrief, Group } from '@/ts/catalog';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
     import type { CreateGroup } from '@/validations/types/catalog';
 
-    const uploadedFile = ref<File | null>(null);
+    const props = defineProps<{ group?: Group | null }>();
 
-    const { defineField, handleSubmit, errors, resetForm } =
+    const isFileSelected = ref(!!props.group);
+    const imageFile = ref<File | null>();
+
+    const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateGroup>({
             validationSchema: createGroupSchema,
             initialValues: {
                 name: '',
-                background: '',
+                image: '',
             },
         });
 
+    const category = ref<CategoryBrief | null>();
     const [name] = defineField('name');
-    const [background] = defineField('background');
-    const [category] = defineField('category');
+    const [image] = defineField('image');
+    const [categoryId] = defineField('category_id');
+    const [requiresAuth] = defineField('requires_auth');
+
+    if (props.group) {
+        category.value = props.group.category;
+        categoryId.value = props.group.category.id;
+
+        setValues(
+            useExcludeProperties({ ...props.group }, ['id', 'date_created'])
+        );
+    }
+
+    /**
+     * Test categories
+     */
+    const categories = [
+        {
+            id: 2,
+            name: 'Science',
+        },
+        {
+            id: 1,
+            name: 'Brands & events',
+        },
+    ];
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            uploadedFile.value = value[0].file;
-            background.value = value[0].name;
+            image.value = URL.createObjectURL(value[0].file);
+            imageFile.value = value[0].file;
+        }
+    };
+
+    const selectCategoryId = (category?: CategoryBrief) => {
+        if (category) {
+            categoryId.value = category.id;
         }
     };
 
     const removeFile = () => {
-        uploadedFile.value = null;
-        background.value = '';
+        isFileSelected.value = false;
+        image.value = '';
+        imageFile.value = null;
     };
 
     const onSubmit = handleSubmit(() => {
+        category.value = null;
+        removeFile();
         resetForm();
     });
 </script>

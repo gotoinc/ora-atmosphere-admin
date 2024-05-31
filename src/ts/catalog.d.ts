@@ -1,25 +1,29 @@
-export interface Category {
+import type { VideoContent } from '@/ts/contents';
+
+interface CommonCatalogTypes {
     id: number;
     name: string;
-    image_url: string;
+    image: string;
     requires_auth: boolean;
+    contents_amount: number;
+    date_created: string;
 }
 
-export interface Group {
-    id: number;
-    name: string;
-    image_url: string;
-    category_id: number;
-    requires_auth: boolean;
+export interface Category extends CommonCatalogTypes {
+    groups: Group[];
 }
 
-export interface Topic {
-    id: number;
-    name: string;
-    image_url: string;
-    group_id: number;
-    requires_auth: boolean;
+export interface Group extends CommonCatalogTypes {
+    topics: Topic[];
+    category: CategoryBrief;
 }
+
+export interface Topic extends CommonCatalogTypes {
+    group: CategoryBrief;
+    videos: VideoContent[];
+}
+
+export type CatalogItem = Category | Group | Topic;
 
 export interface Catalog {
     category: Category;

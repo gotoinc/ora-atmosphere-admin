@@ -1,6 +1,6 @@
 <template>
     <v-dialog v-model="isDialogOpen" max-width="400">
-        <div class="rounded-lg bg-dark p-5 text-center shadow-2xl">
+        <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
             <h3 class="mb-5 text-xl font-semibold">
                 Delete
                 <span v-if="title" class="text-primary-50">

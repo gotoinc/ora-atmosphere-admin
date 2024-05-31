@@ -20,23 +20,45 @@
         </v-btn>
     </div>
 
-    <catalog-table :headers="headers" :items="items" />
+    <catalog-table
+        :headers="headers"
+        :items="items"
+        @edit="handleEdit"
+        @delete="handleDelete"
+    />
 
-    <full-screen-dialog v-model="isDialogOpen" title="Create new category">
-        <create-category-form />
-    </full-screen-dialog>
+    <!--  Dialogs   -->
+    <teleport to="body">
+        <full-screen-dialog v-model="isDialogOpen" title="Create new category">
+            <create-category-form />
+        </full-screen-dialog>
+
+        <full-screen-dialog
+            v-model="isEditOpen"
+            :title="`Edit - ${selectedCategory?.name}`"
+        >
+            <create-category-form v-model:category="selectedCategory" />
+        </full-screen-dialog>
+
+        <delete-dialog v-model="isDeleteOpen" :title="selectedCategory?.name" />
+    </teleport>
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
+    import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateCategoryForm from '@/components/forms/CreateCategoryForm.vue';
 
+    import type { CatalogItem, Category } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isDialogOpen = ref(false);
+    const isEditOpen = ref(false);
+    const isDeleteOpen = ref(false);
+    const selectedCategory = ref<Category | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
         {
@@ -51,11 +73,11 @@
         },
         {
             title: 'Contents amount',
-            key: 'contents',
+            key: 'contents_amount',
         },
         {
             title: 'Date',
-            key: 'date',
+            key: 'date_created',
         },
         {
             align: 'end',
@@ -67,24 +89,45 @@
 
     const items = [
         {
+            id: 1,
             name: 'Brands & events',
-            contents: 10,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            requires_auth: false,
+            contents_amount: 10,
+            groups: [],
+            date_created: new Date().toDateString(),
         },
         {
+            id: 2,
             name: 'Science',
-            contents: 5,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            requires_auth: false,
+            contents_amount: 23,
+            groups: [],
+            date_created: new Date().toDateString(),
         },
         {
+            id: 3,
             name: 'Culture',
-            contents: 5,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            requires_auth: false,
+            contents_amount: 12,
+            groups: [],
+            date_created: new Date().toDateString(),
         },
     ];
+
+    const handleEdit = (category: CatalogItem) => {
+        selectedCategory.value = category as Category;
+
+        isEditOpen.value = true;
+    };
+
+    const handleDelete = (category: CatalogItem) => {
+        selectedCategory.value = category as Category;
+
+        isDeleteOpen.value = true;
+    };
 </script>
 
 <style scoped lang="postcss"></style>

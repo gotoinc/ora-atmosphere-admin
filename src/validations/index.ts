@@ -50,7 +50,7 @@ export const topicSchema = object().shape({
         .min(1, 'Name must be at least 1 character long')
         .max(255, 'Name must be at most 255 characters long'),
 
-    image_url: string().required('Image URL is required'),
+    image: string().required('Image URL is required'),
 
     group_id: number()
         .required('Group ID is required')
