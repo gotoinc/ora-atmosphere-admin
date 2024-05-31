@@ -9,7 +9,7 @@
     >
         <div
             :class="{ '!border-white': dropZoneActive || files.length > 0 }"
-            class="rounded border-2 border-dashed !border-grey-200 p-10 transition-colors"
+            class="relative rounded border-2 border-dashed !border-grey-200 p-10 transition-colors max-sm:p-5"
         >
             <label
                 v-if="files.length === 0"
@@ -18,7 +18,7 @@
             >
                 <svg
                     :class="{ '-translate-y-2': dropZoneActive }"
-                    class="mx-auto h-20 w-20 transition-transform group-hover:-translate-y-2"
+                    class="mx-auto h-20 w-20 transition-transform group-hover:-translate-y-2 max-sm:h-10 max-sm:w-10"
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -29,20 +29,22 @@
                     />
                 </svg>
 
-                <span class="mt-4 block text-2xl">
+                <span class="mt-4 block text-2xl max-sm:text-xl">
                     <strong>Choose a file</strong> or drag it here
                 </span>
 
                 <input id="file-input" type="file" @change="onInputChange" />
             </label>
 
-            <div v-else class="relative mx-auto w-fit">
-                <span class="text-lg">
+            <div v-else class="mx-auto w-fit">
+                <span
+                    class="inline-block w-96 truncate text-lg max-sm:w-56 max-sm:text-base"
+                >
                     {{ files[0].name }}
                 </span>
 
                 <span
-                    class="absolute bottom-full left-full flex h-5 w-5 translate-x-2 translate-y-3 cursor-pointer items-center justify-center rounded-full bg-white transition-colors hover:!bg-red-500 hover:!text-white"
+                    class="absolute right-0 top-0 flex h-5 w-5 -translate-x-2 translate-y-2 cursor-pointer items-center justify-center rounded-full bg-white transition-colors hover:!bg-red-500 hover:!text-white"
                     @click="removeFile(files[0])"
                 >
                     <v-icon size="14" icon="mdi-close" />

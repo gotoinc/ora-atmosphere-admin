@@ -42,13 +42,12 @@
 </template>
 
 <script setup lang="ts">
-    import type { VDataTable } from 'vuetify/components';
-
-    type ReadonlyHeaders = VDataTable['$props']['headers'];
+    import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {
         headers: ReadonlyHeaders;
-        items: never[];
+        // eslint-disable-next-line
+        items: any[];
         editable?: boolean;
     }
 

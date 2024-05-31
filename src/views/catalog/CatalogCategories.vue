@@ -22,59 +22,46 @@
 
     <catalog-table :headers="headers" :items="items" />
 
-    <v-dialog
-        v-model="isDialogOpen"
-        transition="dialog-bottom-transition"
-        fullscreen
-    >
-        <v-card>
-            <v-toolbar class="mb-5" color="primary">
-                <div class="container flex items-center">
-                    <v-toolbar-title>Create new category</v-toolbar-title>
+    <full-screen-dialog v-model="isDialogOpen" title="Create new category">
+        <h3 class="mb-5 text-lg">Please fill out the fields below</h3>
 
-                    <v-btn
-                        icon="mdi-close"
-                        @click="isDialogOpen = false"
-                    ></v-btn>
-                </div>
-            </v-toolbar>
+        <form class="grid gap-2" @submit.prevent>
+            <fieldset>
+                <p class="mb-3">Please enter a category name</p>
 
-            <div class="container">
-                <h3 class="mb-5 text-lg">Please fill out the fields below</h3>
+                <v-text-field
+                    v-model="name"
+                    name="name"
+                    label="Category name"
+                    type="name"
+                    variant="outlined"
+                />
+            </fieldset>
 
-                <form @submit.prevent>
-                    <p class="mb-3">Please enter a category name</p>
+            <fieldset>
+                <p class="mb-3">Please choose a file of background</p>
 
-                    <v-text-field
-                        v-model="name"
-                        name="name"
-                        label="Category name"
-                        type="name"
-                        variant="outlined"
-                        class="mb-2"
-                    />
+                <drag-and-drop @upload="(value) => console.log(value)" />
+            </fieldset>
 
-                    <p class="mb-3">Please choose a file of background</p>
-
-                    <drag-and-drop @upload="(value) => console.log(value)" />
-
-                    <v-btn color="primary text-none"> Save </v-btn>
-                </form>
-            </div>
-        </v-card>
-    </v-dialog>
+            <v-btn color="primary" class="text-none w-fit"> Save </v-btn>
+        </form>
+    </full-screen-dialog>
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
+    import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+
+    import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isDialogOpen = ref(false);
     const name = ref('');
 
-    const headers = ref([
+    const headers = ref<ReadonlyHeaders>([
         {
             title: 'Category',
             align: 'start',
