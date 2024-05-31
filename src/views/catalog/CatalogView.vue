@@ -1,5 +1,7 @@
 <template>
     <section>
+        <h1 class="mb-5 text-2xl font-bold">Catalog</h1>
+
         <v-tabs v-model="tab" class="mb-5 border-b border-white">
             <v-tab
                 :to="{ name: 'categoriesView' }"

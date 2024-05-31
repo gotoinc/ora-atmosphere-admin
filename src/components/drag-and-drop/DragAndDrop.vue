@@ -4,12 +4,14 @@
         :class="{
             'bg-primary-100': files.length > 0,
         }"
-        class="drop-area group mb-5 w-full rounded bg-grey-100 p-3 text-center transition-colors"
+        class="drop-area group mb-5 w-full rounded bg-grey-200 p-3 text-center transition-colors"
         @files-dropped="dropFiles"
     >
         <div
-            :class="{ '!border-white': dropZoneActive || files.length > 0 }"
-            class="relative rounded border-2 border-dashed !border-grey-200 p-10 transition-colors max-sm:p-5"
+            :class="{
+                '!border-red-500': error,
+            }"
+            class="relative rounded border-2 border-dashed border-white p-10 transition-colors max-sm:p-5"
         >
             <label
                 v-if="files.length === 0"
@@ -45,7 +47,7 @@
 
                 <span
                     class="absolute right-0 top-0 flex h-5 w-5 -translate-x-2 translate-y-2 cursor-pointer items-center justify-center rounded-full bg-white transition-colors hover:!bg-red-500 hover:!text-white"
-                    @click="removeFile(files[0])"
+                    @click="onRemoveFile"
                 >
                     <v-icon size="14" icon="mdi-close" />
                 </span>
@@ -61,11 +63,17 @@
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFiles } from '@/hooks/useFileList.ts';
 
+    interface Props {
+        error?: boolean;
+    }
+
     interface Emits {
         (e: 'upload', value: UploadableFile[] | UploadableFile): void;
+        (e: 'remove'): void;
     }
 
     const emits = defineEmits<Emits>();
+    defineProps<Props>();
 
     const { files, addFiles, removeFile } = useFiles();
 
@@ -75,7 +83,7 @@
         emits('upload', files.value);
     };
 
-    function onInputChange(e: Event) {
+    const onInputChange = (e: Event) => {
         const input = e.target as HTMLInputElement;
 
         if (input.files) {
@@ -85,7 +93,12 @@
         input.value = ''; // reset so that selecting the same file again will still cause it to fire this change
 
         emits('upload', files.value);
-    }
+    };
+
+    const onRemoveFile = () => {
+        removeFile(files.value[0]);
+        emits('remove');
+    };
 </script>
 
 <style scoped lang="postcss">
