@@ -51,18 +51,12 @@
                         label="Category name"
                         type="name"
                         variant="outlined"
-                        hint="Enter name of category"
                         class="mb-2"
                     />
 
                     <p class="mb-3">Please choose a file of background</p>
 
-                    <v-file-input
-                        variant="outlined"
-                        label="Category background"
-                        show-size
-                        prepend-icon=""
-                    ></v-file-input>
+                    <drag-and-drop @upload="(value) => console.log(value)" />
 
                     <v-btn color="primary text-none"> Save </v-btn>
                 </form>
@@ -75,6 +69,7 @@
     import { ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
+    import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
 
     const isDialogOpen = ref(false);
     const name = ref('');
@@ -128,4 +123,4 @@
     ];
 </script>
 
-<style scoped></style>
+<style scoped lang="postcss"></style>
