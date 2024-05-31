@@ -1,5 +1,4 @@
 import { useAuthStore } from '@/stores/auth.store.ts';
-import { useSignUpStore } from '@/stores/sign-up.store.ts';
 
 export default {
     path: '/auth',
@@ -16,40 +15,6 @@ export default {
             meta: {
                 title: 'Sign in',
             },
-        },
-        {
-            path: '/sign-up',
-            name: 'signUpView',
-            component: () => import('@/views/auth/SignUpView.vue'),
-            meta: {
-                title: 'Sign up',
-            },
-
-            redirect: { name: 'signUpFirstStep' },
-
-            children: [
-                {
-                    path: '1',
-                    name: 'signUpFirstStep',
-                    component: () =>
-                        import('@/views/auth/SignUpFirstStepView.vue'),
-                },
-                {
-                    path: '2',
-                    name: 'signUpSecondStep',
-                    component: () =>
-                        import('@/views/auth/SignUpSecondStepView.vue'),
-
-                    beforeEnter: () => {
-                        const { firstStepValues, validateObject } =
-                            useSignUpStore();
-
-                        if (!validateObject(firstStepValues)) {
-                            return { name: 'signUpFirstStep' };
-                        }
-                    },
-                },
-            ],
         },
         {
             path: '/reset-password',

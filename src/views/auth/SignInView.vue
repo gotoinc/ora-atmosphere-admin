@@ -44,16 +44,6 @@
                 Sign In
             </v-btn>
         </form>
-
-        <p>
-            Don’t have an account?
-            <router-link
-                class="underline transition-colors hover:text-primary-100"
-                :to="{ name: 'signUpView' }"
-            >
-                Sign Up
-            </router-link>
-        </p>
     </div>
 </template>
 
