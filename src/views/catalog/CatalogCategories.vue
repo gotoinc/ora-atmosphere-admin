@@ -51,11 +51,11 @@
         },
         {
             title: 'Contents amount',
-            key: 'contents',
+            key: 'contents_amount',
         },
         {
             title: 'Date',
-            key: 'date',
+            key: 'date_created',
         },
         {
             align: 'end',
@@ -67,22 +67,31 @@
 
     const items = [
         {
+            id: 1,
             name: 'Brands & events',
-            contents: 10,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            requires_auth: false,
+            contents_amount: 10,
+            groups: [],
+            date_created: new Date().toDateString(),
         },
         {
+            id: 2,
             name: 'Science',
-            contents: 5,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            requires_auth: false,
+            contents_amount: 23,
+            groups: [],
+            date_created: new Date().toDateString(),
         },
         {
+            id: 3,
             name: 'Culture',
-            contents: 5,
-            date: new Date().toDateString(),
             image: '/public/images/example.jpg',
+            requires_auth: false,
+            contents_amount: 12,
+            groups: [],
+            date_created: new Date().toDateString(),
         },
     ];
 </script>
