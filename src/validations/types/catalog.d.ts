@@ -1,6 +1,7 @@
 interface CreateCategory {
     name: string;
-    background: string;
+    background: File | null;
+    requires_auth?: boolean;
 }
 
 interface CreateGroup extends CreateCategory {
