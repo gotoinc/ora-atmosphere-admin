@@ -26,4 +26,4 @@ export interface Catalog {
     groups: Group[];
 }
 
-export interface TopicBrief extends Pick<Topic, 'id' | 'name'> {}
+export interface CategoryBrief extends Pick<Category, 'id' | 'name'> {}

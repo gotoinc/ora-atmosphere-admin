@@ -1,11 +1,11 @@
-import type { TopicBrief } from '@/ts/catalog';
+import type { CategoryBrief } from '@/ts/catalog';
 
 export interface Content {
     id: number;
     file_url: string;
     image_url: string;
     title: string;
-    topic: TopicBrief;
+    topic: CategoryBrief;
     description?: string;
     languages: string[];
     tags: string[];

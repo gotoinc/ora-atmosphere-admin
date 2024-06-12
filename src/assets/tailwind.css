@@ -51,5 +51,21 @@
         @apply flex h-8 w-8 items-center justify-center rounded;
     }
 
+    .fade-b {
+        animation: fade-b 0.3s ease;
+    }
+
+    @keyframes fade-b {
+        0% {
+            opacity: 0;
+            margin-top: -20px;
+        }
+
+        100% {
+            opacity: 1;
+            margin: 0;
+        }
+    }
+
 }
 
