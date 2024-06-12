@@ -25,3 +25,5 @@ export interface Catalog {
     category: Category;
     groups: Group[];
 }
+
+export interface CategoryBrief extends Pick<Category, 'id' | 'name'> {}
