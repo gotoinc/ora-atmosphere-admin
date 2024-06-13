@@ -23,36 +23,22 @@
                 label="Group"
                 variant="outlined"
                 clearable
-                :error-messages="errors.group"
-                :items="['Brands', 'Events', 'Climate']"
+                :error-messages="errors.group_id"
+                return-object
+                item-title="name"
+                :items="groups"
+                @update:model-value="selectGroupId"
             />
         </div>
 
-        <div>
-            <template v-if="!background">
-                <p class="mb-3">Please choose a file of background</p>
-
-                <drag-and-drop
-                    :error="!!errors.background"
-                    @upload="selectFile"
-                    @remove="removeFile"
-                />
-            </template>
-
-            <template v-else>
-                <p class="mb-2 font-semibold">Card preview:</p>
-
-                <v-btn
-                    color="error"
-                    class="text-none mb-3 w-fit"
-                    @click="removeFile"
-                >
-                    Reset background
-                </v-btn>
-
-                <category-card :img="backgroundSrc" :name="name" />
-            </template>
-        </div>
+        <catalog-image-upload
+            v-model:name="name"
+            :show-card="isFileSelected"
+            :background="image"
+            :error="!!errors.image"
+            @upload="selectFile"
+            @remove="removeFile"
+        />
 
         <v-checkbox
             v-model="requiresAuth"
@@ -73,41 +59,79 @@
     import { ref } from 'vue';
     import { useForm } from 'vee-validate';
 
-    import CategoryCard from '@/components/base/CategoryCard.vue';
-    import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+    import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
 
+    import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
+    import type { CategoryBrief, Topic } from '@/ts/catalog';
     import { createThemeSchema } from '@/validations/schemas/catalog.schema.ts';
     import type { CreateTheme } from '@/validations/types/catalog';
 
-    const backgroundSrc = ref('');
+    const props = defineProps<{ topic?: Topic | null }>();
 
-    const { defineField, handleSubmit, errors, resetForm } =
+    const isFileSelected = ref(!!props.topic);
+    const imageFile = ref<File | null>();
+
+    const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateTheme>({
             validationSchema: createThemeSchema,
             initialValues: {
                 name: '',
+                image: '',
             },
         });
 
+    const group = ref<CategoryBrief | null>();
     const [name] = defineField('name');
-    const [background] = defineField('background');
-    const [group] = defineField('group');
+    const [image] = defineField('image');
+    const [groupId] = defineField('group_id');
     const [requiresAuth] = defineField('requires_auth');
+
+    if (props.topic) {
+        group.value = props.topic.group;
+        groupId.value = props.topic.group.id;
+
+        setValues(
+            useExcludeProperties({ ...props.topic }, ['id', 'date_created'])
+        );
+    }
+
+    /**
+     * Test groups
+     */
+    const groups = [
+        {
+            id: 2,
+            name: 'Science',
+        },
+        {
+            id: 1,
+            name: 'Brands',
+        },
+    ];
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            background.value = value[0].file;
-            backgroundSrc.value = URL.createObjectURL(background.value);
+            image.value = URL.createObjectURL(value[0].file);
+            imageFile.value = value[0].file;
+        }
+    };
+
+    const selectGroupId = (group?: CategoryBrief) => {
+        if (group) {
+            groupId.value = group.id;
         }
     };
 
     const removeFile = () => {
-        background.value = null;
-        backgroundSrc.value = '';
+        isFileSelected.value = false;
+        image.value = '';
+        imageFile.value = null;
     };
 
     const onSubmit = handleSubmit(() => {
+        group.value = null;
+        removeFile();
         resetForm();
     });
 </script>

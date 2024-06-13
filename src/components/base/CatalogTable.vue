@@ -3,7 +3,7 @@
         <template #[`item.actions`]="{ item }">
             <div class="flex items-center justify-end gap-2">
                 <button class="action-icon bg-primary-50">
-                    <v-icon size="small" @click="() => console.log(item)">
+                    <v-icon size="small" @click="emits('edit', item)">
                         mdi-pencil
                     </v-icon>
 
@@ -13,7 +13,9 @@
                 </button>
 
                 <button class="action-icon bg-red-500">
-                    <v-icon size="small"> mdi-delete </v-icon>
+                    <v-icon size="small" @click="emits('delete', item)">
+                        mdi-delete
+                    </v-icon>
 
                     <v-tooltip activator="parent" location="top">
                         Delete
@@ -42,6 +44,7 @@
 </template>
 
 <script setup lang="ts">
+    import type { CatalogItem } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {
@@ -51,7 +54,13 @@
         editable?: boolean;
     }
 
+    interface Emits {
+        (e: 'delete', value: CatalogItem): void;
+        (e: 'edit', value: CatalogItem): void;
+    }
+
     defineProps<Props>();
+    const emits = defineEmits<Emits>();
 </script>
 
 <style></style>

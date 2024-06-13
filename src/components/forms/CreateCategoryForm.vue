@@ -15,31 +15,15 @@
             />
         </div>
 
-        <div>
-            <template v-if="!background">
-                <p class="mb-3">Please choose a file of background</p>
-
-                <drag-and-drop
-                    :error="!!errors.background"
-                    @upload="selectFile"
-                    @remove="removeFile"
-                />
-            </template>
-
-            <template v-else>
-                <p class="mb-2 font-semibold">Card preview:</p>
-
-                <v-btn
-                    color="error"
-                    class="text-none mb-3 w-fit"
-                    @click="removeFile"
-                >
-                    Reset background
-                </v-btn>
-
-                <category-card :img="backgroundSrc" :name="name" />
-            </template>
-        </div>
+        <catalog-image-upload
+            v-model:name="name"
+            :show-card="isFileSelected"
+            :background="image"
+            :error="!!errors.image"
+            class="mb-3"
+            @upload="selectFile"
+            @remove="removeFile"
+        />
 
         <v-checkbox
             v-model="requiresAuth"
@@ -51,7 +35,7 @@
         ></v-checkbox>
 
         <v-btn type="submit" color="primary" class="text-none w-fit">
-            Save
+            {{ category ? 'Save changes' : 'Save' }}
         </v-btn>
     </form>
 </template>
@@ -60,40 +44,55 @@
     import { ref } from 'vue';
     import { useForm } from 'vee-validate';
 
-    import CategoryCard from '@/components/base/CategoryCard.vue';
-    import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+    import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
 
+    import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
+    import type { Category } from '@/ts/catalog';
     import { createCategorySchema } from '@/validations/schemas/catalog.schema.ts';
     import type { CreateCategory } from '@/validations/types/catalog';
 
-    const backgroundSrc = ref('');
+    const props = defineProps<{ category?: Category | null }>();
 
-    const { defineField, handleSubmit, errors, resetForm } =
+    const isFileSelected = ref(!!props.category);
+
+    const imageFile = ref<File | null>();
+
+    const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateCategory>({
             validationSchema: createCategorySchema,
             initialValues: {
                 name: '',
+                image: '',
             },
         });
 
+    if (props.category) {
+        setValues(
+            useExcludeProperties({ ...props.category }, ['id', 'date_created'])
+        );
+    }
+
     const [name] = defineField('name');
-    const [background] = defineField('background');
+    const [image] = defineField('image');
     const [requiresAuth] = defineField('requires_auth');
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            background.value = value[0].file;
-            backgroundSrc.value = URL.createObjectURL(background.value);
+            imageFile.value = value[0].file;
+            image.value = URL.createObjectURL(value[0].file);
         }
     };
 
     const removeFile = () => {
-        background.value = null;
-        backgroundSrc.value = '';
+        isFileSelected.value = false;
+
+        image.value = '';
+        imageFile.value = null;
     };
 
     const onSubmit = handleSubmit(() => {
+        removeFile();
         resetForm();
     });
 </script>

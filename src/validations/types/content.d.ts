@@ -1,4 +1,4 @@
-import type { Content } from '@/ts/contents';
+import type { VideoContent } from '@/ts/contents';
 
 type PartialContentKeys =
     | 'tags'
@@ -9,12 +9,12 @@ type PartialContentKeys =
 type OmitContentKeys =
     | 'id'
     | 'topic'
-    | 'image_url'
+    | 'image'
     | 'date_created'
     | PartialContentKeys;
 
 export interface CreateContent
-    extends Omit<Content, OmitContentKeys>,
-        Partial<Pick<Content, PartialContentKeys>> {
+    extends Omit<VideoContent, OmitContentKeys>,
+        Partial<Pick<VideoContent, PartialContentKeys>> {
     topic_id: number;
 }

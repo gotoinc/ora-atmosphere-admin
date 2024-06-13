@@ -15,11 +15,15 @@ export interface Category extends CommonCatalogTypes {
 
 export interface Group extends CommonCatalogTypes {
     topics: Topic[];
+    category: CategoryBrief;
 }
 
 export interface Topic extends CommonCatalogTypes {
+    group: CategoryBrief;
     videos: VideoContent[];
 }
+
+export type CatalogItem = Category | Group | Topic;
 
 export interface Catalog {
     category: Category;

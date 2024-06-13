@@ -2,7 +2,7 @@
     <div class="h-full pb-12">
         <drag-and-drop
             v-if="!videoSrc && !isContentSelected"
-            :error="!!errors.file_url"
+            :error="!!errors.file"
             :accept="['video/mp4', 'video/webm']"
             class="h-full"
             @upload="selectFile"
@@ -67,8 +67,10 @@
                         label="Languages"
                         variant="outlined"
                         clearable
+                        return-object
+                        item-title="name"
                         :error-messages="errors.languages"
-                        :items="['French', 'English', 'Spanish']"
+                        :items="langs"
                     >
                         <template #selection="{ item }">
                             <span class="tag tag--fill tag--lang capitalize">
@@ -112,7 +114,7 @@
                         controls
                         @loadedmetadata="loadVideoInfo"
                     >
-                        <source :src="videoSrc ?? content?.file_url" />
+                        <source :src="videoSrc ?? content?.file" />
                     </video>
                 </div>
 
@@ -150,10 +152,10 @@
 
                             <a
                                 target="_blank"
-                                :href="content.file_url"
+                                :href="content.file"
                                 class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
                             >
-                                {{ content.file_url }}
+                                {{ content.file }}
                             </a>
                         </div>
 
@@ -231,11 +233,11 @@
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import type { Topic } from '@/ts/catalog';
-    import type { Content } from '@/ts/contents';
+    import type { Language, VideoContent } from '@/ts/contents';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
     import type { CreateContent } from '@/validations/types/content';
 
-    const props = defineProps<{ content?: Content | null }>();
+    const props = defineProps<{ content?: VideoContent | null }>();
 
     const isContentSelected = ref(!!props.content);
     const isVideoLoaded = ref(!!props.content);
@@ -251,7 +253,7 @@
      * Data for content sources
      */
     const uploadedFile = ref<File | null>(null);
-    const videoSrc = ref(props.content?.file_url ?? '');
+    const videoSrc = ref(props.content?.file ?? '');
     const imageSrc = ref('');
 
     const videoElement = ref<HTMLVideoElement | null>(null);
@@ -262,7 +264,7 @@
     const topic = ref();
     const [title] = defineField('title');
     const [description] = defineField('description');
-    const [contentFile] = defineField('file_url');
+    const [contentFile] = defineField('file');
     const [topicId] = defineField('topic_id');
     const [languages] = defineField('languages');
     const [tags] = defineField('tags');
@@ -285,6 +287,20 @@
         },
     ];
 
+    /**
+     * Test languages
+     */
+    const langs: Language[] = [
+        {
+            id: 1,
+            name: 'English',
+        },
+        {
+            id: 2,
+            name: 'Spanish',
+        },
+    ];
+
     if (props.content) {
         topic.value = props.content.topic;
         topicId.value = props.content.topic.id;
@@ -293,7 +309,7 @@
             useExcludeProperties({ ...props.content }, [
                 'id',
                 'date_created',
-                'image_url',
+                'image',
             ])
         );
     }
@@ -341,12 +357,10 @@
         contentFile.value = '';
     };
 
-    const onSubmit = handleSubmit((values) => {
+    const onSubmit = handleSubmit(() => {
         if (!props.content) {
             onVideoCapture();
         }
-
-        console.log(values);
 
         resetForm();
         topic.value = null;

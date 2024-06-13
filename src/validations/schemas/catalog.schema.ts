@@ -1,4 +1,6 @@
 import type { ObjectSchema } from 'yup';
+import { boolean } from 'yup';
+import { number } from 'yup';
 import { object, string } from 'yup';
 
 import type {
@@ -12,7 +14,8 @@ import type {
  */
 export const createCategorySchema: ObjectSchema<CreateCategory> = object({
     name: string().required('Please enter name'),
-    background: string().required(),
+    image: string().required('Please select image'),
+    requires_auth: boolean(),
 });
 
 /**
@@ -20,8 +23,9 @@ export const createCategorySchema: ObjectSchema<CreateCategory> = object({
  */
 export const createGroupSchema: ObjectSchema<CreateGroup> = object({
     name: string().required('Please enter name'),
-    background: string().required(),
-    category: string().required('Please select category'),
+    image: string().required(),
+    category_id: number().required('Please select category'),
+    requires_auth: boolean(),
 });
 
 /**
@@ -29,6 +33,7 @@ export const createGroupSchema: ObjectSchema<CreateGroup> = object({
  */
 export const createThemeSchema: ObjectSchema<CreateTheme> = object({
     name: string().required('Please enter name'),
-    background: string().required(),
-    group: string().required('Please select group'),
+    image: string().required(),
+    group_id: number().required('Please select group'),
+    requires_auth: boolean(),
 });

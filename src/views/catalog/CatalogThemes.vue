@@ -20,23 +20,45 @@
         </v-btn>
     </div>
 
-    <catalog-table :headers="headers" :items="items" />
+    <catalog-table
+        :headers="headers"
+        :items="items"
+        @edit="handleEdit"
+        @delete="handleDelete"
+    />
 
-    <full-screen-dialog v-model="isDialogOpen" title="Create new theme">
-        <create-theme-form />
-    </full-screen-dialog>
+    <!--  Dialogs   -->
+    <teleport to="body">
+        <full-screen-dialog v-model="isDialogOpen" title="Create new theme">
+            <create-theme-form />
+        </full-screen-dialog>
+
+        <full-screen-dialog
+            v-model="isEditOpen"
+            :title="`Edit - ${selectedTopic?.name}`"
+        >
+            <create-theme-form v-model:topic="selectedTopic" />
+        </full-screen-dialog>
+
+        <delete-dialog v-model="isDeleteOpen" :title="selectedTopic?.name" />
+    </teleport>
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
+    import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateThemeForm from '@/components/forms/CreateThemeForm.vue';
 
+    import type { CatalogItem, Topic } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isDialogOpen = ref(false);
+    const isEditOpen = ref(false);
+    const isDeleteOpen = ref(false);
+    const selectedTopic = ref<Topic | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
         {
@@ -76,20 +98,6 @@
             group: {
                 id: 1,
                 name: 'Brands',
-                image: '/public/images/example.jpg',
-                category: {
-                    id: 2,
-                    name: 'Science',
-                    image: '/public/images/example.jpg',
-                    requires_auth: false,
-                    contents_amount: 23,
-                    groups: [],
-                    date_created: new Date().toDateString(),
-                },
-                requires_auth: false,
-                contents_amount: 10,
-                topics: [],
-                date_created: new Date().toDateString(),
             },
             date_created: new Date().toDateString(),
             image: '/public/images/example.jpg',
@@ -102,20 +110,6 @@
             group: {
                 id: 1,
                 name: 'Brands',
-                image: '/public/images/example.jpg',
-                category: {
-                    id: 2,
-                    name: 'Science',
-                    image: '/public/images/example.jpg',
-                    requires_auth: false,
-                    contents_amount: 23,
-                    groups: [],
-                    date_created: new Date().toDateString(),
-                },
-                requires_auth: false,
-                contents_amount: 10,
-                topics: [],
-                date_created: new Date().toDateString(),
             },
         },
         {
@@ -126,20 +120,6 @@
             group: {
                 id: 1,
                 name: 'Brands',
-                image: '/public/images/example.jpg',
-                category: {
-                    id: 2,
-                    name: 'Science',
-                    image: '/public/images/example.jpg',
-                    requires_auth: false,
-                    contents_amount: 23,
-                    groups: [],
-                    date_created: new Date().toDateString(),
-                },
-                requires_auth: false,
-                contents_amount: 10,
-                topics: [],
-                date_created: new Date().toDateString(),
             },
         },
         {
@@ -151,20 +131,6 @@
             group: {
                 id: 1,
                 name: 'Brands',
-                image: '/public/images/example.jpg',
-                category: {
-                    id: 2,
-                    name: 'Science',
-                    image: '/public/images/example.jpg',
-                    requires_auth: false,
-                    contents_amount: 23,
-                    groups: [],
-                    date_created: new Date().toDateString(),
-                },
-                requires_auth: false,
-                contents_amount: 10,
-                topics: [],
-                date_created: new Date().toDateString(),
             },
         },
         {
@@ -176,23 +142,21 @@
             group: {
                 id: 1,
                 name: 'Brands',
-                image: '/public/images/example.jpg',
-                category: {
-                    id: 2,
-                    name: 'Science',
-                    image: '/public/images/example.jpg',
-                    requires_auth: false,
-                    contents_amount: 23,
-                    groups: [],
-                    date_created: new Date().toDateString(),
-                },
-                requires_auth: false,
-                contents_amount: 10,
-                topics: [],
-                date_created: new Date().toDateString(),
             },
         },
     ];
+
+    const handleEdit = (topic: CatalogItem) => {
+        selectedTopic.value = topic as Topic;
+
+        isEditOpen.value = true;
+    };
+
+    const handleDelete = (topic: CatalogItem) => {
+        selectedTopic.value = topic as Topic;
+
+        isDeleteOpen.value = true;
+    };
 </script>
 
 <style scoped></style>
