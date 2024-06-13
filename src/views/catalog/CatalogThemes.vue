@@ -30,9 +30,9 @@
 <script setup lang="ts">
     import { ref } from 'vue';
 
-    import CatalogTable from '@/components/base/CatalogTable.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateThemeForm from '@/components/forms/CreateThemeForm.vue';
+    import CatalogTable from '@/components/tables/CatalogTable.vue';
 
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 

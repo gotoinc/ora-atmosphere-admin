@@ -1,25 +1,7 @@
 <template>
     <v-data-table class="!rounded-lg" :headers="headers" :items="items">
-        <template #[`item.actions`]="{ item }">
-            <div class="flex items-center justify-end gap-2">
-                <button class="action-icon bg-primary-50">
-                    <v-icon size="small" @click="() => console.log(item)">
-                        mdi-pencil
-                    </v-icon>
-
-                    <v-tooltip activator="parent" location="start">
-                        Edit
-                    </v-tooltip>
-                </button>
-
-                <button class="action-icon bg-red-500">
-                    <v-icon size="small"> mdi-delete </v-icon>
-
-                    <v-tooltip activator="parent" location="top">
-                        Delete
-                    </v-tooltip>
-                </button>
-            </div>
+        <template #[`item.actions`]>
+            <table-action-buttons />
         </template>
 
         <template #[`item.image`]="{ item }">
@@ -42,6 +24,8 @@
 </template>
 
 <script setup lang="ts">
+    import TableActionButtons from '@/components/tables/TableActionButtons.vue';
+
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {

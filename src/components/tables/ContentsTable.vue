@@ -102,27 +102,10 @@
         </template>
 
         <template #[`item.actions`]="{ item }">
-            <div class="flex items-center justify-end gap-2">
-                <button class="action-icon bg-primary-50">
-                    <v-icon size="small" @click="emits('edit', item)">
-                        mdi-pencil
-                    </v-icon>
-
-                    <v-tooltip activator="parent" location="start">
-                        Edit
-                    </v-tooltip>
-                </button>
-
-                <button class="action-icon bg-red-500">
-                    <v-icon size="small" @click="emits('delete', item)">
-                        mdi-delete
-                    </v-icon>
-
-                    <v-tooltip activator="parent" location="top">
-                        Delete
-                    </v-tooltip>
-                </button>
-            </div>
+            <table-action-buttons
+                @edit="emits('edit', item)"
+                @delete="emits('delete', item)"
+            />
         </template>
 
         <template #no-data>
@@ -132,6 +115,8 @@
 </template>
 
 <script setup lang="ts">
+    import TableActionButtons from '@/components/tables/TableActionButtons.vue';
+
     import type { Content } from '@/ts/contents';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
