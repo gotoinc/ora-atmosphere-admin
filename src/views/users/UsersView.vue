@@ -1,0 +1,56 @@
+<template>
+    <section>
+        <div class="flex flex-wrap items-center justify-between gap-6">
+            <h1 class="mb-5 text-2xl font-bold">Users</h1>
+
+            <v-btn
+                class="text-none max-sm:w-full"
+                append-icon="mdi-plus"
+                color="primary"
+                @click="isDialogOpen = true"
+            >
+                Add new admin
+            </v-btn>
+        </div>
+
+        <v-tabs v-model="tab" class="mb-5 border-b border-white">
+            <v-tab
+                :to="{ name: 'regularUsersView' }"
+                rounded
+                class="text-none"
+                color="white"
+                :value="1"
+            >
+                Regular users
+            </v-tab>
+
+            <v-tab
+                :to="{ name: 'adminsView' }"
+                rounded
+                class="text-none"
+                color="white"
+                :value="2"
+            >
+                Admins
+            </v-tab>
+        </v-tabs>
+
+        <v-dialog v-model="isDialogOpen" max-width="768">
+            <create-user-form @close="isDialogOpen = false" />
+        </v-dialog>
+
+        <router-view></router-view>
+    </section>
+</template>
+
+<script setup lang="ts">
+    import { ref } from 'vue';
+
+    import CreateUserForm from '@/components/forms/CreateUserForm.vue';
+
+    const tab = ref(1);
+
+    const isDialogOpen = ref(false);
+</script>
+
+<style scoped></style>

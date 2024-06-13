@@ -2,7 +2,7 @@
     <h3 class="mb-5 text-lg">Please fill out the fields below</h3>
 
     <form class="grid gap-2" @submit.prevent="onSubmit">
-        <fieldset>
+        <div>
             <p class="mb-3">Please enter a category name</p>
 
             <v-text-field
@@ -10,12 +10,11 @@
                 :error-messages="errors.name"
                 name="name"
                 label="Category name"
-                type="name"
                 variant="outlined"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <p class="mb-3">Please choose a file of background</p>
 
             <drag-and-drop
@@ -23,7 +22,7 @@
                 @upload="selectFile"
                 @remove="removeFile"
             />
-        </fieldset>
+        </div>
 
         <v-btn type="submit" color="primary" class="text-none w-fit">
             Save

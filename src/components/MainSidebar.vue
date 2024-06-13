@@ -45,6 +45,14 @@
                     title="Catalog"
                     value="categories"
                 ></v-list-item>
+
+                <v-list-item
+                    v-if="isSuperAdmin"
+                    :to="{ name: 'usersView' }"
+                    prepend-icon="mdi-account-multiple"
+                    title="Users"
+                    value="users"
+                ></v-list-item>
             </v-list>
 
             <template #append>
@@ -68,6 +76,8 @@
 
     import MainLogo from '@/components/base/MainLogo.vue';
 
+    import { useAuthStore } from '@/stores/auth.store.ts';
+
     interface Props {
         modelValue: boolean;
     }
@@ -88,6 +98,8 @@
             emits('update:modelValue', value);
         },
     });
+
+    const { isSuperAdmin } = useAuthStore();
 </script>
 
 <style scoped></style>
