@@ -2,25 +2,14 @@
     <v-app>
         <v-layout>
             <!-- Header for tablets -->
-            <v-app-bar v-if="!lgAndUp" color="primary" prominent>
-                <v-burger
-                    v-model="toggleSidebar"
-                    @click="toggleSidebar = !toggleSidebar"
-                />
-
-                <v-spacer></v-spacer>
-
-                <div v-if="!lgAndUp" class="pr-5">
-                    <main-logo />
-                </div>
-            </v-app-bar>
+            <main-header v-model="toggleSidebar" />
 
             <!-- Sidebar -->
             <main-sidebar v-model="toggleSidebar" />
 
             <!-- Main view -->
             <v-main>
-                <div class="pl-10 pt-10">
+                <div class="container py-10">
                     <router-view></router-view>
                 </div>
             </v-main>
@@ -32,13 +21,12 @@
     import { ref } from 'vue';
     import { useDisplay } from 'vuetify';
 
-    const { lgAndUp } = useDisplay();
-
-    import MainLogo from '@/components/base/MainLogo.vue';
-    import VBurger from '@/components/base/VBurger.vue';
+    import MainHeader from '@/components/layout/MainHeader.vue';
     import MainSidebar from '@/components/MainSidebar.vue';
 
-    const toggleSidebar = ref(true);
+    const { lgAndUp } = useDisplay();
+
+    const toggleSidebar = ref(lgAndUp.value);
 </script>
 
 <style scoped></style>

@@ -1,0 +1,27 @@
+import type { VideoContent } from '@/ts/contents';
+
+interface CommonCatalogTypes {
+    id: number;
+    name: string;
+    image: string;
+    requires_auth: boolean;
+    contents_amount: number;
+    date_created: string;
+}
+
+export interface Category extends CommonCatalogTypes {
+    groups: Group[];
+}
+
+export interface Group extends CommonCatalogTypes {
+    topics: Topic[];
+}
+
+export interface Topic extends CommonCatalogTypes {
+    videos: VideoContent[];
+}
+
+export interface Catalog {
+    category: Category;
+    groups: Group[];
+}
