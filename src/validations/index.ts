@@ -1,4 +1,4 @@
-import { string } from 'yup';
+import { boolean, number, object, string } from 'yup';
 
 /**
  * Define common validations
@@ -37,3 +37,25 @@ export const phoneValidation = string()
         'Phone must be no longer than 15 digits',
         (value) => !value || value.length <= 15
     );
+
+// Topic schema
+export const topicSchema = object().shape({
+    id: number()
+        .required('ID is required')
+        .positive('ID must be a positive number')
+        .integer('ID must be an integer'),
+
+    name: string()
+        .required('Name is required')
+        .min(1, 'Name must be at least 1 character long')
+        .max(255, 'Name must be at most 255 characters long'),
+
+    image_url: string().required('Image URL is required'),
+
+    group_id: number()
+        .required('Group ID is required')
+        .positive('Group ID must be a positive number')
+        .integer('Group ID must be an integer'),
+
+    requires_auth: boolean().required(),
+});

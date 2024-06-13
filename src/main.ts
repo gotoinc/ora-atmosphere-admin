@@ -4,8 +4,8 @@ import { createPinia } from 'pinia';
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
 
 // Styles
-import './assets/tailwind.css';
 import 'vuetify/styles';
+import './assets/tailwind.css';
 // Router
 import router from '@/router';
 
