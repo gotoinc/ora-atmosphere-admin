@@ -27,7 +27,7 @@
     import EditUserForm from '@/components/forms/EditUserForm.vue';
     import ActionButtons from '@/components/tables/TableActionButtons.vue';
 
-    import type { UserProfile } from '@/ts/profile';
+    import type { UserProfile } from '@/ts/users';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const userName = computed(

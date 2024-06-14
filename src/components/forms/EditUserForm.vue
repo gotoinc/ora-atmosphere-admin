@@ -126,7 +126,7 @@
 
     import activitiesList from '@/constants/activities-list.ts';
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
-    import type { UserProfile } from '@/ts/profile';
+    import type { UserProfile } from '@/ts/users';
     import { editUserSchema } from '@/validations/schemas/user.schema.ts';
 
     const props = defineProps<{ user: UserProfile }>();

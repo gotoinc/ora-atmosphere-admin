@@ -1,14 +1,14 @@
 import type { ObjectSchema } from 'yup';
 import { object, string } from 'yup';
 
-import type { UserProfile } from '@/ts/profile';
+import type { UserProfile } from '@/ts/users';
+import type { AdminUser } from '@/ts/users';
 import { emailValidation, phoneValidation } from '@/validations';
-import type { CreateUser } from '@/validations/types/user';
 
 /**
  * Define schema for create admin form
  */
-export const createUserSchema: ObjectSchema<CreateUser> = object({
+export const createUserSchema: ObjectSchema<AdminUser> = object({
     email: emailValidation,
     company: string().required('Please enter company name'),
     role: string().required('Please select a role'),

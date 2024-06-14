@@ -34,6 +34,7 @@
                     label="Role"
                     variant="outlined"
                     clearable
+                    class="capitalize"
                     :error-messages="errors.role"
                     :items="roles"
                 />
@@ -48,8 +49,13 @@
                     Cancel
                 </v-btn>
 
-                <v-btn type="submit" class="text-none w-fit" color="primary">
-                    Add admin
+                <v-btn
+                    :disabled="isButtonDisabled"
+                    type="submit"
+                    class="text-none w-fit"
+                    color="primary"
+                >
+                    {{ admin ? 'Save changes' : 'Add admin' }}
                 </v-btn>
             </div>
         </form>
@@ -57,27 +63,46 @@
 </template>
 
 <script setup lang="ts">
+    import { computed } from 'vue';
     import { useForm } from 'vee-validate';
 
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
+    import type { AdminUser } from '@/ts/users';
     import { createUserSchema } from '@/validations/schemas/user.schema.ts';
-    import type { CreateUser } from '@/validations/types/user';
 
-    const roles = ['Customer Admin', 'Super Admin'];
+    const roles = ['admin', 'super admin'];
 
+    const props = defineProps<{ admin?: AdminUser }>();
     const emits = defineEmits<{ (e: 'close'): void }>();
 
-    const { defineField, handleSubmit, errors, resetForm } =
-        useForm<CreateUser>({
-            validationSchema: createUserSchema,
-            initialValues: {
-                email: '',
-                company: '',
-            },
-        });
+    const isButtonDisabled = computed(
+        () =>
+            props.admin &&
+            useCompareObjects(controlledValues.value, props.admin)
+    );
+
+    const {
+        defineField,
+        handleSubmit,
+        errors,
+        resetForm,
+        setValues,
+        controlledValues,
+    } = useForm<AdminUser>({
+        validationSchema: createUserSchema,
+        initialValues: {
+            email: '',
+            company: '',
+        },
+    });
 
     const [email] = defineField('email');
     const [company] = defineField('company');
     const [role] = defineField('role');
+
+    if (props.admin) {
+        setValues({ ...props.admin });
+    }
 
     const onSubmit = handleSubmit(() => {
         resetForm();
