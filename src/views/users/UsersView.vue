@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold">Users</h1>
 
             <v-btn
-                class="text-none max-sm:w-full"
+                class="text-none"
                 append-icon="mdi-plus"
                 color="primary"
                 @click="isDialogOpen = true"
