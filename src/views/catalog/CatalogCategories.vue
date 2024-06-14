@@ -20,7 +20,7 @@
         </v-btn>
     </div>
 
-    <catalog-table :headers="headers" :items="items" />
+    <catalog-table :items="items" />
 
     <full-screen-dialog v-model="isDialogOpen" title="Create new category">
         <create-category-form />
@@ -34,36 +34,7 @@
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateCategoryForm from '@/components/forms/CreateCategoryForm.vue';
 
-    import type { ReadonlyHeaders } from '@/ts/vuetify';
-
     const isDialogOpen = ref(false);
-
-    const headers = ref<ReadonlyHeaders>([
-        {
-            title: 'Category',
-            align: 'start',
-            key: 'name',
-        },
-        {
-            title: 'Image',
-            key: 'image',
-            sortable: false,
-        },
-        {
-            title: 'Contents amount',
-            key: 'contents',
-        },
-        {
-            title: 'Date',
-            key: 'date',
-        },
-        {
-            align: 'end',
-            title: 'Actions',
-            key: 'actions',
-            sortable: false,
-        },
-    ]);
 
     const items = [
         {

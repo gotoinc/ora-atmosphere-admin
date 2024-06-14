@@ -42,16 +42,44 @@
 </template>
 
 <script setup lang="ts">
+    import { ref } from 'vue';
+
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {
-        headers: ReadonlyHeaders;
         // eslint-disable-next-line
         items: any[];
         editable?: boolean;
     }
 
     defineProps<Props>();
+
+    const headers = ref<ReadonlyHeaders>([
+        {
+            title: 'Category',
+            align: 'start',
+            key: 'name',
+        },
+        {
+            title: 'Image',
+            key: 'image',
+            sortable: false,
+        },
+        {
+            title: 'Contents amount',
+            key: 'contents',
+        },
+        {
+            title: 'Date',
+            key: 'date',
+        },
+        {
+            align: 'end',
+            title: 'Actions',
+            key: 'actions',
+            sortable: false,
+        },
+    ]);
 </script>
 
 <style></style>

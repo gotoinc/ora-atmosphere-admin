@@ -73,32 +73,17 @@
         </button>
     </div>
 
-    <contents-table
-        :headers="headers"
-        :items="items"
-        @delete="handleDelete"
-        @edit="handleEdit"
-    />
+    <contents-table :items="items" />
 
     <full-screen-dialog v-model="isDialogOpen" title="Add new content">
         <create-content-form />
     </full-screen-dialog>
-
-    <full-screen-dialog
-        v-model="isEditOpen"
-        :title="`Edit - ${selectedContent?.title}`"
-    >
-        <create-content-form v-model:content="selectedContent" />
-    </full-screen-dialog>
-
-    <delete-dialog v-model="isDeleteOpen" :title="selectedContent?.title" />
 </template>
 
 <script setup lang="ts">
     import { computed, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
 
-    import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateContentForm from '@/components/forms/CreateContentForm.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
@@ -106,7 +91,6 @@
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
     import type { CategoryBrief } from '@/ts/catalog';
     import type { Content } from '@/ts/contents';
-    import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Filters {
         search: string;
@@ -117,66 +101,6 @@
 
     const router = useRouter();
     const route = useRoute();
-
-    const selectedContent = ref<Content | null>(null);
-
-    const isDialogOpen = ref(false);
-    const isEditOpen = ref(false);
-    const isDeleteOpen = ref(false);
-
-    const headers = ref<ReadonlyHeaders>([
-        {
-            title: 'Title',
-            align: 'start',
-            key: 'title',
-        },
-        {
-            title: 'Preview',
-            key: 'image_url',
-            sortable: false,
-        },
-        {
-            title: 'Theme',
-            key: 'topic.name',
-        },
-        {
-            title: 'Description',
-            key: 'description',
-        },
-        {
-            title: 'Duration',
-            key: 'duration',
-            sortable: false,
-        },
-        {
-            title: 'Sound',
-            key: 'with_sound',
-            sortable: false,
-        },
-        {
-            title: 'Narration',
-            key: 'with_narration',
-            sortable: false,
-        },
-        {
-            title: 'Date',
-            key: 'date_created',
-        },
-        {
-            title: 'Languages',
-            key: 'languages',
-        },
-        {
-            title: 'Tags',
-            key: 'tags',
-        },
-        {
-            align: 'end',
-            title: 'Actions',
-            key: 'actions',
-            sortable: false,
-        },
-    ]);
 
     const items: Content[] = [
         {
@@ -247,17 +171,7 @@
         },
     ]);
 
-    const handleEdit = (content: Content) => {
-        selectedContent.value = content;
-
-        isEditOpen.value = true;
-    };
-
-    const handleDelete = (content: Content) => {
-        selectedContent.value = content;
-
-        isDeleteOpen.value = true;
-    };
+    const isDialogOpen = ref(false);
 
     const resetFilters = () => {
         filters.search = '';
