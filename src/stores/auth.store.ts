@@ -1,14 +1,13 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useToast } from 'vue-toastification';
 import Cookies from 'js-cookie';
 
 import { defineStore } from 'pinia';
 
-import type { AdminUser } from '@/ts/users';
-
 import { authLogin } from '@/api/auth/auth-login.api.ts';
 import { authLogout } from '@/api/auth/auth-logout.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
+import type { AdminUser } from '@/ts/users';
 import type { SignInInput } from '@/validations/types/auth';
 
 const toast = useToast();
@@ -27,6 +26,10 @@ export const useAuthStore = defineStore(
             company_name: 'Tech Solutions',
             role: 'super admin',
         });
+
+        const profileName = computed(
+            () => `${profile.value?.first_name} ${profile.value?.last_name}`
+        );
 
         const clearAuth = () => {
             Cookies.remove('ora_admin');
@@ -76,6 +79,7 @@ export const useAuthStore = defineStore(
             isAuthenticated,
             isSuperAdmin,
             profile,
+            profileName,
             clearAuth,
             login,
             logout,

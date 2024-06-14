@@ -1,5 +1,5 @@
 <template>
-    <aside>
+    <aside ref="sidebarElement" class="fixed left-0 top-0 z-20 h-screen w-64">
         <v-navigation-drawer v-model="isExpand" color="rgb(73, 90, 255)">
             <div v-if="lgAndUp" class="p-5">
                 <main-logo />
@@ -17,7 +17,7 @@
 
                     <v-list-item
                         subtitle="test@gmail.com"
-                        title="Philippe Walter"
+                        :title="profileName"
                         value="profile"
                         :to="{ name: 'profile' }"
                     ></v-list-item>
@@ -119,7 +119,7 @@
     const emits = defineEmits<Emits>();
 
     const router = useRouter();
-    const { clearAuth } = useAuthStore();
+    const { clearAuth, profileName } = useAuthStore();
 
     const isExpand = computed({
         get() {
@@ -146,6 +146,8 @@
             isLoading.value = false;
         }
     };
+
+    const sidebarElement = ref<HTMLElement>();
 </script>
 
 <style scoped></style>

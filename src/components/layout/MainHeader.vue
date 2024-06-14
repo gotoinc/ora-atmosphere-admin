@@ -1,6 +1,13 @@
 <template>
-    <v-app-bar v-if="!lgAndUp" color="primary" prominent>
-        <div class="container flex w-full items-center justify-between">
+    <v-app-bar
+        v-if="!lgAndUp"
+        :class="{
+            '!fixed ': !lgAndUp && modelValue,
+        }"
+        color="primary"
+        prominent
+    >
+        <div class="container z-50 flex w-full items-center justify-between">
             <v-burger v-model="isOpen" @click="isOpen = !isOpen" />
 
             <div v-if="!lgAndUp" class="pr-5">
