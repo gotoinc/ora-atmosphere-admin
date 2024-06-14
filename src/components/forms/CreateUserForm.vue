@@ -1,6 +1,30 @@
 <template>
-    <div class="rounded-lg bg-dark p-6 shadow-2xl">
+    <div class="pb-10">
         <form class="grid gap-2" @submit.prevent="onSubmit">
+            <div>
+                <p class="mb-3">Please enter first name</p>
+
+                <v-text-field
+                    v-model="firstName"
+                    :error-messages="errors.first_name"
+                    name="first_name"
+                    label="First name"
+                    variant="outlined"
+                />
+            </div>
+
+            <div>
+                <p class="mb-3">Please enter last name</p>
+
+                <v-text-field
+                    v-model="lastName"
+                    :error-messages="errors.last_name"
+                    name="last_name"
+                    label="Last name"
+                    variant="outlined"
+                />
+            </div>
+
             <div>
                 <p class="mb-3">Please enter an email of new admin</p>
 
@@ -19,7 +43,7 @@
 
                 <v-text-field
                     v-model="company"
-                    :error-messages="errors.company"
+                    :error-messages="errors.company_name"
                     name="company"
                     label="Company"
                     variant="outlined"
@@ -36,28 +60,18 @@
                     clearable
                     class="capitalize"
                     :error-messages="errors.role"
-                    :items="roles"
+                    :items="userRoles"
                 />
             </div>
 
-            <div class="flex justify-center gap-4">
-                <v-btn
-                    class="text-none w-fit"
-                    color="error"
-                    @click="emits('close')"
-                >
-                    Cancel
-                </v-btn>
-
-                <v-btn
-                    :disabled="isButtonDisabled"
-                    type="submit"
-                    class="text-none w-fit"
-                    color="primary"
-                >
-                    {{ admin ? 'Save changes' : 'Add admin' }}
-                </v-btn>
-            </div>
+            <v-btn
+                :disabled="isButtonDisabled"
+                type="submit"
+                class="text-none w-fit"
+                color="primary"
+            >
+                {{ admin ? 'Save changes' : 'Add admin' }}
+            </v-btn>
         </form>
     </div>
 </template>
@@ -66,14 +80,13 @@
     import { computed } from 'vue';
     import { useForm } from 'vee-validate';
 
+    import userRoles from '@/constants/user-roles.ts';
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import type { AdminUser } from '@/ts/users';
     import { createUserSchema } from '@/validations/schemas/user.schema.ts';
 
-    const roles = ['admin', 'super admin'];
-
     const props = defineProps<{ admin?: AdminUser }>();
-    const emits = defineEmits<{ (e: 'close'): void }>();
+    defineEmits<{ (e: 'close'): void }>();
 
     const isButtonDisabled = computed(
         () =>
@@ -92,13 +105,15 @@
         validationSchema: createUserSchema,
         initialValues: {
             email: '',
-            company: '',
+            company_name: '',
         },
     });
 
     const [email] = defineField('email');
-    const [company] = defineField('company');
+    const [company] = defineField('company_name');
     const [role] = defineField('role');
+    const [firstName] = defineField('first_name');
+    const [lastName] = defineField('last_name');
 
     if (props.admin) {
         setValues({ ...props.admin });

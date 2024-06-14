@@ -19,21 +19,25 @@
     </v-data-table>
 
     <teleport to="body">
-        <v-dialog v-model="isEditOpen" max-width="768">
+        <full-screen-dialog v-model="isEditOpen" :title="`Edit - ${userName}`">
             <create-user-form
                 :admin="selectedUser as AdminUser"
                 @close="isEditOpen = false"
             />
-        </v-dialog>
+        </full-screen-dialog>
 
-        <delete-dialog v-model="isDeleteOpen" :title="selectedUser?.company" />
+        <delete-dialog
+            v-model="isDeleteOpen"
+            :title="selectedUser?.company_name"
+        />
     </teleport>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { computed, ref } from 'vue';
 
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
+    import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateUserForm from '@/components/forms/CreateUserForm.vue';
     import ActionButtons from '@/components/tables/TableActionButtons.vue';
 
@@ -44,11 +48,26 @@
     const isDeleteOpen = ref(false);
     const selectedUser = ref<AdminUser | null>(null);
 
+    const userName = computed(
+        () =>
+            `${selectedUser.value?.first_name} ${selectedUser.value?.last_name}`
+    );
+
     const headers = ref<ReadonlyHeaders>([
+        {
+            title: 'First name',
+            align: 'start',
+            key: 'first_name',
+        },
+        {
+            title: 'Last name',
+            align: 'start',
+            key: 'last_name',
+        },
         {
             title: 'Company name',
             align: 'start',
-            key: 'company',
+            key: 'company_name',
         },
         {
             title: 'Email',
@@ -68,29 +87,39 @@
 
     const items = [
         {
+            first_name: 'Joe',
+            last_name: 'Doe',
             email: 'admin1@example.com',
-            company: 'Tech Solutions',
-            role: 'admin' as const,
+            company_name: 'Tech Solutions',
+            role: 'admin',
         },
         {
+            first_name: 'Joe',
+            last_name: 'Doe',
             email: 'superadmin1@example.com',
-            company: 'Innovatech',
-            role: 'super admin' as const,
+            company_name: 'Innovatech',
+            role: 'super admin',
         },
         {
+            first_name: 'Joe',
+            last_name: 'Doe',
             email: 'admin2@example.com',
-            company: 'Creative Works',
-            role: 'admin' as const,
+            company_name: 'Creative Works',
+            role: 'admin',
         },
         {
+            first_name: 'Joe',
+            last_name: 'Doe',
             email: 'superadmin2@example.com',
-            company: 'Business Corp',
-            role: 'super admin' as const,
+            company_name: 'Business Corp',
+            role: 'super admin',
         },
         {
+            first_name: 'Joe',
+            last_name: 'Doe',
             email: 'admin3@example.com',
-            company: 'Future Innovations',
-            role: 'admin' as const,
+            company_name: 'Future Innovations',
+            role: 'admin',
         },
     ];
 

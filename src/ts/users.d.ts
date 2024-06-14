@@ -1,7 +1,9 @@
 export interface AdminUser {
+    first_name: string;
+    last_name: string;
     email: string;
-    company: string;
-    role: 'admin' | 'super admin';
+    company_name: string;
+    role: string;
 }
 
 export interface UserProfile {

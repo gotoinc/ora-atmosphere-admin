@@ -1,10 +1,10 @@
 <template>
     <section>
-        <div class="flex flex-wrap items-center justify-between gap-6">
-            <h1 class="mb-5 text-2xl font-bold">Users</h1>
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-6">
+            <h1 class="text-2xl font-bold">Users</h1>
 
             <v-btn
-                class="text-none max-sm:w-full"
+                class="text-none"
                 append-icon="mdi-plus"
                 color="primary"
                 @click="isDialogOpen = true"
@@ -35,9 +35,9 @@
             </v-tab>
         </v-tabs>
 
-        <v-dialog v-model="isDialogOpen" max-width="768">
+        <full-screen-dialog v-model="isDialogOpen" title="Create new user">
             <create-user-form @close="isDialogOpen = false" />
-        </v-dialog>
+        </full-screen-dialog>
 
         <router-view></router-view>
     </section>
@@ -46,6 +46,7 @@
 <script setup lang="ts">
     import { ref } from 'vue';
 
+    import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateUserForm from '@/components/forms/CreateUserForm.vue';
 
     const tab = ref(1);
