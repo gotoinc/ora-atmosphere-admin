@@ -1,13 +1,13 @@
 <template>
     <div class="flex items-center justify-end gap-2">
-        <button class="action-icon bg-primary-50">
-            <v-icon size="small" @click="emits('edit')"> mdi-pencil </v-icon>
+        <button class="action-icon bg-primary-50" @click="emits('edit')">
+            <v-icon size="small"> mdi-pencil </v-icon>
 
             <v-tooltip activator="parent" location="start"> Edit </v-tooltip>
         </button>
 
-        <button class="action-icon bg-red-500">
-            <v-icon size="small" @click="emits('delete')"> mdi-delete </v-icon>
+        <button class="action-icon bg-red-500" @click="emits('delete')">
+            <v-icon size="small"> mdi-delete </v-icon>
 
             <v-tooltip activator="parent" location="top"> Delete </v-tooltip>
         </button>

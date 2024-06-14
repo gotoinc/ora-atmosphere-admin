@@ -2,7 +2,7 @@
     <h3 class="mb-5 text-lg">Please fill out the fields below</h3>
 
     <form class="grid gap-2" @submit.prevent="onSubmit">
-        <fieldset>
+        <div>
             <p class="mb-3">Please enter a group name</p>
 
             <v-text-field
@@ -13,9 +13,9 @@
                 :error-messages="errors.name"
                 variant="outlined"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <p class="mb-3">Please select parent group</p>
 
             <v-select
@@ -26,9 +26,9 @@
                 :error-messages="errors.group"
                 :items="['Brands', 'Events', 'Climate']"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <p class="mb-3">Please choose a file of background</p>
 
             <drag-and-drop
@@ -36,7 +36,7 @@
                 @upload="selectFile"
                 @remove="removeFile"
             />
-        </fieldset>
+        </div>
 
         <v-btn type="submit" class="text-none w-fit" color="primary">
             Save
