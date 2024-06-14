@@ -4,6 +4,8 @@ import Cookies from 'js-cookie';
 
 import { defineStore } from 'pinia';
 
+import type { AdminUser } from '@/ts/users';
+
 import { authLogin } from '@/api/auth/auth-login.api.ts';
 import { authLogout } from '@/api/auth/auth-logout.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
@@ -16,6 +18,15 @@ export const useAuthStore = defineStore(
     () => {
         const isEmailConfirmed = ref(false);
         const isAuthenticated = ref(!!Cookies.get('ora_admin'));
+        const isSuperAdmin = ref(true);
+
+        const profile = ref<AdminUser | null>({
+            first_name: 'Joe',
+            last_name: 'Doe',
+            email: 'admin1@example.com',
+            company_name: 'Tech Solutions',
+            role: 'super admin',
+        });
 
         const clearAuth = () => {
             Cookies.remove('ora_admin');
@@ -63,6 +74,8 @@ export const useAuthStore = defineStore(
         return {
             isEmailConfirmed,
             isAuthenticated,
+            isSuperAdmin,
+            profile,
             clearAuth,
             login,
             logout,
