@@ -181,8 +181,7 @@
     const items: Content[] = [
         {
             id: 1000,
-            file_url:
-                'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4',
+            file_url: '/videos/test.mp4',
             image_url: '/images/example.jpg',
             title: 'Сisco',
             topic: {

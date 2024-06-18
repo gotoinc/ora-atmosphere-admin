@@ -23,6 +23,10 @@ export default {
                 },
             },
 
+            maxWidth: {
+                card: '347px',
+            },
+
             fontSize: {
                 h1: [
                     '3.5rem',

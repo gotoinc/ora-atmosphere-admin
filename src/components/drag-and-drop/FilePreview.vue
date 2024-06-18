@@ -1,8 +1,6 @@
 <template>
     <component :is="tag" class="file-preview">
-        <button class="close-icon" @click="$emit('remove', file)">
-            &times;
-        </button>
+        <button class="close-icon" @click="$emit('remove')">&times;</button>
 
         <img :src="file.url" :alt="file.file.name" :title="file.file.name" />
 
@@ -27,9 +25,11 @@
 </template>
 
 <script setup lang="ts">
+    import type { UploadableFile } from '@/hooks/useFileList.ts';
+
     interface Props {
         tag?: string;
-        file: File;
+        file: UploadableFile;
     }
 
     defineProps<Props>();

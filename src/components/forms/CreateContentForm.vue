@@ -102,7 +102,7 @@
 
             <!-- Video block -->
             <div
-                v-if="uploadedFile || content"
+                v-show="uploadedFile || content"
                 class="relative max-w-96 flex-shrink-0 overflow-hidden rounded bg-grey-300 max-tab:w-full max-tab:max-w-full"
             >
                 <div class="h-64 max-tab:h-[45vw]">
@@ -110,7 +110,7 @@
                         ref="videoElement"
                         class="h-full w-full object-cover"
                         controls
-                        @loadedmetadata="loadVideoInfo"
+                        @loadeddata="loadVideoInfo"
                     >
                         <source :src="videoSrc ?? content?.file_url" />
                     </video>
@@ -195,6 +195,41 @@
                                     label="Show video on main banner by default"
                                 ></v-checkbox>
                             </div>
+
+                            <div v-show="isShowPreview" class="fade-b mb-4">
+                                <v-divider class="my-3"></v-divider>
+
+                                <p class="mb-3">Card preview:</p>
+
+                                <label
+                                    class="group relative z-10 flex max-w-card cursor-pointer items-center justify-center overflow-hidden"
+                                >
+                                    <category-card
+                                        v-if="isVideoLoaded"
+                                        class="mb-4 w-full transition-opacity group-hover:opacity-10"
+                                        :img="imageSrc"
+                                        :name="title"
+                                    />
+
+                                    <span
+                                        class="absolute flex flex-col items-center !opacity-0 transition-opacity group-hover:!opacity-100"
+                                    >
+                                        <v-icon
+                                            size="40"
+                                            icon="mdi-tray-arrow-up "
+                                        />
+
+                                        Change background
+                                    </span>
+
+                                    <input
+                                        class="hidden"
+                                        type="file"
+                                        accept="image/png, image/jpeg, image/gifm image/jpg, image/webp"
+                                        @change="changeBackground"
+                                    />
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -203,14 +238,23 @@
                         type="paragraph"
                     ></v-skeleton-loader>
 
-                    <div class="text-right">
+                    <div class="flex justify-end gap-3 max-xs:flex-col">
                         <v-btn
                             type="submit"
                             color="error"
-                            class="text-none w-fit"
+                            class="text-none w-fit max-xs:w-full"
                             @click="changeVideo"
                         >
                             Change video
+                        </v-btn>
+
+                        <v-btn
+                            variant="outlined"
+                            color="secondary"
+                            class="text-none w-fit !text-white max-xs:w-full"
+                            @click="showPreview"
+                        >
+                            {{ isShowPreview ? 'Hide' : 'Show' }} preview
                         </v-btn>
                     </div>
                 </div>
@@ -223,6 +267,7 @@
     import { ref } from 'vue';
     import { useForm } from 'vee-validate';
 
+    import CategoryCard from '@/components/base/CategoryCard.vue';
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
 
     import { useCaptureImage } from '@/hooks/useCaptureImage.ts';
@@ -238,7 +283,8 @@
     const props = defineProps<{ content?: Content | null }>();
 
     const isContentSelected = ref(!!props.content);
-    const isVideoLoaded = ref(!!props.content);
+    const isVideoLoaded = ref(false);
+    const isShowPreview = ref(false);
     const showContentByDefault = ref(false);
 
     const { defineField, handleSubmit, errors, resetForm, setValues } =
@@ -254,7 +300,7 @@
     const videoSrc = ref(props.content?.file_url ?? '');
     const imageSrc = ref('');
 
-    const videoElement = ref<HTMLVideoElement | null>(null);
+    const videoElement = ref<HTMLVideoElement>();
 
     /**
      * Define fields for form
@@ -321,6 +367,12 @@
         }
     };
 
+    const showPreview = () => {
+        isShowPreview.value = !isShowPreview.value;
+
+        if (isShowPreview.value) onVideoCapture();
+    };
+
     const onVideoCapture = () => {
         if (videoElement.value) {
             const src = useCaptureImage(videoElement.value);
@@ -336,18 +388,20 @@
         isContentSelected.value = false;
     };
 
+    const changeBackground = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+
+        if (target.files) {
+            imageSrc.value = URL.createObjectURL(target.files[0]);
+        }
+    };
+
     const removeFile = () => {
         uploadedFile.value = null;
         contentFile.value = '';
     };
 
-    const onSubmit = handleSubmit((values) => {
-        if (!props.content) {
-            onVideoCapture();
-        }
-
-        console.log(values);
-
+    const onSubmit = handleSubmit(() => {
         resetForm();
         topic.value = null;
     });
