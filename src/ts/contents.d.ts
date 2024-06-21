@@ -1,10 +1,13 @@
+import type { Identifiable } from '@/ts/common';
+
 export interface VideoContent {
     id: number;
     title: string;
     description: string;
     file: string;
     image: string;
-    languages: Language[];
+    languages: Identifiable[];
+    topic: Identifiable;
     audio?: string[];
     tags: string[];
     requires_auth: boolean;
@@ -12,9 +15,4 @@ export interface VideoContent {
     with_sound: boolean;
     with_narration: boolean;
     date_created: string;
-}
-
-export interface Language {
-    id: number;
-    name: string;
 }

@@ -107,15 +107,15 @@
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
-    import type { CategoryBrief } from '@/ts/catalog';
+    import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Filters {
         search: string;
-        category: CategoryBrief | null;
-        group: CategoryBrief | null;
-        topic: CategoryBrief | null;
+        category: Identifiable | null;
+        group: Identifiable | null;
+        topic: Identifiable | null;
     }
 
     const router = useRouter();
@@ -256,7 +256,7 @@
         topic: null,
     });
 
-    const topics = ref<CategoryBrief[]>([
+    const topics = ref<Identifiable[]>([
         {
             id: 100,
             name: 'Theme 1',

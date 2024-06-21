@@ -20,6 +20,7 @@
                 </v-btn>
 
                 <v-btn
+                    :loading="loading"
                     class="text-none flex-grow"
                     color="error"
                     @click="emits('delete')"
@@ -37,6 +38,7 @@
     interface Props {
         modelValue: boolean;
         title?: string;
+        loading?: boolean;
     }
 
     interface Emits {

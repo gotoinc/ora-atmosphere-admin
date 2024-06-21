@@ -1,5 +1,10 @@
 <template>
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
+    <v-data-table
+        :loading="loading"
+        class="!rounded-lg"
+        :headers="headers"
+        :items="items"
+    >
         <template #[`item.actions`]="{ item }">
             <div class="flex items-center justify-end gap-2">
                 <button class="action-icon bg-primary-50">
@@ -38,7 +43,11 @@
         </template>
 
         <template #no-data>
-            <v-btn color="primary"> Reset </v-btn>
+            <p class="text-lg">No results</p>
+        </template>
+
+        <template #loading>
+            <v-skeleton-loader type="table-row@10"></v-skeleton-loader>
         </template>
     </v-data-table>
 </template>
@@ -52,6 +61,7 @@
         // eslint-disable-next-line
         items: any[];
         editable?: boolean;
+        loading?: boolean;
     }
 
     interface Emits {

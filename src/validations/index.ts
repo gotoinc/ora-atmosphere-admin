@@ -1,4 +1,6 @@
-import { boolean, number, object, string } from 'yup';
+import { boolean, mixed, number, object, string } from 'yup';
+
+import { isFile } from '@/ts/guards/file.guard.ts';
 
 /**
  * Define common validations
@@ -59,3 +61,15 @@ export const topicSchema = object().shape({
 
     requires_auth: boolean().required(),
 });
+
+export const fileSchema = mixed<File | string>()
+    .test('value', 'Field is required', (value) => {
+        return isFile(value) || typeof value === 'string';
+    })
+    .test('fileSize', 'File size is too large', (value) => {
+        if (value && isFile(value)) {
+            return value.size <= 5000000; // not bigger that 5mb
+        } else {
+            return true;
+        }
+    });

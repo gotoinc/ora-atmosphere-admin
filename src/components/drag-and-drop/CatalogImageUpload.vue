@@ -5,7 +5,7 @@
 
             <drag-and-drop
                 :accept="acceptedImages"
-                :error="error"
+                :error="!!error"
                 @upload="(item) => emits('upload', item)"
                 @remove="emits('remove')"
             />
@@ -29,6 +29,10 @@
                     </v-icon>
                 </button>
             </div>
+
+            <p class="mt-2 font-semibold text-error">
+                {{ error }}
+            </p>
         </template>
     </div>
 </template>
@@ -44,7 +48,7 @@
         showCard: boolean;
         name: string;
         background: string;
-        error?: boolean;
+        error?: string;
     }
 
     interface Emits {

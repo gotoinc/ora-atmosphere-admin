@@ -23,8 +23,8 @@
                 label="Group"
                 variant="outlined"
                 clearable
-                :error-messages="errors.group_id"
                 return-object
+                :error-messages="errors.group_id"
                 item-title="name"
                 :items="groups"
                 @update:model-value="selectGroupId"
@@ -34,8 +34,8 @@
         <catalog-image-upload
             v-model:name="name"
             :show-card="isFileSelected"
-            :background="image"
-            :error="!!errors.image"
+            :background="imageSrc"
+            :error="errors.image"
             @upload="selectFile"
             @remove="removeFile"
         />
@@ -49,75 +49,91 @@
             label="Visible for unregistered users"
         ></v-checkbox>
 
-        <v-btn type="submit" class="text-none w-fit" color="primary">
+        <v-btn
+            :loading="isLoading"
+            type="submit"
+            class="text-none w-fit"
+            color="primary"
+        >
             Save
         </v-btn>
     </form>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
+    import { getGroups } from '@/api/catalog/groups/get-groups.api.ts';
+    import { postTopic } from '@/api/catalog/topics/post-topic.api.ts';
+    import { updateTopic } from '@/api/catalog/topics/update-topic.api.ts';
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
-    import type { CategoryBrief, Topic } from '@/ts/catalog';
+    import type { Group, Topic } from '@/ts/catalog';
+    import type { KeysToString } from '@/ts/types/types';
     import { createThemeSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateTheme } from '@/validations/types/catalog';
+    import type {
+        CreateCategory,
+        CreateTheme,
+    } from '@/validations/types/catalog';
 
     const props = defineProps<{ topic?: Topic | null }>();
+    const emits = defineEmits<CreateFormEmits>();
 
-    const isFileSelected = ref(!!props.topic);
-    const imageFile = ref<File | null>();
+    const toast = useToast();
+
+    const isFileSelected = ref(!!props.topic?.image);
+    const imageSrc = ref('');
+
+    const isLoading = ref(false);
+    const isGroupsLoading = ref(true);
 
     const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateTheme>({
             validationSchema: createThemeSchema,
             initialValues: {
                 name: '',
-                image: '',
             },
         });
 
-    const group = ref<CategoryBrief | null>();
+    const group = ref<Group | null>();
+    const groups = ref<Group[]>([]);
+
     const [name] = defineField('name');
     const [image] = defineField('image');
     const [groupId] = defineField('group_id');
     const [requiresAuth] = defineField('requires_auth');
 
+    const excludedProperties = useExcludeProperties({ ...props.topic }, [
+        'id',
+        'date_created',
+        'videos',
+    ]);
+
     if (props.topic) {
-        group.value = props.topic.group;
-        groupId.value = props.topic.group.id;
+        // group.value = props.topic.group;
+        // groupId.value = props.topic.group.id;
 
-        setValues(
-            useExcludeProperties({ ...props.topic }, ['id', 'date_created'])
-        );
+        if (props.topic.image) {
+            imageSrc.value = props.topic.image;
+        }
+
+        setValues(excludedProperties);
     }
-
-    /**
-     * Test groups
-     */
-    const groups = [
-        {
-            id: 2,
-            name: 'Science',
-        },
-        {
-            id: 1,
-            name: 'Brands',
-        },
-    ];
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            image.value = URL.createObjectURL(value[0].file);
-            imageFile.value = value[0].file;
+            imageSrc.value = URL.createObjectURL(value[0].file);
+            image.value = value[0].file;
         }
     };
 
-    const selectGroupId = (group?: CategoryBrief) => {
+    const selectGroupId = (group?: Group) => {
         if (group) {
             groupId.value = group.id;
         }
@@ -125,14 +141,63 @@
 
     const removeFile = () => {
         isFileSelected.value = false;
-        image.value = '';
-        imageFile.value = null;
+        image.value = null;
+        imageSrc.value = '';
     };
 
-    const onSubmit = handleSubmit(() => {
-        group.value = null;
-        removeFile();
-        resetForm();
+    const onSubmit = handleSubmit(async (values) => {
+        const editedValues = useCompareObjects(
+            excludedProperties,
+            values as KeysToString<CreateCategory>
+        );
+
+        if (props.topic && !editedValues) {
+            toast.error('No changes were captured');
+
+            return;
+        }
+
+        isLoading.value = true;
+
+        try {
+            if (props.topic) {
+                await updateTopic(props.topic.id, {
+                    ...editedValues,
+                    group_id: groupId.value,
+                });
+
+                toast.success('Topic successfully updated');
+            } else {
+                await postTopic({
+                    ...values,
+                });
+
+                toast.success('Topic successfully created');
+
+                group.value = null;
+                removeFile();
+                resetForm();
+            }
+
+            emits('update');
+            emits('close');
+        } catch (e) {
+            if (props.topic) {
+                toast.error('Topic not updated');
+            } else {
+                toast.error('Topic not created');
+            }
+        } finally {
+            isLoading.value = false;
+        }
+    });
+
+    onMounted(async () => {
+        try {
+            groups.value = (await getGroups()) ?? [];
+        } finally {
+            isGroupsLoading.value = false;
+        }
     });
 </script>
 

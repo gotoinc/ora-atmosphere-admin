@@ -20,22 +20,21 @@
 
             <v-select
                 v-model="category"
+                :loading="isCategoriesLoading"
                 label="Category"
                 variant="outlined"
                 clearable
-                :error-messages="errors.category_id"
                 :items="categories"
                 return-object
                 item-title="name"
-                @update:model-value="selectCategoryId"
             />
         </div>
 
         <catalog-image-upload
             v-model:name="name"
             :show-card="isFileSelected"
-            :background="image"
-            :error="!!errors.image"
+            :background="imageSrc"
+            :error="errors.image"
             @upload="selectFile"
             @remove="removeFile"
         />
@@ -49,90 +48,155 @@
             label="Visible for unregistered users"
         ></v-checkbox>
 
-        <v-btn type="submit" color="primary" class="text-none w-fit">
-            Save
+        <v-btn
+            :loading="isLoading"
+            type="submit"
+            color="primary"
+            class="text-none w-fit"
+        >
+            {{ group ? 'Save changes' : 'Save' }}
         </v-btn>
     </form>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
+    import { getCategories } from '@/api/catalog/categories/get-categories.api.ts';
+    import { postGroup } from '@/api/catalog/groups/post-group.api.ts';
+    import { updateGroup } from '@/api/catalog/groups/update-group.api.ts';
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
-    import type { CategoryBrief, Group } from '@/ts/catalog';
+    import type { Category, Group } from '@/ts/catalog';
+    import type { KeysToString } from '@/ts/types/types';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateGroup } from '@/validations/types/catalog';
+    import type {
+        CreateCategory,
+        CreateGroup,
+    } from '@/validations/types/catalog';
 
     const props = defineProps<{ group?: Group | null }>();
+    const emits = defineEmits<CreateFormEmits>();
 
-    const isFileSelected = ref(!!props.group);
-    const imageFile = ref<File | null>();
+    const toast = useToast();
+
+    const isFileSelected = ref(!!props.group?.image);
+    const imageSrc = ref('');
+
+    const isLoading = ref(false);
+    const isCategoriesLoading = ref(true);
 
     const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateGroup>({
             validationSchema: createGroupSchema,
             initialValues: {
                 name: '',
-                image: '',
             },
         });
 
-    const category = ref<CategoryBrief | null>();
+    const category = ref<Category | null>();
+    const categories = ref<Category[]>([]);
+
     const [name] = defineField('name');
     const [image] = defineField('image');
-    const [categoryId] = defineField('category_id');
+    // const [categoryId] = defineField('category_id');
     const [requiresAuth] = defineField('requires_auth');
+
+    const excludedProperties = useExcludeProperties({ ...props.group }, [
+        'id',
+        'date_created',
+        'topics',
+    ]);
 
     if (props.group) {
         category.value = props.group.category;
-        categoryId.value = props.group.category.id;
+        // categoryId.value = props.group.category.id;
 
-        setValues(
-            useExcludeProperties({ ...props.group }, ['id', 'date_created'])
-        );
+        setValues(excludedProperties);
+
+        if (props.group.image) {
+            imageSrc.value = props.group.image;
+        }
     }
-
-    /**
-     * Test categories
-     */
-    const categories = [
-        {
-            id: 2,
-            name: 'Science',
-        },
-        {
-            id: 1,
-            name: 'Brands & events',
-        },
-    ];
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            image.value = URL.createObjectURL(value[0].file);
-            imageFile.value = value[0].file;
+            imageSrc.value = URL.createObjectURL(value[0].file);
+            image.value = value[0].file;
         }
     };
 
-    const selectCategoryId = (category?: CategoryBrief) => {
-        if (category) {
-            categoryId.value = category.id;
-        }
-    };
+    // const selectCategoryId = (category?: Identifiable) => {
+    //     if (category) {
+    //         categoryId.value = category.id;
+    //     }
+    // };
 
     const removeFile = () => {
         isFileSelected.value = false;
-        image.value = '';
-        imageFile.value = null;
+        image.value = null;
+        imageSrc.value = '';
     };
 
-    const onSubmit = handleSubmit(() => {
-        category.value = null;
-        removeFile();
-        resetForm();
+    const onSubmit = handleSubmit(async (values) => {
+        const editedValues = useCompareObjects(
+            excludedProperties,
+            values as KeysToString<CreateCategory>
+        );
+
+        if (props.group && !editedValues) {
+            toast.error('No changes were captured');
+
+            return;
+        }
+
+        isLoading.value = true;
+
+        try {
+            if (props.group) {
+                await updateGroup(props.group.id, {
+                    ...editedValues,
+                });
+
+                toast.success('Group successfully updated');
+            } else {
+                await postGroup({
+                    ...values,
+                    // category_id: categoryId.value,
+                });
+
+                toast.success('Group successfully created');
+
+                category.value = null;
+                removeFile();
+                resetForm();
+            }
+
+            emits('update');
+            emits('close');
+        } catch (e) {
+            if (props.group) {
+                toast.error('Group not updated');
+            } else {
+                toast.error('Group not created');
+            }
+        } finally {
+            isLoading.value = false;
+        }
+    });
+
+    onMounted(async () => {
+        try {
+            categories.value = (await getCategories()) ?? [];
+        } finally {
+            isCategoriesLoading.value = false;
+        }
     });
 </script>
 

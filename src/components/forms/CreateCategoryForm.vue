@@ -18,8 +18,8 @@
         <catalog-image-upload
             v-model:name="name"
             :show-card="isFileSelected"
-            :background="image"
-            :error="!!errors.image"
+            :background="imageSrc"
+            :error="errors.image"
             class="mb-3"
             @upload="selectFile"
             @remove="removeFile"
@@ -34,7 +34,12 @@
             label="Visible for unregistered users"
         ></v-checkbox>
 
-        <v-btn type="submit" color="primary" class="text-none w-fit">
+        <v-btn
+            :loading="isLoading"
+            type="submit"
+            color="primary"
+            class="text-none w-fit"
+        >
             {{ category ? 'Save changes' : 'Save' }}
         </v-btn>
     </form>
@@ -42,35 +47,55 @@
 
 <script setup lang="ts">
     import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
+    import { postCategories } from '@/api/catalog/categories/post-category.api.ts';
+    import { updateCategory } from '@/api/catalog/categories/update-category.api.ts';
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Category } from '@/ts/catalog';
+    import type { KeysToString } from '@/ts/types/types';
     import { createCategorySchema } from '@/validations/schemas/catalog.schema.ts';
     import type { CreateCategory } from '@/validations/types/catalog';
 
-    const props = defineProps<{ category?: Category | null }>();
+    interface Props {
+        category?: Category | null;
+    }
 
-    const isFileSelected = ref(!!props.category);
+    const props = defineProps<Props>();
+    const emits = defineEmits<CreateFormEmits>();
 
-    const imageFile = ref<File | null>();
+    const toast = useToast();
+
+    const isFileSelected = ref(!!props.category?.image);
+    const isLoading = ref(false);
+    const imageSrc = ref('');
 
     const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateCategory>({
             validationSchema: createCategorySchema,
             initialValues: {
                 name: '',
-                image: '',
             },
         });
 
+    const excludedProperties = useExcludeProperties({ ...props.category }, [
+        'id',
+        'date_created',
+        'groups',
+    ]);
+
     if (props.category) {
-        setValues(
-            useExcludeProperties({ ...props.category }, ['id', 'date_created'])
-        );
+        setValues(excludedProperties);
+
+        if (props.category.image) {
+            imageSrc.value = props.category.image;
+        }
     }
 
     const [name] = defineField('name');
@@ -79,21 +104,58 @@
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            imageFile.value = value[0].file;
-            image.value = URL.createObjectURL(value[0].file);
+            image.value = value[0].file;
+            imageSrc.value = URL.createObjectURL(value[0].file);
         }
     };
 
     const removeFile = () => {
         isFileSelected.value = false;
-
-        image.value = '';
-        imageFile.value = null;
+        imageSrc.value = '';
+        image.value = null;
     };
 
-    const onSubmit = handleSubmit(() => {
-        removeFile();
-        resetForm();
+    const onSubmit = handleSubmit(async (values) => {
+        const editedValues = useCompareObjects(
+            excludedProperties,
+            values as KeysToString<CreateCategory>
+        );
+
+        if (props.category && !editedValues) {
+            toast.error('No changes were captured');
+
+            return;
+        }
+
+        isLoading.value = true;
+
+        try {
+            if (props.category) {
+                await updateCategory(props.category.id, {
+                    ...editedValues,
+                });
+
+                toast.success('Category successfully updated');
+            } else {
+                await postCategories(values);
+
+                toast.success('Category successfully created');
+
+                removeFile();
+                resetForm();
+            }
+
+            emits('update');
+            emits('close');
+        } catch (e) {
+            if (props.category) {
+                toast.error('Category not updated');
+            } else {
+                toast.error('Category not created');
+            }
+        } finally {
+            isLoading.value = false;
+        }
     });
 </script>
 

@@ -1,11 +1,11 @@
 interface CreateCategory {
     name: string;
-    image: string;
+    image: File | string | null;
     requires_auth?: boolean;
 }
 
 interface CreateGroup extends CreateCategory {
-    category_id: number;
+    // category_id: number;
 }
 
 interface CreateTheme extends CreateCategory {
