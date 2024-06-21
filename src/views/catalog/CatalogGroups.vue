@@ -21,6 +21,7 @@
     </div>
 
     <catalog-table
+        :loading="isLoading"
         :headers="headers"
         :items="items"
         @edit="handleEdit"
@@ -45,19 +46,21 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateGroupForm from '@/components/forms/CreateGroupForm.vue';
 
+    import { getGroups } from '@/api/catalog/get-groups.api.ts';
     import type { CatalogItem, Group } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
+    const isLoading = ref(true);
     const selectedGroup = ref<Group | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
@@ -91,47 +94,7 @@
         },
     ]);
 
-    const items = [
-        {
-            id: 1,
-            name: 'Brands',
-            image: '/public/images/example.jpg',
-            category: {
-                id: 2,
-                name: 'Science',
-            },
-            requires_auth: false,
-            contents_amount: 10,
-            topics: [],
-            date_created: new Date().toDateString(),
-        },
-        {
-            id: 2,
-            name: 'Events',
-            image: '/public/images/example.jpg',
-            category: {
-                id: 2,
-                name: 'Brands & events',
-            },
-            requires_auth: false,
-            contents_amount: 23,
-            topics: [],
-            date_created: new Date().toDateString(),
-        },
-        {
-            id: 3,
-            name: 'Culture',
-            image: '/public/images/example.jpg',
-            category: {
-                id: 2,
-                name: 'Brands & events',
-            },
-            requires_auth: false,
-            topics: [],
-            contents_amount: 12,
-            date_created: new Date().toDateString(),
-        },
-    ];
+    const items = ref<Group[]>([]);
 
     const handleEdit = (group: CatalogItem) => {
         selectedGroup.value = group as Group;
@@ -144,6 +107,14 @@
 
         isDeleteOpen.value = true;
     };
+
+    onMounted(async () => {
+        try {
+            items.value = (await getGroups()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    });
 </script>
 
 <style scoped></style>

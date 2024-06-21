@@ -1,4 +1,7 @@
 import { createApp } from 'vue';
+import type { PluginOptions } from 'vue-toastification';
+import { POSITION } from 'vue-toastification';
+import Toast from 'vue-toastification';
 
 import { createPinia } from 'pinia';
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
@@ -16,5 +19,16 @@ pinia.use(piniaPluginPersistedState);
 import App from './App.vue';
 import vuetify from './vuetify.ts';
 
+// Toast options
+const toastOptions: PluginOptions = {
+    position: POSITION.BOTTOM_RIGHT,
+    pauseOnHover: false,
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-createApp(App).use(router).use(pinia).use(vuetify).mount('#app');
+createApp(App)
+    .use(router)
+    .use(pinia)
+    .use(vuetify)
+    .use(Toast, toastOptions)
+    .mount('#app');

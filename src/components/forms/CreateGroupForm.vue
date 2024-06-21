@@ -63,7 +63,8 @@
 
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
-    import type { CategoryBrief, Group } from '@/ts/catalog';
+    import type { Group } from '@/ts/catalog';
+    import type { Identifiable } from '@/ts/common';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
     import type { CreateGroup } from '@/validations/types/catalog';
 
@@ -81,7 +82,7 @@
             },
         });
 
-    const category = ref<CategoryBrief | null>();
+    const category = ref<Identifiable | null>();
     const [name] = defineField('name');
     const [image] = defineField('image');
     const [categoryId] = defineField('category_id');
@@ -92,7 +93,11 @@
         categoryId.value = props.group.category.id;
 
         setValues(
-            useExcludeProperties({ ...props.group }, ['id', 'date_created'])
+            useExcludeProperties({ ...props.group }, [
+                'id',
+                'image',
+                'date_created',
+            ])
         );
     }
 
@@ -117,7 +122,7 @@
         }
     };
 
-    const selectCategoryId = (category?: CategoryBrief) => {
+    const selectCategoryId = (category?: Identifiable) => {
         if (category) {
             categoryId.value = category.id;
         }

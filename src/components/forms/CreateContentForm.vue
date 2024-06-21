@@ -233,7 +233,8 @@
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import type { Topic } from '@/ts/catalog';
-    import type { Language, VideoContent } from '@/ts/contents';
+    import type { Identifiable } from '@/ts/common';
+    import type { VideoContent } from '@/ts/contents';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
     import type { CreateContent } from '@/validations/types/content';
 
@@ -290,7 +291,7 @@
     /**
      * Test languages
      */
-    const langs: Language[] = [
+    const langs: Identifiable[] = [
         {
             id: 1,
             name: 'English',

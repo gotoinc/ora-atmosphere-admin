@@ -1,7 +1,7 @@
 import router from '@/router';
-import type { CategoryBrief } from '@/ts/catalog';
+import type { Identifiable } from '@/ts/common';
 
-type FilterValue = string | CategoryBrief | null;
+type FilterValue = string | Identifiable | null;
 
 export const useUpdateQueryParams = <T extends Record<string, FilterValue>>(
     filters: T

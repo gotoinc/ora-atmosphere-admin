@@ -1,4 +1,4 @@
-import type { CategoryBrief } from '@/ts/catalog';
+import type { Identifiable } from '@/ts/common';
 
 export interface VideoContent {
     id: number;
@@ -6,17 +6,12 @@ export interface VideoContent {
     description: string;
     file: string;
     image: string;
-    languages: Language[];
-    topic: CategoryBrief;
+    languages: Identifiable[];
+    topic: Identifiable;
     tags: string[];
     requires_auth: boolean;
     duration: number;
     with_sound: boolean;
     with_narration: boolean;
     date_created: string;
-}
-
-export interface Language {
-    id: number;
-    name: string;
 }
