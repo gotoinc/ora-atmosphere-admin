@@ -31,36 +31,55 @@
     <!--  Dialogs   -->
     <teleport to="body">
         <full-screen-dialog v-model="isDialogOpen" title="Create new group">
-            <create-group-form />
+            <create-group-form
+                @close="isDialogOpen = false"
+                @update="loadGroups"
+            />
         </full-screen-dialog>
 
         <full-screen-dialog
             v-model="isEditOpen"
             :title="`Edit - ${selectedGroup?.name}`"
         >
-            <create-group-form v-model:group="selectedGroup" />
+            <create-group-form
+                v-model:group="selectedGroup"
+                @close="isEditOpen = false"
+                @update="loadGroups"
+            />
         </full-screen-dialog>
 
-        <delete-dialog v-model="isDeleteOpen" :title="selectedGroup?.name" />
+        <delete-dialog
+            v-model="isDeleteOpen"
+            :title="selectedGroup?.name"
+            :loading="isDeleteLoading"
+            @delete="confirmDelete"
+        />
     </teleport>
 </template>
 
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
+    import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateGroupForm from '@/components/forms/CreateGroupForm.vue';
 
-    import { getGroups } from '@/api/catalog/get-groups.api.ts';
+    import { deleteGroup } from '@/api/catalog/groups/delete-group.api.ts';
+    import { getGroups } from '@/api/catalog/groups/get-groups.api.ts';
     import type { CatalogItem, Group } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
+
+    const toast = useToast();
 
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
+
     const isLoading = ref(true);
+    const isDeleteLoading = ref(false);
+
     const selectedGroup = ref<Group | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
@@ -108,13 +127,38 @@
         isDeleteOpen.value = true;
     };
 
-    onMounted(async () => {
+    const confirmDelete = async () => {
+        const group = selectedGroup.value as Group;
+
+        isDeleteLoading.value = true;
+
+        try {
+            await deleteGroup(group.id);
+
+            toast.success('Group successfully deleted');
+
+            isDeleteOpen.value = false;
+
+            void loadGroups();
+        } catch (e) {
+            toast.error('Group is not deleted');
+        } finally {
+            isLoading.value = false;
+            isDeleteLoading.value = false;
+        }
+    };
+
+    const loadGroups = async () => {
+        isLoading.value = true;
+
         try {
             items.value = (await getGroups()) ?? [];
         } finally {
             isLoading.value = false;
         }
-    });
+    };
+
+    void loadGroups();
 </script>
 
 <style scoped></style>

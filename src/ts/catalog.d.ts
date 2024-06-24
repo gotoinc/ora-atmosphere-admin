@@ -7,7 +7,7 @@ export interface Category extends CommonCatalogTypes {
 
 export interface Group extends CommonCatalogTypes {
     topics: Topic[];
-    category: Identifiable;
+    category: Category;
 }
 
 export interface Topic extends CommonCatalogTypes {

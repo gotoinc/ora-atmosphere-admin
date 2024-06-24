@@ -66,8 +66,8 @@
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateCategoryForm from '@/components/forms/CreateCategoryForm.vue';
 
-    import { deleteCategory } from '@/api/catalog/delete-category.api.ts';
-    import { getCategories } from '@/api/catalog/get-categories.api.ts';
+    import { deleteCategory } from '@/api/catalog/categories/delete-category.api.ts';
+    import { getCategories } from '@/api/catalog/categories/get-categories.api.ts';
     import type { CatalogItem, Category } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 

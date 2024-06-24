@@ -51,9 +51,10 @@
     import { useForm } from 'vee-validate';
 
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
-    import { postCategories } from '@/api/catalog/post-category.api.ts';
-    import { updateCategory } from '@/api/catalog/update-category.api.ts';
+    import { postCategories } from '@/api/catalog/categories/post-category.api.ts';
+    import { updateCategory } from '@/api/catalog/categories/update-category.api.ts';
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
@@ -66,17 +67,12 @@
         category?: Category | null;
     }
 
-    interface Emits {
-        (e: 'update'): void;
-        (e: 'close'): void;
-    }
-
     const props = defineProps<Props>();
-    const emits = defineEmits<Emits>();
+    const emits = defineEmits<CreateFormEmits>();
 
     const toast = useToast();
 
-    const isFileSelected = ref(!!props.category);
+    const isFileSelected = ref(!!props.category?.image);
     const isLoading = ref(false);
     const imageSrc = ref('');
 
@@ -116,6 +112,7 @@
     const removeFile = () => {
         isFileSelected.value = false;
         imageSrc.value = '';
+        image.value = '';
     };
 
     const onSubmit = handleSubmit(async (values) => {
@@ -134,7 +131,6 @@
 
         try {
             if (props.category) {
-                console.log(editedValues);
                 await updateCategory(props.category.id, {
                     ...editedValues,
                 });
