@@ -19,7 +19,7 @@
             v-model:name="name"
             :show-card="isFileSelected"
             :background="imageSrc"
-            :error="!!errors.image"
+            :error="errors.image"
             class="mb-3"
             @upload="selectFile"
             @remove="removeFile"

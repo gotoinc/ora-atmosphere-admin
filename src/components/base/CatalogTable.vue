@@ -43,7 +43,7 @@
         </template>
 
         <template #no-data>
-            <v-btn color="primary"> No results </v-btn>
+            <p class="text-lg">No results</p>
         </template>
 
         <template #loading>

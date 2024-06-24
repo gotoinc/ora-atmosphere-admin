@@ -58,15 +58,12 @@
                 </span>
             </div>
         </div>
-
-        <v-snackbar v-model="showAlert" :timeout="2000" color="red">
-            This file type is not supported
-        </v-snackbar>
     </drop-zone>
 </template>
 
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { computed } from 'vue';
+    import { useToast } from 'vue-toastification';
 
     import DropZone from '@/components/drag-and-drop/DropZone.vue';
 
@@ -87,11 +84,11 @@
     const emits = defineEmits<Emits>();
     const props = defineProps<Props>();
 
+    const toast = useToast();
+
     const acceptFileTypes = computed(() =>
         props.accept ? props.accept.join(', ') : ''
     );
-
-    const showAlert = ref(false);
 
     const { files, addFiles, removeFile } = useFiles();
 
@@ -99,14 +96,21 @@
         if (!props.accept) {
             addFiles(newFiles);
             emits('upload', files.value);
+
             return;
         }
 
         if (props.accept.includes(newFiles[0].type)) {
+            if (newFiles[0].size >= 5000000) {
+                toast.error('File size is too large');
+
+                return;
+            }
+
             addFiles(newFiles);
             emits('upload', files.value);
         } else {
-            showAlert.value = true;
+            toast.error('This file type is not supported');
         }
     };
 
