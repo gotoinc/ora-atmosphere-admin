@@ -8,6 +8,7 @@ import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
 
 // Styles
 import 'vuetify/styles';
+import 'vue-toastification/dist/index.css';
 import './assets/tailwind.css';
 // Router
 import router from '@/router';

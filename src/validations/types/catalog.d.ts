@@ -1,6 +1,6 @@
 interface CreateCategory {
     name: string;
-    image: string;
+    image: File | string | null;
     requires_auth?: boolean;
 }
 

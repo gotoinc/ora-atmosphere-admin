@@ -31,36 +31,53 @@
     <!--  Dialogs   -->
     <teleport to="body">
         <full-screen-dialog v-model="isDialogOpen" title="Create new category">
-            <create-category-form />
+            <create-category-form
+                @close="isDialogOpen = false"
+                @update="loadCategories"
+            />
         </full-screen-dialog>
 
         <full-screen-dialog
             v-model="isEditOpen"
             :title="`Edit - ${selectedCategory?.name}`"
         >
-            <create-category-form v-model:category="selectedCategory" />
+            <create-category-form
+                v-model:category="selectedCategory"
+                @close="isEditOpen = false"
+                @update="loadCategories"
+            />
         </full-screen-dialog>
 
-        <delete-dialog v-model="isDeleteOpen" :title="selectedCategory?.name" />
+        <delete-dialog
+            v-model="isDeleteOpen"
+            :loading="isDeleteLoading"
+            :title="selectedCategory?.name"
+            @delete="confirmDelete"
+        />
     </teleport>
 </template>
 
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
+    import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateCategoryForm from '@/components/forms/CreateCategoryForm.vue';
 
+    import { deleteCategory } from '@/api/catalog/delete-category.api.ts';
     import { getCategories } from '@/api/catalog/get-categories.api.ts';
     import type { CatalogItem, Category } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
+    const toast = useToast();
+
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
-    const isLoading = ref(true);
+    const isLoading = ref(false);
+    const isDeleteLoading = ref(false);
     const selectedCategory = ref<Category | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
@@ -98,19 +115,44 @@
         isEditOpen.value = true;
     };
 
+    const loadCategories = async () => {
+        isLoading.value = true;
+
+        try {
+            items.value = (await getCategories()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    const confirmDelete = async () => {
+        const category = selectedCategory.value as Category;
+
+        isDeleteLoading.value = true;
+
+        try {
+            await deleteCategory(category.id);
+
+            toast.success('Category successfully deleted');
+
+            isDeleteOpen.value = false;
+
+            void loadCategories();
+        } catch (e) {
+            toast.error('Category is not deleted');
+        } finally {
+            isLoading.value = false;
+            isDeleteLoading.value = false;
+        }
+    };
+
     const handleDelete = (category: CatalogItem) => {
         selectedCategory.value = category as Category;
 
         isDeleteOpen.value = true;
     };
 
-    onMounted(async () => {
-        try {
-            items.value = (await getCategories()) ?? [];
-        } finally {
-            isLoading.value = false;
-        }
-    });
+    void loadCategories();
 </script>
 
 <style scoped lang="postcss"></style>

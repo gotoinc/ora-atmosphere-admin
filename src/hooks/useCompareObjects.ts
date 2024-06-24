@@ -1,14 +1,15 @@
 export const useCompareObjects = (
-    first: NonNullable<unknown>,
-    second: NonNullable<unknown>
+    first: Record<string, unknown>,
+    second: Record<string, unknown>
 ) => {
+    const differentValues: Record<string, unknown> = {};
     const keys = Object.keys(first);
 
     for (const key of keys) {
         if (first[key] !== second[key]) {
-            return false; // return false, if objects are different
+            differentValues[key] = second[key];
         }
     }
 
-    return true; // return true, if objects are the same
+    return Object.keys(differentValues).length > 0 ? differentValues : null; // return false, if objects are the same
 };

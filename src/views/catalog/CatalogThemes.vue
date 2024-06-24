@@ -23,6 +23,7 @@
     <catalog-table
         :headers="headers"
         :items="items"
+        :loading="isLoading"
         @edit="handleEdit"
         @delete="handleDelete"
     />
@@ -45,19 +46,21 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateThemeForm from '@/components/forms/CreateThemeForm.vue';
 
+    import { getTopics } from '@/api/catalog/get-topics.api.ts';
     import type { CatalogItem, Topic } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
+    const isLoading = ref(true);
     const selectedTopic = ref<Topic | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
@@ -91,60 +94,7 @@
         },
     ]);
 
-    const items = [
-        {
-            name: 'Theme 1',
-            contents_amount: 5,
-            group: {
-                id: 1,
-                name: 'Brands',
-            },
-            date_created: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-        },
-        {
-            name: 'Theme 2',
-            contents_amount: 5,
-            date_created: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            group: {
-                id: 1,
-                name: 'Brands',
-            },
-        },
-        {
-            name: 'Theme 3',
-            contents_amount: 5,
-            date_created: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            group: {
-                id: 1,
-                name: 'Brands',
-            },
-        },
-        {
-            name: 'Theme 4',
-            contents_amount: 5,
-            date_created: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
-            group: {
-                id: 1,
-                name: 'Brands',
-            },
-        },
-        {
-            name: 'Theme 5',
-            contents_amount: 2,
-            date_created: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
-            group: {
-                id: 1,
-                name: 'Brands',
-            },
-        },
-    ];
+    const items = ref<Topic[]>([]);
 
     const handleEdit = (topic: CatalogItem) => {
         selectedTopic.value = topic as Topic;
@@ -157,6 +107,14 @@
 
         isDeleteOpen.value = true;
     };
+
+    onMounted(async () => {
+        try {
+            items.value = (await getTopics()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    });
 </script>
 
 <style scoped></style>
