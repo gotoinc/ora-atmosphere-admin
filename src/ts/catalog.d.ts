@@ -1,4 +1,4 @@
-import type { CommonCatalogTypes, Identifiable } from '@/ts/common';
+import type { CommonCatalogTypes } from '@/ts/common';
 import type { VideoContent } from '@/ts/contents';
 
 export interface Category extends CommonCatalogTypes {
@@ -12,7 +12,7 @@ export interface Group extends CommonCatalogTypes {
 
 export interface Topic extends CommonCatalogTypes {
     videos: VideoContent[];
-    group: Identifiable;
+    group: Group;
 }
 
 export type CatalogItem = Category | Group | Topic;
