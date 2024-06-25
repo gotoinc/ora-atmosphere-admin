@@ -141,7 +141,7 @@
 
     const removeFile = () => {
         isFileSelected.value = false;
-        image.value = '';
+        image.value = null;
         imageSrc.value = '';
     };
 

@@ -112,7 +112,7 @@
     const removeFile = () => {
         isFileSelected.value = false;
         imageSrc.value = '';
-        image.value = '';
+        image.value = null;
     };
 
     const onSubmit = handleSubmit(async (values) => {
