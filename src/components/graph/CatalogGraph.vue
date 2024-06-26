@@ -1,7 +1,7 @@
 <template>
     <div class="v-sheet--offset mx-auto w-full rounded bg-grey-200 p-5">
         <div class="mb-10 flex items-start justify-between">
-            <h2 class="text-xl font-semibold">Visit statistics</h2>
+            <h2 class="text-xl font-semibold">Catalog statistics</h2>
 
             <v-btn-toggle v-model="selectedGraphOption" color="primary">
                 <v-btn class="text-none"> Categories </v-btn>
