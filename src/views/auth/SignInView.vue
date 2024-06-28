@@ -40,7 +40,12 @@
                 </router-link>
             </div>
 
-            <v-btn class="w-full" color="primary" type="submit">
+            <v-btn
+                :loading="isLoading"
+                class="w-full"
+                color="primary"
+                type="submit"
+            >
                 Sign In
             </v-btn>
         </form>
@@ -52,20 +57,17 @@
     import { useRouter } from 'vue-router';
     import { useForm } from 'vee-validate';
 
-    import { storeToRefs } from 'pinia';
-    import { useAuthStore } from '@/stores/auth.store.ts';
-
+    import { authLogin } from '@/api/auth/auth-login.api.ts';
     import { signInSchema } from '@/validations/schemas/auth.schema.ts';
-    import type { SignInType } from '@/validations/types/auth';
+    import type { SignInInput } from '@/validations/types/auth';
 
     const router = useRouter();
 
     const isRememberChecked = ref(false);
-
-    const { isAuthenticated } = storeToRefs(useAuthStore());
+    const isLoading = ref(false);
 
     const { defineField, handleSubmit, errors, resetForm } =
-        useForm<SignInType>({
+        useForm<SignInInput>({
             validationSchema: signInSchema,
             initialValues: {
                 email: '',
@@ -76,14 +78,23 @@
     const [email] = defineField('email');
     const [password] = defineField('password');
 
-    const onSubmit = handleSubmit(() => {
-        void router.push({ name: 'main' });
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
+
+        try {
+            await authLogin(values);
+
+            void router.push({ name: 'main' });
+            resetForm();
+        } catch (e) {
+            console.log(e);
+        } finally {
+            isLoading.value = false;
+        }
 
         // setFieldError('email', 'Email already exists');
 
-        isAuthenticated.value = true;
-
-        resetForm();
+        // isAuthenticated.value = true;
     });
 </script>
 
