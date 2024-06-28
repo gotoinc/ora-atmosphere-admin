@@ -11,10 +11,12 @@ type OmitContentKeys =
     | 'topic'
     | 'image_url'
     | 'date_created'
+    | 'audio'
     | PartialContentKeys;
 
 export interface CreateContent
     extends Omit<Content, OmitContentKeys>,
         Partial<Pick<Content, PartialContentKeys>> {
     topic_id: number;
+    audio: File[];
 }

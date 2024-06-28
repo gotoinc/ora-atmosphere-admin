@@ -6,7 +6,7 @@
     >
         <v-card>
             <v-toolbar class="mb-5" color="primary">
-                <div class="container flex items-center">
+                <div class="container md flex items-center">
                     <v-toolbar-title>
                         {{ title }}
                     </v-toolbar-title>
@@ -18,7 +18,7 @@
                 </div>
             </v-toolbar>
 
-            <div class="container flex-grow">
+            <div class="container md flex-grow">
                 <slot></slot>
             </div>
         </v-card>

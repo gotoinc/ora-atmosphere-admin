@@ -11,12 +11,11 @@ export const createContentSchema: ObjectSchema<CreateContent> = object({
     title: string().required('Please enter title'),
     description: string(),
     topic_id: number().required('Please select topic'),
-    languages: array()
-        .min(1, 'At least one language is required')
-        .required('Languages are required'),
+    language: string().required('Please select language'),
     tags: array(),
     requires_auth: boolean(),
     with_narration: boolean(),
     with_sound: boolean(),
     duration: number().required(),
+    audio: array(),
 });

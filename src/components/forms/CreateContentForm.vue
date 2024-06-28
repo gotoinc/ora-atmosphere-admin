@@ -1,161 +1,87 @@
 <template>
     <div class="h-full pb-12">
-        <drag-and-drop
-            v-if="!videoSrc && !isContentSelected"
-            :error="!!errors.file_url"
-            :accept="['video/mp4', 'video/webm']"
-            class="h-full"
-            @upload="selectFile"
-            @remove="removeFile"
-        />
+        <div class="mb-5 w-full gap-4">
+            <div class="mb-5 w-full rounded bg-grey-400 p-4">
+                <h3 class="mb-5 text-lg font-semibold">Upload video</h3>
 
-        <div
-            v-else
-            class="flex items-start justify-between gap-10 max-tab:flex-col-reverse"
-        >
-            <!-- Form -->
-            <form
-                class="grid flex-grow gap-2 max-tab:w-full"
-                @submit.prevent="onSubmit"
-            >
-                <div>
-                    <p class="mb-5">Please enter a content title</p>
+                <drag-and-drop
+                    v-if="!videoSrc && !isContentSelected"
+                    :error="!!errors.file_url"
+                    :accept="['video/mp4', 'video/webm']"
+                    @upload="selectVideoFile"
+                    @remove="removeVideoFile"
+                >
+                    <template #icon>
+                        <span class="mdi mdi-video-vintage text-6xl"></span>
+                    </template>
+                </drag-and-drop>
 
-                    <v-text-field
-                        v-model="title"
-                        :error-messages="errors.title"
-                        name="title"
-                        label="Content title"
-                        type="name"
-                        variant="outlined"
-                    />
-                </div>
+                <!-- Video block -->
+                <div
+                    v-else
+                    class="relative w-full flex-shrink-0 overflow-hidden rounded"
+                >
+                    <div class="mb-4 h-80 max-tab:h-[45vw]">
+                        <video
+                            ref="videoElement"
+                            class="h-full w-full object-cover"
+                            controls
+                            @loadedmetadata="loadVideoInfo"
+                        >
+                            <source :src="videoSrc ?? content?.file_url" />
+                        </video>
+                    </div>
 
-                <div>
-                    <p class="mb-5">Please enter a description (optional)</p>
+                    <div class="flex flex-col">
+                        <!-- Video info -->
+                        <div v-if="isVideoLoaded">
+                            <template v-if="uploadedVideoFile">
+                                <div class="mb-2">
+                                    <span class="text-sm">File name:</span>
 
-                    <v-textarea
-                        v-model="description"
-                        :error-messages="errors.description"
-                        label="Description"
-                        variant="outlined"
-                    ></v-textarea>
-                </div>
+                                    <p class="block truncate font-semibold">
+                                        {{ uploadedVideoFile.name }}
+                                    </p>
+                                </div>
 
-                <div>
-                    <p class="mb-5">Please select theme of the content</p>
+                                <div class="mb-2">
+                                    <span class="text-sm">File size:</span>
 
-                    <v-select
-                        v-model="topic"
-                        label="Theme"
-                        variant="outlined"
-                        clearable
-                        :error-messages="errors.topic_id"
-                        :items="topics"
-                        item-title="name"
-                        return-object
-                        @update:model-value="selectTopicId"
-                    />
-                </div>
+                                    <p class="font-semibold">
+                                        {{
+                                            useFormatFileSize(
+                                                uploadedVideoFile.size
+                                            )
+                                        }}
+                                    </p>
+                                </div>
 
-                <div>
-                    <p class="mb-5">Please select languages of the content</p>
+                                <div class="mb-5">
+                                    <span class="text-sm">Duration:</span>
 
-                    <v-select
-                        v-model="languages"
-                        multiple
-                        label="Languages"
-                        variant="outlined"
-                        clearable
-                        :error-messages="errors.languages"
-                        :items="['French', 'English', 'Spanish']"
-                    >
-                        <template #selection="{ item }">
-                            <span class="tag tag--fill tag--lang capitalize">
-                                {{ item.title }}
-                            </span>
-                        </template>
-                    </v-select>
-                </div>
+                                    <p class="font-semibold">
+                                        {{ useFormatVideoDuration(duration) }}
+                                    </p>
+                                </div>
+                            </template>
 
-                <div>
-                    <p class="mb-5">Tags</p>
+                            <div v-else-if="content" class="mb-5">
+                                <span class="block text-sm">Video link:</span>
 
-                    <v-combobox
-                        v-model="tags"
-                        multiple
-                        label="Tags"
-                        variant="outlined"
-                    >
-                        <template #selection="{ item }">
-                            <span class="tag tag--fill">
-                                {{ item.title }}
-                            </span>
-                        </template>
-                    </v-combobox>
-                </div>
-
-                <v-btn type="submit" color="primary" class="text-none w-fit">
-                    {{ content ? 'Save changes' : 'Save' }}
-                </v-btn>
-            </form>
-
-            <!-- Video block -->
-            <div
-                v-if="uploadedFile || content"
-                class="relative max-w-96 flex-shrink-0 overflow-hidden rounded bg-grey-300 max-tab:w-full max-tab:max-w-full"
-            >
-                <div class="h-64 max-tab:h-[45vw]">
-                    <video
-                        ref="videoElement"
-                        class="h-full w-full object-cover"
-                        controls
-                        @loadedmetadata="loadVideoInfo"
-                    >
-                        <source :src="videoSrc ?? content?.file_url" />
-                    </video>
-                </div>
-
-                <div class="p-4">
-                    <!-- Video info -->
-                    <div v-if="isVideoLoaded">
-                        <template v-if="uploadedFile">
-                            <div class="mb-2">
-                                <span class="text-sm">File name:</span>
-
-                                <p class="block truncate font-semibold">
-                                    {{ uploadedFile.name }}
-                                </p>
+                                <a
+                                    target="_blank"
+                                    :href="content.file_url"
+                                    class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
+                                >
+                                    {{ content.file_url }}
+                                </a>
                             </div>
-
-                            <div class="mb-2">
-                                <span class="text-sm">File size:</span>
-
-                                <p class="font-semibold">
-                                    {{ useFormatFileSize(uploadedFile.size) }}
-                                </p>
-                            </div>
-
-                            <div class="mb-5">
-                                <span class="text-sm">Duration:</span>
-
-                                <p class="font-semibold">
-                                    {{ useFormatVideoDuration(duration) }}
-                                </p>
-                            </div>
-                        </template>
-
-                        <div v-else-if="content" class="mb-5">
-                            <span class="block text-sm">Video link:</span>
-
-                            <a
-                                target="_blank"
-                                :href="content.file_url"
-                                class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
-                            >
-                                {{ content.file_url }}
-                            </a>
                         </div>
+
+                        <v-skeleton-loader
+                            v-else-if="!content"
+                            type="paragraph"
+                        ></v-skeleton-loader>
 
                         <div class="mb-4">
                             <h3 class="text-xl">Settings</h3>
@@ -196,26 +122,162 @@
                                 ></v-checkbox>
                             </div>
                         </div>
+
+                        <div class="mt-auto text-right">
+                            <v-btn
+                                type="submit"
+                                color="red"
+                                class="text-none w-fit"
+                                @click="changeVideo"
+                            >
+                                Change video
+                            </v-btn>
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    <v-skeleton-loader
-                        v-else-if="!content"
-                        type="paragraph"
-                    ></v-skeleton-loader>
+            <div class="w-full rounded bg-grey-400 p-4">
+                <h3 class="mb-5 text-lg font-semibold">Upload audio</h3>
 
-                    <div class="text-right">
-                        <v-btn
-                            type="submit"
-                            color="error"
-                            class="text-none w-fit"
-                            @click="changeVideo"
+                <drag-and-drop
+                    :accept="['audio/mpeg']"
+                    multiple
+                    class="mb-5"
+                    @upload="selectAudioFiles"
+                >
+                    <template #icon>
+                        <span class="mdi mdi-music text-6xl"></span>
+                    </template>
+                </drag-and-drop>
+
+                <div v-if="audioFiles.size > 0" class="grid gap-2">
+                    <h4 class="mb-3 font-semibold">
+                        Uploaded files
+                        {{ `(${audioFiles.size})` }}
+                    </h4>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div
+                            v-for="(file, i) in audioFiles"
+                            :key="i"
+                            class="rounded bg-slate-600 p-4"
                         >
-                            Change video
-                        </v-btn>
+                            <audio
+                                preload="metadata"
+                                class="mb-2 w-full"
+                                controls
+                                :src="getSource(file)"
+                            ></audio>
+
+                            <div class="space-y-4">
+                                <h5 class="mb-2">
+                                    File name:
+                                    <span class="line-camp-1">
+                                        {{ file.name }}
+                                    </span>
+                                </h5>
+
+                                <p>
+                                    File size:
+                                    {{ useFormatFileSize(file.size) }}
+                                </p>
+
+                                <v-btn
+                                    type="submit"
+                                    color="red"
+                                    class="text-none w-fit"
+                                    @click="removeAudioFile(file)"
+                                >
+                                    Remove
+                                </v-btn>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Form -->
+        <form
+            class="grid flex-grow gap-2 max-tab:w-full"
+            @submit.prevent="onSubmit"
+        >
+            <div>
+                <p class="mb-5">Please enter a content title</p>
+
+                <v-text-field
+                    v-model="title"
+                    :error-messages="errors.title"
+                    name="title"
+                    label="Content title"
+                    type="name"
+                    variant="outlined"
+                />
+            </div>
+
+            <div>
+                <p class="mb-5">Please enter a description (optional)</p>
+
+                <v-textarea
+                    v-model="description"
+                    :error-messages="errors.description"
+                    label="Description"
+                    variant="outlined"
+                ></v-textarea>
+            </div>
+
+            <div>
+                <p class="mb-5">Please select theme of the content</p>
+
+                <v-select
+                    v-model="topic"
+                    label="Theme"
+                    variant="outlined"
+                    clearable
+                    :error-messages="errors.topic_id"
+                    :items="topics"
+                    item-title="name"
+                    return-object
+                    @update:model-value="selectTopicId"
+                />
+            </div>
+
+            <div>
+                <p class="mb-5">Please select language of the content</p>
+
+                <v-select
+                    v-model="language"
+                    label="Languages"
+                    variant="outlined"
+                    clearable
+                    :error-messages="errors.language"
+                    :items="['French', 'English', 'Spanish']"
+                >
+                </v-select>
+            </div>
+
+            <div>
+                <p class="mb-5">Tags</p>
+
+                <v-combobox
+                    v-model="tags"
+                    multiple
+                    label="Tags"
+                    variant="outlined"
+                >
+                    <template #selection="{ item }">
+                        <span class="tag tag--fill">
+                            {{ item.title }}
+                        </span>
+                    </template>
+                </v-combobox>
+            </div>
+
+            <v-btn type="submit" color="primary" class="text-none w-fit">
+                {{ content ? 'Save changes' : 'Save' }}
+            </v-btn>
+        </form>
     </div>
 </template>
 
@@ -250,9 +312,11 @@
     /**
      * Data for content sources
      */
-    const uploadedFile = ref<File | null>(null);
+    const uploadedVideoFile = ref<File | null>(null);
     const videoSrc = ref(props.content?.file_url ?? '');
     const imageSrc = ref('');
+
+    const audioFiles = ref<Set<File>>(new Set());
 
     const videoElement = ref<HTMLVideoElement | null>(null);
 
@@ -264,12 +328,13 @@
     const [description] = defineField('description');
     const [contentFile] = defineField('file_url');
     const [topicId] = defineField('topic_id');
-    const [languages] = defineField('languages');
+    const [language] = defineField('language');
     const [tags] = defineField('tags');
     const [requiresAuth] = defineField('requires_auth');
     const [withNarration] = defineField('with_narration');
     const [withSound] = defineField('with_sound');
     const [duration] = defineField('duration');
+    const [audio] = defineField('audio');
 
     /**
      * Test topics
@@ -294,17 +359,26 @@
                 'id',
                 'date_created',
                 'image_url',
+                'audio',
             ])
         );
     }
 
-    const selectFile = (value: UploadableFile[] | UploadableFile) => {
-        if (Array.isArray(value)) {
-            uploadedFile.value = value[0].file;
-            contentFile.value = value[0].name;
+    const getSource = (file: File) => URL.createObjectURL(file);
 
-            videoSrc.value = URL.createObjectURL(uploadedFile.value);
-        }
+    const selectVideoFile = (files: UploadableFile[]) => {
+        uploadedVideoFile.value = files[0].file;
+        contentFile.value = files[0].name;
+
+        videoSrc.value = getSource(uploadedVideoFile.value);
+    };
+
+    const selectAudioFiles = (files: UploadableFile[]) => {
+        files.forEach((item) => {
+            audioFiles.value.add(item.file);
+        });
+
+        audio.value = Array.from(audioFiles.value);
     };
 
     const selectTopicId = (topic?: Topic) => {
@@ -336,9 +410,13 @@
         isContentSelected.value = false;
     };
 
-    const removeFile = () => {
-        uploadedFile.value = null;
+    const removeVideoFile = () => {
+        uploadedVideoFile.value = null;
         contentFile.value = '';
+    };
+
+    const removeAudioFile = (file: File) => {
+        audioFiles.value.delete(file);
     };
 
     const onSubmit = handleSubmit((values) => {

@@ -14,8 +14,6 @@ export const useCaptureImage = (video: HTMLVideoElement) => {
     // draw the video at that frame
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    console.log(ctx);
-
     // convert it to a usable data URL
     return canvas.toDataURL('image/jpg');
 };
