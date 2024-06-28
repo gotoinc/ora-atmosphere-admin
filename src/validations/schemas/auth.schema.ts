@@ -5,13 +5,13 @@ import { emailValidation, passwordValidation } from '@/validations';
 import type {
     EmailType,
     SetNewPasswordType,
-    SignInType,
+    SignInInput,
 } from '@/validations/types/auth';
 
 /**
  * Define schema for Sign in form
  */
-export const signInSchema: ObjectSchema<SignInType> = object({
+export const signInSchema: ObjectSchema<SignInInput> = object({
     email: emailValidation,
     password: passwordValidation,
 });
