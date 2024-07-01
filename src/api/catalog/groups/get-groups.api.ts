@@ -4,7 +4,7 @@ import type { Group } from '@/ts/catalog';
 
 export const getGroups = async () => {
     try {
-        const res = await axios.get<Group[]>(`/groups`);
+        const res = await axios.get<Group[]>(`/admin/groups`);
 
         return res.data;
     } catch (err) {

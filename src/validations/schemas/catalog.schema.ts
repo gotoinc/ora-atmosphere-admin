@@ -25,7 +25,7 @@ export const createCategorySchema: ObjectSchema<CreateCategory> = object({
 export const createGroupSchema: ObjectSchema<CreateGroup> = object({
     name: string().required('Please enter name'),
     image: fileSchema.required('Please upload a file'),
-    // category_id: number().required('Please select category'),
+    category_id: number().required('Please select category'),
     requires_auth: boolean(),
 });
 

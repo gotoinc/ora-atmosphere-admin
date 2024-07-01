@@ -3,7 +3,7 @@ export interface CommonCatalogTypes {
     name: string;
     image: string | null;
     requires_auth: boolean;
-    date_created: string;
+    is_active: boolean;
 }
 
 export interface DetailResponse {

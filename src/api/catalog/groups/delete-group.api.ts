@@ -7,7 +7,7 @@ import type { Group } from '@/ts/catalog';
 export const deleteGroup = async (id: string | number) => {
     try {
         const res = await axios.delete<undefined, AxiosResponse<Group>>(
-            `/groups/${id}/`
+            `/admin/groups/${id}/`
         );
 
         return res.data;

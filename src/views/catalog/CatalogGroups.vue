@@ -106,6 +106,10 @@
             key: 'date_created',
         },
         {
+            title: 'Visible for all',
+            key: 'requires_auth',
+        },
+        {
             align: 'end',
             title: 'Actions',
             key: 'actions',

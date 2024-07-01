@@ -27,6 +27,7 @@
                 :items="categories"
                 return-object
                 item-title="name"
+                @update:model-value="selectCategoryId"
             />
         </div>
 
@@ -45,7 +46,7 @@
             color="primary"
             class="mb-5"
             density="comfortable"
-            label="Visible for unregistered users"
+            label="Visible for all users"
         ></v-checkbox>
 
         <v-btn
@@ -105,18 +106,16 @@
 
     const [name] = defineField('name');
     const [image] = defineField('image');
-    // const [categoryId] = defineField('category_id');
+    const [categoryId] = defineField('category_id');
     const [requiresAuth] = defineField('requires_auth');
 
     const excludedProperties = useExcludeProperties({ ...props.group }, [
         'id',
-        'date_created',
         'topics',
     ]);
 
     if (props.group) {
         category.value = props.group.category;
-        // categoryId.value = props.group.category.id;
 
         setValues(excludedProperties);
 
@@ -132,11 +131,12 @@
         }
     };
 
-    // const selectCategoryId = (category?: Identifiable) => {
-    //     if (category) {
-    //         categoryId.value = category.id;
-    //     }
-    // };
+    const selectCategoryId = (category?: Category) => {
+        if (category) {
+            console.log(category);
+            categoryId.value = category.id;
+        }
+    };
 
     const removeFile = () => {
         isFileSelected.value = false;
@@ -168,7 +168,7 @@
             } else {
                 await postGroup({
                     ...values,
-                    // category_id: categoryId.value,
+                    category_id: categoryId.value,
                 });
 
                 toast.success('Group successfully created');

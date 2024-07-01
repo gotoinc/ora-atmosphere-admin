@@ -20,12 +20,16 @@ export const updateTopic = async (
             formData.append('name', body.name);
         }
 
+        if (body.group_id) {
+            formData.append('group_id', String(body.group_id));
+        }
+
         formData.append('requires_auth', String(!!body.requires_auth));
 
         const res = await axios.patch<
             Partial<CreateTheme>,
             AxiosResponse<Topic>
-        >(`/topics/${id}/`, formData);
+        >(`/admin/topics/${id}/`, formData);
 
         return res.data;
     } catch (err) {

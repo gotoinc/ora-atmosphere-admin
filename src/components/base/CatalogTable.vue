@@ -42,6 +42,16 @@
             <div v-else>No image</div>
         </template>
 
+        <template #[`item.requires_auth`]="{ item }">
+            <v-icon
+                v-if="item.requires_auth"
+                icon="mdi mdi-check-circle"
+                color="green"
+            />
+
+            <v-icon v-else icon="mdi mdi-cancel" color="red" />
+        </template>
+
         <template #no-data>
             <p class="text-lg">No results</p>
         </template>

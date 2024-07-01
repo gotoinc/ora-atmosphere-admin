@@ -12,10 +12,10 @@ export const postGroup = async (body: CreateGroup) => {
         formData.append('image', body.image as File);
         formData.append('name', body.name);
         formData.append('requires_auth', String(body.requires_auth));
-        // formData.append('category_id', String(body.category_id));
+        formData.append('category_id', String(body.category_id));
 
         const res = await axios.post<CreateGroup, AxiosResponse<Group>>(
-            `/groups/`,
+            `/admin/groups/`,
             formData
         );
 
