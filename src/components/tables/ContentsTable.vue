@@ -1,5 +1,10 @@
 <template>
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
+    <v-data-table
+        :loading="loading"
+        class="!rounded-lg"
+        :headers="headers"
+        :items="items"
+    >
         <template #[`item.image_url`]="{ item }">
             <v-card
                 v-if="item.image_url"
@@ -155,6 +160,7 @@
     interface Props {
         items: Content[];
         editable?: boolean;
+        loading?: boolean;
     }
 
     interface Emits {

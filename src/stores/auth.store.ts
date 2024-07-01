@@ -4,11 +4,10 @@ import Cookies from 'js-cookie';
 
 import { defineStore } from 'pinia';
 
-import type { AdminUser } from '@/ts/users';
-
 import { authLogin } from '@/api/auth/auth-login.api.ts';
 import { authLogout } from '@/api/auth/auth-logout.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
+import type { AdminUser } from '@/ts/users';
 import type { SignInInput } from '@/validations/types/auth';
 
 const toast = useToast();

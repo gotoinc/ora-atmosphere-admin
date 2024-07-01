@@ -20,17 +20,41 @@
             class="mb-10 grid grid-cols-4 gap-x-4 gap-y-12 max-tab:grid-cols-2 max-mob-md:grid-cols-1"
         >
             <info-card>
-                <template #top> 0 </template>
+                <template #top>
+                    <v-progress-circular
+                        v-if="isLoading || !dashboardStats"
+                        indeterminate
+                    ></v-progress-circular>
+
+                    <span v-else>
+                        {{ dashboardStats.total_users }}
+                    </span>
+                </template>
 
                 <template #text>
-                    <div class="text-h6 font-weight-light">Total users</div>
+                    <div class="flex items-center gap-3">
+                        <h3
+                            class="text-h6 font-weight-light flex items-center gap-3"
+                        >
+                            Total users
+                        </h3>
 
-                    <span class="mdi mdi-account-multiple text-xl"></span>
+                        <span class="mdi mdi-account-multiple text-xl"></span>
+                    </div>
                 </template>
             </info-card>
 
             <info-card>
-                <template #top> 0 </template>
+                <template #top>
+                    <v-progress-circular
+                        v-if="isLoading || !dashboardStats"
+                        indeterminate
+                    ></v-progress-circular>
+
+                    <span v-else>
+                        {{ dashboardStats.total_admins }}
+                    </span>
+                </template>
 
                 <template #text>
                     <div class="text-h6 font-weight-light">Total admins</div>
@@ -40,7 +64,16 @@
             </info-card>
 
             <info-card>
-                <template #top> 0 </template>
+                <template #top>
+                    <v-progress-circular
+                        v-if="isLoading || !dashboardStats"
+                        indeterminate
+                    ></v-progress-circular>
+
+                    <span v-else>
+                        {{ dashboardStats.total_super_admins }}
+                    </span>
+                </template>
 
                 <template #text>
                     <div class="text-h6 font-weight-light">
@@ -52,7 +85,16 @@
             </info-card>
 
             <info-card class="">
-                <template #top> 0 </template>
+                <template #top>
+                    <v-progress-circular
+                        v-if="isLoading || !dashboardStats"
+                        indeterminate
+                    ></v-progress-circular>
+
+                    <span v-else>
+                        {{ dashboardStats.total_videos }}
+                    </span>
+                </template>
 
                 <template #text>
                     <div class="text-h6 font-weight-light">Total contents</div>
@@ -65,64 +107,44 @@
         <div class="mb-10">
             <h2 class="mb-5 text-2xl font-bold">Last added contents</h2>
 
-            <contents-table :items="items" />
+            <contents-table :loading="isLoading" :items="items" />
         </div>
     </section>
 </template>
 
 <script setup lang="ts">
+    import { onMounted, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
+
     import InfoCard from '@/components/base/InfoCard.vue';
     import CatalogGraph from '@/components/graph/CatalogGraph.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
     import { useAuthStore } from '@/stores/auth.store.ts';
 
+    import { getDashboardStats } from '@/api/stats/dashboard-stats.api.ts';
     import type { Content } from '@/ts/contents';
+    import type { DashboardStats } from '@/ts/stats';
+
+    const toast = useToast();
 
     const { profile } = useAuthStore();
 
-    const items: Content[] = [
-        {
-            id: 1000,
-            file_url:
-                'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4',
-            image_url: '/images/example.jpg',
-            title: 'Сisco',
-            topic: {
-                id: 100,
-                name: 'Theme 1',
-            },
-            description:
-                'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            languages: ['en', 'fr', 'de', 'es'],
-            tags: ['environment', 'museum', 'luxury', 'art'],
-            requires_auth: false,
-            duration: 13,
-            with_sound: true,
-            with_narration: true,
-            date_created: new Date().toISOString().split('T')[0],
-        },
-        {
-            id: 1001,
-            file_url:
-                'https://videos.pexels.com/video-files/4114797/4114797-hd_1280_720_50fps.mp4',
-            image_url: '/images/example.jpg',
-            title: 'Сisco 2',
-            topic: {
-                id: 100,
-                name: 'Theme 2',
-            },
-            description:
-                'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            languages: ['en', 'fr', 'de', 'es'],
-            tags: ['environment', 'museum', 'luxury', 'art'],
-            requires_auth: true,
-            duration: 13,
-            with_sound: true,
-            with_narration: true,
-            date_created: new Date().toISOString().split('T')[0],
-        },
-    ];
+    const isLoading = ref(true);
+
+    const dashboardStats = ref<DashboardStats>();
+
+    const items = ref<Content[]>([]);
+
+    onMounted(async () => {
+        try {
+            dashboardStats.value = await getDashboardStats();
+        } catch (e) {
+            toast.error('The dashboard statistics could not be found');
+        } finally {
+            isLoading.value = false;
+        }
+    });
 </script>
 
 <style></style>

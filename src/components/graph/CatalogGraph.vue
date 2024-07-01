@@ -41,12 +41,12 @@
     // Categories
     const categoriesData = ref<ChartData<'bar'>>({
         labels: [
-            'Brands & events',
-            'Science',
-            'Culture',
-            'Our World',
-            'Entertainment',
-            'Oceans & Skies',
+            `Brands & events id:1`,
+            'Science id:2',
+            'Culture id:3',
+            'Our World id:4',
+            'Entertainment id:5',
+            'Oceans & Skies id:6',
         ],
 
         datasets: [
