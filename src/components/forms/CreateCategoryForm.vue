@@ -31,7 +31,7 @@
             color="primary"
             class="mb-5"
             density="comfortable"
-            label="Visible for unregistered users"
+            label="Visible for all users"
         ></v-checkbox>
 
         <v-btn
@@ -86,7 +86,6 @@
 
     const excludedProperties = useExcludeProperties({ ...props.category }, [
         'id',
-        'date_created',
         'groups',
     ]);
 

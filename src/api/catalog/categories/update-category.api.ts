@@ -25,7 +25,7 @@ export const updateCategory = async (
         const res = await axios.patch<
             Partial<CreateCategory>,
             AxiosResponse<Category>
-        >(`/categories/${id}/`, formData);
+        >(`/admin/categories/${id}/`, formData);
 
         return res.data;
     } catch (err) {

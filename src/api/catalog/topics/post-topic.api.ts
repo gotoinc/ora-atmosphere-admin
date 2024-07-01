@@ -12,10 +12,10 @@ export const postTopic = async (body: CreateTheme) => {
         formData.append('image', body.image as File);
         formData.append('name', body.name);
         formData.append('requires_auth', String(body.requires_auth));
-        // formData.append('category_id', String(body.category_id));
+        formData.append('group_id', String(body.group_id));
 
         const res = await axios.post<CreateTheme, AxiosResponse<Topic>>(
-            `/topics/`,
+            `/admin/topics/`,
             formData
         );
 

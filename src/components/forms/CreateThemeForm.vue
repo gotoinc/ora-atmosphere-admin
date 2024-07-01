@@ -46,7 +46,7 @@
             color="primary"
             class="mb-5"
             density="comfortable"
-            label="Visible for unregistered users"
+            label="Visible for all users"
         ></v-checkbox>
 
         <v-btn
@@ -111,13 +111,11 @@
 
     const excludedProperties = useExcludeProperties({ ...props.topic }, [
         'id',
-        'date_created',
         'videos',
     ]);
 
     if (props.topic) {
-        // group.value = props.topic.group;
-        // groupId.value = props.topic.group.id;
+        group.value = props.topic.group;
 
         if (props.topic.image) {
             imageSrc.value = props.topic.image;

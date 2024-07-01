@@ -170,7 +170,7 @@
                                     hide-details
                                     color="primary"
                                     density="comfortable"
-                                    label="Visible for unregistered users"
+                                    label="Visible for all users"
                                 ></v-checkbox>
 
                                 <v-checkbox

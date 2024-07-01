@@ -14,7 +14,7 @@ export const postCategories = async (body: CreateCategory) => {
         formData.append('requires_auth', String(body.requires_auth));
 
         const res = await axios.post<CreateCategory, AxiosResponse<Category>>(
-            `/categories/`,
+            `/admin/categories/`,
             formData
         );
 

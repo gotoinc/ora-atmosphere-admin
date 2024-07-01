@@ -5,7 +5,7 @@ interface CreateCategory {
 }
 
 interface CreateGroup extends CreateCategory {
-    // category_id: number;
+    category_id: number;
 }
 
 interface CreateTheme extends CreateCategory {

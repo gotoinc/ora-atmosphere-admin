@@ -4,7 +4,7 @@ import type { Topic } from '@/ts/catalog';
 
 export const getTopics = async () => {
     try {
-        const res = await axios.get<Topic[]>(`/topics`);
+        const res = await axios.get<Topic[]>(`/admin/topics`);
 
         return res.data;
     } catch (err) {
