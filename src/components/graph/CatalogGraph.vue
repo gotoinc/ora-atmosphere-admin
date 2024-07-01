@@ -41,12 +41,12 @@
     // Categories
     const categoriesData = ref<ChartData<'bar'>>({
         labels: [
-            'Brands & events',
-            'Science',
-            'Culture',
-            'Our World',
-            'Entertainment',
-            'Oceans & Skies',
+            `Brands & events id:1`,
+            'Science id:2',
+            'Culture id:3',
+            'Our World id:4',
+            'Entertainment id:5',
+            'Oceans & Skies id:6',
         ],
 
         datasets: [
@@ -59,13 +59,13 @@
     // Groups
     const groupsData = ref<ChartData<'bar'>>({
         labels: [
-            'Brands',
-            'Events',
-            'Climate',
-            'Biodiversity',
-            'Space',
-            'Geology',
-            'The Future',
+            'Brands id:1',
+            'Events id:2',
+            'Climate id:3',
+            'Biodiversity id:4',
+            'Space id:5',
+            'Geology id:6',
+            'The Future id:7',
         ],
 
         datasets: [
@@ -78,12 +78,12 @@
     // Themes
     const topicsData = ref<ChartData<'bar'>>({
         labels: [
-            'Theme 1',
-            'Theme 2',
-            'Theme 3',
-            'Theme 4',
-            'Theme 5',
-            'Theme 6',
+            'Theme 1 id:1',
+            'Theme 2 id:2',
+            'Theme 3 id:3',
+            'Theme 4 id:4',
+            'Theme 5 id:5',
+            'Theme 6 id:6',
         ],
 
         datasets: [

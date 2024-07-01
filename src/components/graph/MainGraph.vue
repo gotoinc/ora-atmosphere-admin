@@ -1,11 +1,11 @@
 <template>
-    <bar-chart :chart-data="chartData" :options="chartOptions" />
+    <bar-chart ref="chartRef" :chart-data="chartData" :options="chartOptions" />
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, onMounted, ref } from 'vue';
     import { BarChart } from 'vue-chart-3';
-    import type { ChartData } from 'chart.js';
+    import type { ChartData, ChartOptions } from 'chart.js';
     import { Chart, registerables } from 'chart.js';
 
     // eslint-disable-next-line no-restricted-imports
@@ -19,6 +19,15 @@
     }
 
     const props = defineProps<Props>();
+
+    // Get label name
+    function splitLabel(label: string, separator: 0): string;
+    // Get id of the label
+    function splitLabel(label: string, separator: 1): number;
+    function splitLabel(label: string, separator: 0 | 1): string | number {
+        const value = label.split('id:')[separator];
+        return separator === 0 ? value : Number(value);
+    }
 
     const chartData = computed(() => {
         const dataset = props.data.datasets.map((item) => {
@@ -36,7 +45,7 @@
     });
 
     // Chart options
-    const chartOptions = {
+    const chartOptions: ChartOptions = {
         layout: {
             padding: {
                 top: 20,
@@ -59,13 +68,15 @@
                     color: 'rgba(255,255,255,0.1)',
                 },
 
-                padding: 10,
-
                 ticks: {
                     font: {
                         family: 'Mulish',
                     },
-                    color: '#f4effe',
+                    color: '#fff',
+
+                    callback: function (val) {
+                        return splitLabel(this.getLabelForValue(+val), 0);
+                    },
                 },
             },
             y: {
@@ -73,7 +84,6 @@
                     color: 'rgba(255,255,255,0.1)',
                 },
 
-                padding: 10,
                 beginAtZero: true,
 
                 ticks: {
@@ -102,6 +112,12 @@
 
                 titleColor: '#f4effe',
                 backgroundColor: '#080211',
+
+                callbacks: {
+                    title(tooltipItems) {
+                        return splitLabel(tooltipItems[0].label, 0);
+                    },
+                },
             },
 
             legend: {
@@ -113,7 +129,7 @@
                     font: {
                         family: 'Mulish',
                     },
-                    color: '#f4effe',
+                    color: '#fff',
                 },
             },
 
@@ -123,6 +139,31 @@
             },
         },
     };
+
+    const chartRef = ref<InstanceType<typeof BarChart>>();
+
+    onMounted(() => {
+        const chart = chartRef.value?.chartInstance as Chart;
+
+        chart.canvas.onclick = (evt) => {
+            const res = chart.getElementsAtEventForMode(
+                evt,
+                'nearest',
+                { intersect: true },
+                true
+            );
+
+            // If didn't click on a bar, `res` will be an empty array
+            if (res.length === 0) {
+                return;
+            }
+
+            if (chart.data.labels) {
+                const label = chart.data.labels[res[0].index] as string;
+                console.log(label);
+            }
+        };
+    });
 </script>
 
 <style scoped></style>

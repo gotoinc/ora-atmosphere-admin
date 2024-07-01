@@ -193,7 +193,7 @@
             },
             description:
                 'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            languages: [
+            language: [
                 {
                     name: 'English',
                     id: 1,
@@ -221,7 +221,7 @@
             },
             description:
                 'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            languages: [
+            language: [
                 {
                     name: 'English',
                     id: 1,
