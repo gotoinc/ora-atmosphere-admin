@@ -38,20 +38,36 @@
                     :error-messages="errors.email"
                 />
 
-                <v-btn class="w-full" color="primary" type="submit">
+                <v-btn
+                    :loading="isLoading"
+                    class="w-full"
+                    color="primary"
+                    type="submit"
+                >
                     Continue
                 </v-btn>
             </form>
         </template>
     </div>
+
+    <router-link
+        class="text-white underline transition-colors hover:!text-primary-100"
+        :to="{ name: 'signInView' }"
+    >
+        Go to Sign in
+    </router-link>
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
+    import { authPasswordReset } from '@/api/auth/auth-password-reset.api.ts';
     import { forgotPasswordSchema } from '@/validations/schemas/auth.schema.ts';
     import type { EmailType } from '@/validations/types/auth';
+
+    const toast = useToast();
 
     const { defineField, handleSubmit, resetForm, errors } = useForm<EmailType>(
         {
@@ -65,11 +81,21 @@
     const [email] = defineField('email');
 
     const isRequestSent = ref(false);
+    const isLoading = ref(false);
 
-    const onSubmit = handleSubmit(() => {
-        isRequestSent.value = true;
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
 
-        resetForm();
+        try {
+            await authPasswordReset(values.email);
+
+            isRequestSent.value = true;
+            resetForm();
+        } catch (e) {
+            toast.error('Reset link has not been sent');
+        } finally {
+            isLoading.value = false;
+        }
     });
 </script>
 
