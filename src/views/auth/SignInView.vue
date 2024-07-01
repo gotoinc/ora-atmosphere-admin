@@ -57,11 +57,13 @@
     import { useRouter } from 'vue-router';
     import { useForm } from 'vee-validate';
 
-    import { authLogin } from '@/api/auth/auth-login.api.ts';
+    import { useAuthStore } from '@/stores/auth.store.ts';
+
     import { signInSchema } from '@/validations/schemas/auth.schema.ts';
     import type { SignInInput } from '@/validations/types/auth';
 
     const router = useRouter();
+    const { login } = useAuthStore();
 
     const isRememberChecked = ref(false);
     const isLoading = ref(false);
@@ -82,12 +84,11 @@
         isLoading.value = true;
 
         try {
-            await authLogin(values);
+            await login(values, isRememberChecked.value);
 
             void router.push({ name: 'main' });
+
             resetForm();
-        } catch (e) {
-            console.log(e);
         } finally {
             isLoading.value = false;
         }
