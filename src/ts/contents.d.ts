@@ -3,10 +3,10 @@ import type { Identifiable } from '@/ts/common';
 export interface VideoContent {
     id: number;
     title: string;
-    description: string;
+    description?: string;
     file: string;
     image: string;
-    languages: Identifiable[];
+    language: Identifiable[];
     topic: Identifiable;
     audio?: string[];
     tags: string[];

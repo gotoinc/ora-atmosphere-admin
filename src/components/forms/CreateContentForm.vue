@@ -293,11 +293,11 @@
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import type { Topic } from '@/ts/catalog';
-    import type { Content } from '@/ts/contents';
+    import type { VideoContent } from '@/ts/contents';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
     import type { CreateContent } from '@/validations/types/content';
 
-    const props = defineProps<{ content?: Content | null }>();
+    const props = defineProps<{ content?: VideoContent | null }>();
 
     const isContentSelected = ref(!!props.content);
     const isVideoLoaded = ref(!!props.content);
@@ -313,7 +313,7 @@
      * Data for content sources
      */
     const uploadedVideoFile = ref<File | null>(null);
-    const videoSrc = ref(props.content?.file_url ?? '');
+    const videoSrc = ref(props.content?.file ?? '');
     const imageSrc = ref('');
 
     const audioFiles = ref<Set<File>>(new Set());
@@ -326,7 +326,7 @@
     const topic = ref();
     const [title] = defineField('title');
     const [description] = defineField('description');
-    const [contentFile] = defineField('file_url');
+    const [contentFile] = defineField('file');
     const [topicId] = defineField('topic_id');
     const [language] = defineField('language');
     const [tags] = defineField('tags');
@@ -358,7 +358,8 @@
             useExcludeProperties({ ...props.content }, [
                 'id',
                 'date_created',
-                'image_url',
+                'image',
+                'language',
                 'audio',
             ])
         );

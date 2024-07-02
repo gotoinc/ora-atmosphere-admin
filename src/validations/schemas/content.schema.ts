@@ -1,5 +1,5 @@
 import type { ObjectSchema } from 'yup';
-import { array, boolean, number, object, string } from 'yup';
+import { array, boolean, mixed, number, object, string } from 'yup';
 
 import type { CreateContent } from '@/validations/types/content';
 
@@ -7,7 +7,7 @@ import type { CreateContent } from '@/validations/types/content';
  * Define schema for create category form
  */
 export const createContentSchema: ObjectSchema<CreateContent> = object({
-    file_url: string().required('Please select file'),
+    file: string().required('Please select file'),
     title: string().required('Please enter title'),
     description: string(),
     topic_id: number().required('Please select topic'),
@@ -17,5 +17,16 @@ export const createContentSchema: ObjectSchema<CreateContent> = object({
     with_narration: boolean(),
     with_sound: boolean(),
     duration: number().required(),
-    audio: array(),
+    audio: array()
+        .of(
+            mixed<File>()
+                .test(
+                    'is-file',
+                    'Each audio must be a valid file',
+                    (value) => value instanceof File
+                )
+                .required('Please upload audio files')
+        )
+        .required('Please upload audio files')
+        .min(1, 'At least one audio file is required'),
 });
