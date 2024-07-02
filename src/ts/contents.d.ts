@@ -7,7 +7,8 @@ export interface Content {
     title: string;
     topic: CategoryBrief;
     description?: string;
-    languages: string[];
+    language: string;
+    audio?: string[];
     tags: string[];
     requires_auth: boolean;
     duration: number;
