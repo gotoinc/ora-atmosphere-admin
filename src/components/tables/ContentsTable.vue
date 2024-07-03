@@ -1,5 +1,10 @@
 <template>
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
+    <v-data-table
+        :loading="loading"
+        class="!rounded-lg"
+        :headers="headers"
+        :items="items"
+    >
         <template #[`item.image`]="{ item }">
             <v-card
                 v-if="item.image"
@@ -122,17 +127,19 @@
         </template>
 
         <template #no-data>
-            <v-btn color="primary"> No contents found </v-btn>
+            <p class="text-lg">No contents found</p>
         </template>
     </v-data-table>
 </template>
 
 <script setup lang="ts">
+    import { ref } from 'vue';
+
     import type { VideoContent } from '@/ts/contents';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {
-        headers: ReadonlyHeaders;
+        loading?: boolean;
         items: VideoContent[];
         editable?: boolean;
     }
@@ -144,6 +151,60 @@
 
     defineProps<Props>();
     const emits = defineEmits<Emits>();
+
+    const headers = ref<ReadonlyHeaders>([
+        {
+            title: 'Title',
+            align: 'start',
+            key: 'title',
+        },
+        {
+            title: 'Preview',
+            key: 'image',
+            sortable: false,
+        },
+        {
+            title: 'Theme',
+            key: 'topic.name',
+        },
+        {
+            title: 'Description',
+            key: 'description',
+        },
+        {
+            title: 'Duration',
+            key: 'duration',
+            sortable: false,
+        },
+        {
+            title: 'Sound',
+            key: 'with_sound',
+            sortable: false,
+        },
+        {
+            title: 'Narration',
+            key: 'with_narration',
+            sortable: false,
+        },
+        {
+            title: 'Date',
+            key: 'date_created',
+        },
+        {
+            title: 'Languages',
+            key: 'languages',
+        },
+        {
+            title: 'Tags',
+            key: 'tags',
+        },
+        {
+            align: 'end',
+            title: 'Actions',
+            key: 'actions',
+            sortable: false,
+        },
+    ]);
 </script>
 
 <style scoped></style>

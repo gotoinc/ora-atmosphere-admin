@@ -123,7 +123,7 @@
     import { useAuthStore } from '@/stores/auth.store.ts';
 
     import { getDashboardStats } from '@/api/stats/dashboard-stats.api.ts';
-    import type { Content } from '@/ts/contents';
+    import type { VideoContent } from '@/ts/contents';
     import type { DashboardStats } from '@/ts/stats';
 
     const toast = useToast();
@@ -134,7 +134,7 @@
 
     const dashboardStats = ref<DashboardStats>();
 
-    const items = ref<Content[]>([]);
+    const items = ref<VideoContent[]>([]);
 
     onMounted(async () => {
         try {
