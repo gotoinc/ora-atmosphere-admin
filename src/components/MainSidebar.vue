@@ -45,6 +45,14 @@
                     title="Catalog"
                     value="categories"
                 ></v-list-item>
+
+                <v-list-item
+                    v-if="isSuperAdmin"
+                    :to="{ name: 'usersView' }"
+                    prepend-icon="mdi-account-group"
+                    title="Users"
+                    value="users"
+                ></v-list-item>
             </v-list>
 
             <template #append>
@@ -119,7 +127,7 @@
     const emits = defineEmits<Emits>();
 
     const router = useRouter();
-    const { clearAuth, profileName } = useAuthStore();
+    const { clearAuth, profileName, isSuperAdmin } = useAuthStore();
 
     const isExpand = computed({
         get() {

@@ -61,10 +61,10 @@
     import { ref } from 'vue';
     import { useToast } from 'vue-toastification';
 
-    import CatalogTable from '@/components/base/CatalogTable.vue';
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateGroupForm from '@/components/forms/CreateGroupForm.vue';
+    import CatalogTable from '@/components/tables/CatalogTable.vue';
 
     import { deleteGroup } from '@/api/catalog/groups/delete-group.api.ts';
     import { getGroups } from '@/api/catalog/groups/get-groups.api.ts';

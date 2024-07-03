@@ -124,7 +124,6 @@
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {
-        headers: ReadonlyHeaders;
         loading?: boolean;
         items: VideoContent[];
         editable?: boolean;

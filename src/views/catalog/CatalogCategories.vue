@@ -61,10 +61,10 @@
     import { ref } from 'vue';
     import { useToast } from 'vue-toastification';
 
-    import CatalogTable from '@/components/base/CatalogTable.vue';
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateCategoryForm from '@/components/forms/CreateCategoryForm.vue';
+    import CatalogTable from '@/components/tables/CatalogTable.vue';
 
     import { deleteCategory } from '@/api/catalog/categories/delete-category.api.ts';
     import { getCategories } from '@/api/catalog/categories/get-categories.api.ts';
