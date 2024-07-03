@@ -1,6 +1,6 @@
 <template>
     <v-dialog v-model="isDialogOpen" max-width="400">
-        <div class="rounded-lg bg-dark p-5 text-center shadow-2xl">
+        <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
             <h3 class="mb-5 text-xl font-semibold">
                 Delete
                 <span v-if="title" class="text-primary-50">
@@ -20,6 +20,7 @@
                 </v-btn>
 
                 <v-btn
+                    :loading="loading"
                     class="text-none flex-grow"
                     color="error"
                     @click="emits('delete')"
@@ -37,6 +38,7 @@
     interface Props {
         modelValue: boolean;
         title?: string;
+        loading?: boolean;
     }
 
     interface Emits {

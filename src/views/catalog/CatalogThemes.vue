@@ -20,23 +20,67 @@
         </v-btn>
     </div>
 
-    <catalog-table :headers="headers" :items="items" />
+    <catalog-table
+        :headers="headers"
+        :items="items"
+        :loading="isLoading"
+        @edit="handleEdit"
+        @delete="handleDelete"
+    />
 
-    <full-screen-dialog v-model="isDialogOpen" title="Create new theme">
-        <create-theme-form />
-    </full-screen-dialog>
+    <!--  Dialogs   -->
+    <teleport to="body">
+        <full-screen-dialog v-model="isDialogOpen" title="Create new theme">
+            <create-theme-form
+                @close="isDialogOpen = false"
+                @update="loadTopics"
+            />
+        </full-screen-dialog>
+
+        <full-screen-dialog
+            v-model="isEditOpen"
+            :title="`Edit - ${selectedTopic?.name}`"
+        >
+            <create-theme-form
+                v-model:topic="selectedTopic"
+                @close="isEditOpen = false"
+                @update="loadTopics"
+            />
+        </full-screen-dialog>
+
+        <delete-dialog
+            v-model="isDeleteOpen"
+            :loading="isDeleteLoading"
+            :title="selectedTopic?.name"
+            @delete="confirmDelete"
+        />
+    </teleport>
 </template>
 
 <script setup lang="ts">
     import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
 
     import CatalogTable from '@/components/base/CatalogTable.vue';
+    import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateThemeForm from '@/components/forms/CreateThemeForm.vue';
 
+    import { deleteTopic } from '@/api/catalog/topics/delete-topic.api.ts';
+    import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
+    import type { CatalogItem, Topic } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
+    const toast = useToast();
+
     const isDialogOpen = ref(false);
+    const isEditOpen = ref(false);
+    const isDeleteOpen = ref(false);
+
+    const isLoading = ref(true);
+    const isDeleteLoading = ref(false);
+
+    const selectedTopic = ref<Topic | null>(null);
 
     const headers = ref<ReadonlyHeaders>([
         {
@@ -50,20 +94,20 @@
             sortable: false,
         },
         {
-            title: 'Category',
-            key: 'category',
-        },
-        {
             title: 'Group',
-            key: 'group',
+            key: 'group.name',
         },
         {
             title: 'Contents amount',
-            key: 'contents',
+            key: 'contents_amount',
         },
         {
             title: 'Date',
-            key: 'date',
+            key: 'date_created',
+        },
+        {
+            title: 'Visible for all',
+            key: 'requires_auth',
         },
         {
             align: 'end',
@@ -73,48 +117,52 @@
         },
     ]);
 
-    const items = [
-        {
-            name: 'Theme 1',
-            contents: 5,
-            category: 'Brands & events',
-            group: 'Brands',
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-        },
-        {
-            name: 'Theme 2',
-            contents: 5,
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Brands & events',
-            group: 'Events',
-        },
-        {
-            name: 'Theme 3',
-            contents: 5,
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
-            group: 'Climate',
-        },
-        {
-            name: 'Theme 4',
-            contents: 5,
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
-            group: 'Biodiversity',
-        },
-        {
-            name: 'Theme 5',
-            contents: 2,
-            date: new Date().toDateString(),
-            image: '/public/images/example.jpg',
-            category: 'Science',
-            group: 'Space',
-        },
-    ];
+    const items = ref<Topic[]>([]);
+
+    const handleEdit = (topic: CatalogItem) => {
+        selectedTopic.value = topic as Topic;
+
+        isEditOpen.value = true;
+    };
+
+    const handleDelete = (topic: CatalogItem) => {
+        selectedTopic.value = topic as Topic;
+
+        isDeleteOpen.value = true;
+    };
+
+    const confirmDelete = async () => {
+        const topic = selectedTopic.value as Topic;
+
+        isDeleteLoading.value = true;
+
+        try {
+            await deleteTopic(topic.id);
+
+            toast.success('Theme successfully deleted');
+
+            isDeleteOpen.value = false;
+
+            void loadTopics();
+        } catch (e) {
+            toast.error('Theme is not deleted');
+        } finally {
+            isLoading.value = false;
+            isDeleteLoading.value = false;
+        }
+    };
+
+    const loadTopics = async () => {
+        isLoading.value = true;
+
+        try {
+            items.value = (await getTopics()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    void loadTopics();
 </script>
 
 <style scoped></style>

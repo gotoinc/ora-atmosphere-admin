@@ -2,7 +2,7 @@
     <h3 class="mb-5 text-lg">Please fill out the fields below</h3>
 
     <form class="grid gap-2" @submit.prevent="onSubmit">
-        <fieldset>
+        <div>
             <p class="mb-3">Please enter a group name</p>
 
             <v-text-field
@@ -13,76 +13,190 @@
                 variant="outlined"
                 :error-messages="errors.name"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <p class="mb-3">Please select parent category</p>
 
             <v-select
                 v-model="category"
+                :loading="isCategoriesLoading"
                 label="Category"
                 variant="outlined"
                 clearable
-                :error-messages="errors.category"
-                :items="['Brands & events', 'Science', 'Culture']"
+                :items="categories"
+                return-object
+                item-title="name"
+                @update:model-value="selectCategoryId"
             />
-        </fieldset>
+        </div>
 
-        <fieldset>
-            <p class="mb-3">Please choose a file of background</p>
+        <catalog-image-upload
+            v-model:name="name"
+            :show-card="isFileSelected"
+            :background="imageSrc"
+            :error="errors.image"
+            @upload="selectFile"
+            @remove="removeFile"
+        />
 
-            <drag-and-drop
-                :error="!!errors.background"
-                @upload="selectFile"
-                @remove="removeFile"
-            />
-        </fieldset>
+        <v-checkbox
+            v-model="requiresAuth"
+            hide-details
+            color="primary"
+            class="mb-5"
+            density="comfortable"
+            label="Visible for all users"
+        ></v-checkbox>
 
-        <v-btn type="submit" color="primary" class="text-none w-fit">
-            Save
+        <v-btn
+            :loading="isLoading"
+            type="submit"
+            color="primary"
+            class="text-none w-fit"
+        >
+            {{ group ? 'Save changes' : 'Save' }}
         </v-btn>
     </form>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
-    import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+    import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
+    import { getCategories } from '@/api/catalog/categories/get-categories.api.ts';
+    import { postGroup } from '@/api/catalog/groups/post-group.api.ts';
+    import { updateGroup } from '@/api/catalog/groups/update-group.api.ts';
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
+    import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
+    import type { Category, Group } from '@/ts/catalog';
+    import type { KeysToString } from '@/ts/types/types';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateGroup } from '@/validations/types/catalog';
+    import type {
+        CreateCategory,
+        CreateGroup,
+    } from '@/validations/types/catalog';
 
-    const uploadedFile = ref<File | null>(null);
+    const props = defineProps<{ group?: Group | null }>();
+    const emits = defineEmits<CreateFormEmits>();
 
-    const { defineField, handleSubmit, errors, resetForm } =
+    const toast = useToast();
+
+    const isFileSelected = ref(!!props.group?.image);
+    const imageSrc = ref('');
+
+    const isLoading = ref(false);
+    const isCategoriesLoading = ref(true);
+
+    const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateGroup>({
             validationSchema: createGroupSchema,
             initialValues: {
                 name: '',
-                background: '',
             },
         });
 
+    const category = ref<Category | null>();
+    const categories = ref<Category[]>([]);
+
     const [name] = defineField('name');
-    const [background] = defineField('background');
-    const [category] = defineField('category');
+    const [image] = defineField('image');
+    const [categoryId] = defineField('category_id');
+    const [requiresAuth] = defineField('requires_auth');
+
+    const excludedProperties = useExcludeProperties({ ...props.group }, [
+        'id',
+        'topics',
+    ]);
+
+    if (props.group) {
+        category.value = props.group.category;
+
+        setValues(excludedProperties);
+
+        if (props.group.image) {
+            imageSrc.value = props.group.image;
+        }
+    }
 
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
-            uploadedFile.value = value[0].file;
-            background.value = value[0].name;
+            imageSrc.value = URL.createObjectURL(value[0].file);
+            image.value = value[0].file;
+        }
+    };
+
+    const selectCategoryId = (category?: Category) => {
+        if (category) {
+            console.log(category);
+            categoryId.value = category.id;
         }
     };
 
     const removeFile = () => {
-        uploadedFile.value = null;
-        background.value = '';
+        isFileSelected.value = false;
+        image.value = null;
+        imageSrc.value = '';
     };
 
-    const onSubmit = handleSubmit(() => {
-        resetForm();
+    const onSubmit = handleSubmit(async (values) => {
+        const editedValues = useCompareObjects(
+            excludedProperties,
+            values as KeysToString<CreateCategory>
+        );
+
+        if (props.group && !editedValues) {
+            toast.error('No changes were captured');
+
+            return;
+        }
+
+        isLoading.value = true;
+
+        try {
+            if (props.group) {
+                await updateGroup(props.group.id, {
+                    ...editedValues,
+                });
+
+                toast.success('Group successfully updated');
+            } else {
+                await postGroup({
+                    ...values,
+                    category_id: categoryId.value,
+                });
+
+                toast.success('Group successfully created');
+
+                category.value = null;
+                removeFile();
+                resetForm();
+            }
+
+            emits('update');
+            emits('close');
+        } catch (e) {
+            if (props.group) {
+                toast.error('Group not updated');
+            } else {
+                toast.error('Group not created');
+            }
+        } finally {
+            isLoading.value = false;
+        }
+    });
+
+    onMounted(async () => {
+        try {
+            categories.value = (await getCategories()) ?? [];
+        } finally {
+            isCategoriesLoading.value = false;
+        }
     });
 </script>
 

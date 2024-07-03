@@ -1,14 +1,15 @@
 interface CreateCategory {
     name: string;
-    background: string;
+    image: File | string | null;
+    requires_auth?: boolean;
 }
 
 interface CreateGroup extends CreateCategory {
-    category: string;
+    category_id: number;
 }
 
 interface CreateTheme extends CreateCategory {
-    group: string;
+    group_id: number;
 }
 
 export type { CreateCategory, CreateGroup, CreateTheme };

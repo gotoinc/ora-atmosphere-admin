@@ -1,29 +1,18 @@
-export interface Category {
-    id: number;
-    name: string;
-    image_url: string;
-    requires_auth: boolean;
-}
+import type { CommonCatalogTypes } from '@/ts/common';
+import type { VideoContent } from '@/ts/contents';
 
-export interface Group {
-    id: number;
-    name: string;
-    image_url: string;
-    category_id: number;
-    requires_auth: boolean;
-}
-
-export interface Topic {
-    id: number;
-    name: string;
-    image_url: string;
-    group_id: number;
-    requires_auth: boolean;
-}
-
-export interface Catalog {
-    category: Category;
+export interface Category extends CommonCatalogTypes {
     groups: Group[];
 }
 
-export interface CategoryBrief extends Pick<Category, 'id' | 'name'> {}
+export interface Group extends CommonCatalogTypes {
+    topics: Topic[];
+    category: Category;
+}
+
+export interface Topic extends CommonCatalogTypes {
+    videos: VideoContent[];
+    group: Group;
+}
+
+export type CatalogItem = Category | Group | Topic;

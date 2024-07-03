@@ -1,17 +1,13 @@
 <template>
     <v-data-table class="!rounded-lg" :headers="headers" :items="items">
-        <template #[`item.image_url`]="{ item }">
+        <template #[`item.image`]="{ item }">
             <v-card
-                v-if="item.image_url"
+                v-if="item.image"
                 class="my-2 h-20 w-20"
                 elevation="2"
                 rounded
             >
-                <v-img
-                    :src="item.image_url"
-                    class="h-full w-full"
-                    cover
-                ></v-img>
+                <v-img :src="item.image" class="h-full w-full" cover></v-img>
             </v-card>
 
             <div v-else>No image</div>
@@ -70,10 +66,10 @@
             >
                 <span
                     v-for="lang in item.languages.slice(0, 2)"
-                    :key="lang"
-                    class="tag tag--lang tag--fill"
+                    :key="lang.id"
+                    class="tag tag--lang tag--fill pointer-events-none"
                 >
-                    {{ lang }}
+                    {{ lang.name }}
                 </span>
 
                 <span class="text-xs">+ {{ item.tags.length - 2 }} more</span>
@@ -90,7 +86,7 @@
                 <span
                     v-for="tag in item.tags.slice(0, 2)"
                     :key="tag"
-                    class="tag tag--fill"
+                    class="tag tag--fill pointer-events-none"
                 >
                     {{ tag }}
                 </span>
@@ -132,18 +128,18 @@
 </template>
 
 <script setup lang="ts">
-    import type { Content } from '@/ts/contents';
+    import type { VideoContent } from '@/ts/contents';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Props {
         headers: ReadonlyHeaders;
-        items: Content[];
+        items: VideoContent[];
         editable?: boolean;
     }
 
     interface Emits {
-        (e: 'delete', value: Content): void;
-        (e: 'edit', value: Content): void;
+        (e: 'delete', value: VideoContent): void;
+        (e: 'edit', value: VideoContent): void;
     }
 
     defineProps<Props>();
