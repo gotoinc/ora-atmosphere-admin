@@ -1,10 +1,6 @@
 import type { VideoContent } from '@/ts/contents';
 
-type PartialContentKeys =
-    | 'tags'
-    | 'requires_auth'
-    | 'with_sound'
-    | 'with_narration';
+type PartialContentKeys = 'tags' | 'requires_auth' | 'audio' | 'speech';
 
 type OmitContentKeys =
     | 'id'
@@ -20,5 +16,4 @@ export interface CreateContent
         Partial<Pick<VideoContent, PartialContentKeys>> {
     topic_id: number;
     language: string;
-    audio: File[];
 }

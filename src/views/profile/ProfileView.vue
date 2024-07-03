@@ -3,7 +3,7 @@
         <div class="mb-5 flex flex-wrap items-center justify-between gap-6">
             <h1 class="text-2xl font-bold">Profile</h1>
 
-            <v-btn class="text-none" color="error"> Deactivate account </v-btn>
+            <v-btn class="text-none" color="red"> Deactivate account </v-btn>
         </div>
 
         <v-tabs v-model="tab" class="mb-6 border-b border-white">

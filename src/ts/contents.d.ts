@@ -1,4 +1,4 @@
-import type { Identifiable } from '@/ts/common';
+import type { Audio, Identifiable } from '@/ts/common';
 
 export interface VideoContent {
     id: number;
@@ -8,11 +8,11 @@ export interface VideoContent {
     image: string;
     language: Identifiable[];
     topic: Identifiable;
-    audio?: string[];
+    tracks?: Audio[];
     tags: string[];
     requires_auth: boolean;
     duration: number;
-    with_sound: boolean;
-    with_narration: boolean;
+    audio: boolean;
+    speech: boolean;
     date_created: string;
 }

@@ -10,7 +10,7 @@
             </div>
 
             <v-card class="overflow-visible">
-                <div class="">
+                <div>
                     <catalog-graph />
                 </div>
             </v-card>

@@ -6,7 +6,7 @@
 
                 <drag-and-drop
                     v-if="!videoSrc && !isContentSelected"
-                    :error="!!errors.file_url"
+                    :error="!!errors.file"
                     :accept="['video/mp4', 'video/webm']"
                     @upload="selectVideoFile"
                     @remove="removeVideoFile"
@@ -28,7 +28,7 @@
                             controls
                             @loadedmetadata="loadVideoInfo"
                         >
-                            <source :src="videoSrc ?? content?.file_url" />
+                            <source :src="videoSrc ?? content?.file" />
                         </video>
                     </div>
 
@@ -70,10 +70,10 @@
 
                                 <a
                                     target="_blank"
-                                    :href="content.file_url"
+                                    :href="content.file"
                                     class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
                                 >
-                                    {{ content.file_url }}
+                                    {{ content.file }}
                                 </a>
                             </div>
                         </div>
@@ -98,7 +98,7 @@
                                 ></v-checkbox>
 
                                 <v-checkbox
-                                    v-model="withSound"
+                                    v-model="withAudio"
                                     hide-details
                                     color="primary"
                                     density="comfortable"
@@ -106,7 +106,7 @@
                                 ></v-checkbox>
 
                                 <v-checkbox
-                                    v-model="withNarration"
+                                    v-model="speech"
                                     hide-details
                                     color="primary"
                                     density="comfortable"
@@ -157,37 +157,54 @@
                         {{ `(${audioFiles.size})` }}
                     </h4>
 
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
                         <div
-                            v-for="(file, i) in audioFiles"
+                            v-for="(audio, i) in audioFiles"
                             :key="i"
                             class="rounded bg-slate-600 p-4"
                         >
+                            <span
+                                v-if="!isFile(audio.file)"
+                                class="mb-4 inline-flex items-center rounded-full bg-grey-300 px-3 py-1 text-sm"
+                            >
+                                Active
+                                <v-icon
+                                    class="ml-1"
+                                    size="20"
+                                    icon="mdi-check-circle-outline"
+                                    color="green"
+                                />
+                            </span>
+
                             <audio
                                 preload="metadata"
                                 class="mb-2 w-full"
                                 controls
-                                :src="getSource(file)"
+                                :src="getSource(audio.file)"
                             ></audio>
 
                             <div class="space-y-4">
                                 <h5 class="mb-2">
                                     File name:
                                     <span class="line-camp-1">
-                                        {{ file.name }}
+                                        {{
+                                            isFile(audio.file)
+                                                ? audio.file.name
+                                                : audio.name
+                                        }}
                                     </span>
                                 </h5>
 
-                                <p>
+                                <p v-if="isFile(audio.file)">
                                     File size:
-                                    {{ useFormatFileSize(file.size) }}
+                                    {{ useFormatFileSize(audio.file.size) }}
                                 </p>
 
                                 <v-btn
                                     type="submit"
                                     color="red"
                                     class="text-none w-fit"
-                                    @click="removeAudioFile(file)"
+                                    @click="removeAudioFile(audio)"
                                 >
                                     Remove
                                 </v-btn>
@@ -293,6 +310,7 @@
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import type { Topic } from '@/ts/catalog';
+    import type { Audio } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
     import type { CreateContent } from '@/validations/types/content';
@@ -316,7 +334,7 @@
     const videoSrc = ref(props.content?.file ?? '');
     const imageSrc = ref('');
 
-    const audioFiles = ref<Set<File>>(new Set());
+    const audioFiles = ref<Set<Audio>>(new Set());
 
     const videoElement = ref<HTMLVideoElement | null>(null);
 
@@ -331,10 +349,10 @@
     const [language] = defineField('language');
     const [tags] = defineField('tags');
     const [requiresAuth] = defineField('requires_auth');
-    const [withNarration] = defineField('with_narration');
-    const [withSound] = defineField('with_sound');
+    const [speech] = defineField('speech');
+    const [withAudio] = defineField('audio');
     const [duration] = defineField('duration');
-    const [audio] = defineField('audio');
+    const [tracks] = defineField('tracks');
 
     /**
      * Test topics
@@ -354,18 +372,27 @@
         topic.value = props.content.topic;
         topicId.value = props.content.topic.id;
 
+        if (props.content.tracks) {
+            audioFiles.value = new Set(props.content.tracks);
+        }
+
+        // Set existing values to form
         setValues(
             useExcludeProperties({ ...props.content }, [
                 'id',
                 'date_created',
                 'image',
                 'language',
-                'audio',
+                'tracks',
             ])
         );
     }
 
-    const getSource = (file: File) => URL.createObjectURL(file);
+    const getSource = (file: File | string) =>
+        isFile(file) ? URL.createObjectURL(file) : file;
+
+    const isFile = (file: File | string): file is File =>
+        typeof file !== 'string';
 
     const selectVideoFile = (files: UploadableFile[]) => {
         uploadedVideoFile.value = files[0].file;
@@ -376,10 +403,13 @@
 
     const selectAudioFiles = (files: UploadableFile[]) => {
         files.forEach((item) => {
-            audioFiles.value.add(item.file);
+            audioFiles.value.add({
+                file: item.file,
+                name: item.name,
+            });
         });
 
-        audio.value = Array.from(audioFiles.value);
+        tracks.value = Array.from(audioFiles.value);
     };
 
     const selectTopicId = (topic?: Topic) => {
@@ -416,7 +446,7 @@
         contentFile.value = '';
     };
 
-    const removeAudioFile = (file: File) => {
+    const removeAudioFile = (file: Audio) => {
         audioFiles.value.delete(file);
     };
 

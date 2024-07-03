@@ -18,7 +18,7 @@
                 </div>
             </v-toolbar>
 
-            <div class="container md flex-grow">
+            <div class="container md flex-grow pb-5">
                 <slot></slot>
             </div>
         </v-card>

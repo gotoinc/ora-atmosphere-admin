@@ -143,11 +143,21 @@
                     id: 2,
                 },
             ],
+            tracks: [
+                {
+                    file: '/audios/test-1.mp3',
+                    name: 'Test 1',
+                },
+                {
+                    file: '/audios/test-2.mp3',
+                    name: 'Test 2',
+                },
+            ],
             tags: ['environment', 'museum', 'luxury', 'art'],
             requires_auth: false,
             duration: 13,
-            with_sound: true,
-            with_narration: true,
+            audio: true,
+            speech: true,
             date_created: new Date().toISOString().split('T')[0],
         },
         {
@@ -171,11 +181,12 @@
                     id: 2,
                 },
             ],
+            tracks: [],
             tags: ['environment', 'museum', 'luxury', 'art'],
             requires_auth: true,
             duration: 13,
-            with_sound: true,
-            with_narration: true,
+            audio: true,
+            speech: true,
             date_created: new Date().toISOString().split('T')[0],
         },
     ];

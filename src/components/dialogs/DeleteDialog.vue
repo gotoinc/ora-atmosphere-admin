@@ -22,7 +22,7 @@
                 <v-btn
                     :loading="loading"
                     class="text-none flex-grow"
-                    color="error"
+                    color="red"
                     @click="emits('delete')"
                 >
                     Delete

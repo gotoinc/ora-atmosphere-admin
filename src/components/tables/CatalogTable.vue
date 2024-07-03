@@ -1,10 +1,21 @@
 <template>
-    <v-data-table class="!rounded-lg" :loading="loading" :headers="headers" :items="items">
+    <v-data-table
+        class="!rounded-lg"
+        :loading="loading"
+        :headers="headers"
+        :items="items"
+    >
         <template #[`item.actions`]="{ item }">
             <table-action-buttons
                 @delete="emits('delete', item)"
                 @edit="emits('edit', item)"
             />
+        </template>
+
+        <template #[`item.name`]="{ item }">
+            <p class="min-w-44">
+                {{ item.name }}
+            </p>
         </template>
 
         <template #[`item.image`]="{ item }">

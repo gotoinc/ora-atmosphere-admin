@@ -1,6 +1,7 @@
 import type { ObjectSchema } from 'yup';
-import { array, boolean, mixed, number, object, string } from 'yup';
+import { array, boolean, number, object, string } from 'yup';
 
+import { audioSchema } from '@/validations';
 import type { CreateContent } from '@/validations/types/content';
 
 /**
@@ -14,19 +15,8 @@ export const createContentSchema: ObjectSchema<CreateContent> = object({
     language: string().required('Please select language'),
     tags: array(),
     requires_auth: boolean(),
-    with_narration: boolean(),
-    with_sound: boolean(),
+    speech: boolean(),
+    audio: boolean(),
     duration: number().required(),
-    audio: array()
-        .of(
-            mixed<File>()
-                .test(
-                    'is-file',
-                    'Each audio must be a valid file',
-                    (value) => value instanceof File
-                )
-                .required('Please upload audio files')
-        )
-        .required('Please upload audio files')
-        .min(1, 'At least one audio file is required'),
+    tracks: array().of(audioSchema),
 });

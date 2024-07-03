@@ -1,31 +1,35 @@
 <template>
     <div class="v-sheet--offset mx-auto w-full rounded bg-grey-200 p-5">
-        <div class="mb-10 flex items-start justify-between">
+        <div class="mb-10 flex flex-wrap items-start justify-between gap-5">
             <h2 class="text-xl font-semibold">Catalog statistics</h2>
 
-            <v-btn-toggle v-model="selectedGraphOption" color="primary">
-                <v-btn class="text-none"> Categories </v-btn>
+            <v-btn-toggle
+                v-model="selectedGraphOption"
+                class="max-xs:!h-auto max-xs:w-full max-xs:flex-col"
+                color="primary"
+            >
+                <v-btn class="tab"> Categories </v-btn>
 
-                <v-btn class="text-none"> Groups </v-btn>
+                <v-btn class="tab"> Groups </v-btn>
 
-                <v-btn class="text-none"> Themes </v-btn>
+                <v-btn class="tab"> Themes </v-btn>
             </v-btn-toggle>
         </div>
 
-        <div>
+        <div class="min-h-[350px] overflow-x-auto pb-5">
             <main-graph
                 v-if="selectedGraphOption === 0"
-                class="min-h-[350px]"
+                class="graph"
                 :data="categoriesData"
             />
 
             <main-graph
                 v-else-if="selectedGraphOption === 1"
-                class="min-h-[350px]"
+                class="graph"
                 :data="groupsData"
             />
 
-            <main-graph v-else class="min-h-[350px]" :data="topicsData" />
+            <main-graph v-else class="graph" :data="topicsData" />
         </div>
     </div>
 </template>
@@ -99,5 +103,17 @@
         top: -24px;
         position: relative;
         max-width: calc(100% - 32px);
+    }
+
+    .v-sheet--offset {
+        @apply max-mob:max-w-full;
+    }
+
+    .tab {
+        @apply capitalize max-sm:min-h-12;
+    }
+
+    .graph {
+        min-width: 685px;
     }
 </style>

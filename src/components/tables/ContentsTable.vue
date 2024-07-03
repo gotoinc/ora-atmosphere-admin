@@ -26,9 +26,9 @@
             <div v-else>No image</div>
         </template>
 
-        <template #[`item.with_sound`]="{ item }">
+        <template #[`item.audio`]="{ item }">
             <img
-                v-if="item.with_sound"
+                v-if="item.audio"
                 src="@img/volume-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -42,9 +42,9 @@
             />
         </template>
 
-        <template #[`item.with_narration`]="{ item }">
+        <template #[`item.speech`]="{ item }">
             <img
-                v-if="item.with_narration"
+                v-if="item.speech"
                 src="@img/narration-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -163,12 +163,12 @@
         },
         {
             title: 'Sound',
-            key: 'with_sound',
+            key: 'audio',
             sortable: false,
         },
         {
             title: 'Narration',
-            key: 'with_narration',
+            key: 'speech',
             sortable: false,
         },
         {

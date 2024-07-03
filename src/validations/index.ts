@@ -62,6 +62,7 @@ export const topicSchema = object().shape({
     requires_auth: boolean().required(),
 });
 
+// File schema
 export const fileSchema = mixed<File | string>()
     .test('value', 'Field is required', (value) => {
         return isFile(value) || typeof value === 'string';
@@ -73,3 +74,17 @@ export const fileSchema = mixed<File | string>()
             return true;
         }
     });
+
+// Audio schema
+export const audioSchema = object({
+    name: string().required('Please enter the name'),
+    file: mixed<File | string>()
+        .test(
+            'is-file-or-string',
+            'File must be a valid file or a string',
+            (value) => {
+                return typeof value === 'string' || value instanceof File;
+            }
+        )
+        .required('Please upload'),
+});
