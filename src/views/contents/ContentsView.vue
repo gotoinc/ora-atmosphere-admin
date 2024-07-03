@@ -73,12 +73,7 @@
         </button>
     </div>
 
-    <contents-table
-        :headers="headers"
-        :items="items"
-        @delete="handleDelete"
-        @edit="handleEdit"
-    />
+    <contents-table :items="items" @delete="handleDelete" @edit="handleEdit" />
 
     <!--  Dialogs   -->
     <teleport to="body">
@@ -109,7 +104,6 @@
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
-    import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     interface Filters {
         search: string;
@@ -127,60 +121,6 @@
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
 
-    const headers = ref<ReadonlyHeaders>([
-        {
-            title: 'Title',
-            align: 'start',
-            key: 'title',
-        },
-        {
-            title: 'Preview',
-            key: 'image',
-            sortable: false,
-        },
-        {
-            title: 'Theme',
-            key: 'topic.name',
-        },
-        {
-            title: 'Description',
-            key: 'description',
-        },
-        {
-            title: 'Duration',
-            key: 'duration',
-            sortable: false,
-        },
-        {
-            title: 'Sound',
-            key: 'with_sound',
-            sortable: false,
-        },
-        {
-            title: 'Narration',
-            key: 'with_narration',
-            sortable: false,
-        },
-        {
-            title: 'Date',
-            key: 'date_created',
-        },
-        {
-            title: 'Languages',
-            key: 'languages',
-        },
-        {
-            title: 'Tags',
-            key: 'tags',
-        },
-        {
-            align: 'end',
-            title: 'Actions',
-            key: 'actions',
-            sortable: false,
-        },
-    ]);
-
     const items: VideoContent[] = [
         {
             id: 1000,
@@ -193,7 +133,7 @@
             },
             description:
                 'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            languages: [
+            language: [
                 {
                     name: 'English',
                     id: 1,
@@ -221,7 +161,7 @@
             },
             description:
                 'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            languages: [
+            language: [
                 {
                     name: 'English',
                     id: 1,

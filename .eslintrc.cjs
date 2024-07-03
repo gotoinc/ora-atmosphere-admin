@@ -29,6 +29,8 @@ module.exports = {
     },
     plugins: ['@typescript-eslint', 'prettier', 'simple-import-sort'],
     rules: {
+        'no-redeclare': 'off',
+        '@typescript-eslint/no-redeclare': 'off',
         '@typescript-eslint/await-thenable': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
         '@typescript-eslint/unified-signatures': 'off',

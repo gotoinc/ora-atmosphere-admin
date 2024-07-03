@@ -20,7 +20,7 @@
     }
 
     body {
-        @apply text-white
+        @apply text-white !right-0
     }
 
     .v-tooltip > .v-overlay__content {
