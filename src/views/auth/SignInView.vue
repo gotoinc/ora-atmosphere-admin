@@ -34,7 +34,7 @@
 
                 <router-link
                     class="underline transition-colors hover:text-primary-100"
-                    :to="{ name: 'resetPasswordView' }"
+                    :to="{ name: 'forgotPasswordView' }"
                 >
                     Forgot Password?
                 </router-link>

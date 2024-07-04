@@ -1,101 +1,65 @@
 <template>
     <div class="mx-auto text-white">
-        <!-- If request link has been sent -->
-        <template v-if="isRequestSent">
-            <div class="mb-6 text-center">
-                <h1 class="mb-2 text-h4">Link sent!</h1>
+        <h1 class="mb-6 text-h4">Choose a new password</h1>
 
-                <p class="text-base text-grey-150">
-                    A password reset link has been sent to your email address
-                </p>
-            </div>
-
-            <v-btn color="primary" class="w-full" :to="{ name: 'signInView' }">
-                Back to Sign in
-            </v-btn>
-        </template>
-
-        <!-- Reset password form -->
-        <template v-else>
-            <div class="mb-6">
-                <h1 class="mb-2 text-h4">Forgot your password</h1>
-
-                <p class="text-base text-grey-100">
-                    Enter the email address associated with your account and
-                    we'll send you a link to reset your password.
-                </p>
-            </div>
-
-            <form class="mb-6" @submit.prevent="onSubmit">
+        <form class="mb-6" @submit.prevent="onSubmit">
+            <div class="mb-6 grid gap-4">
                 <v-text-field
-                    v-model="email"
-                    name="email"
-                    label="Email"
+                    v-model="password"
+                    name="password"
                     variant="outlined"
-                    type="email"
-                    placeholder="Enter your email"
-                    class="mb-6"
-                    :error-messages="errors.email"
+                    type="password"
+                    label="Password"
+                    placeholder="Set your password"
+                    :error-messages="errors.password"
+                    hint="Use 8 or more characters with a mix of letters, numbers & symbols"
                 />
 
-                <v-btn
-                    :loading="isLoading"
-                    class="w-full"
-                    color="primary"
-                    type="submit"
-                >
-                    Continue
-                </v-btn>
-            </form>
-        </template>
-    </div>
+                <v-text-field
+                    v-model="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    variant="outlined"
+                    label="Confirm Password"
+                    placeholder="Confirm your password"
+                    :error-messages="errors.confirmPassword"
+                />
+            </div>
 
-    <router-link
-        class="text-white underline transition-colors hover:!text-primary-100"
-        :to="{ name: 'signInView' }"
-    >
-        Go to Sign in
-    </router-link>
+            <v-btn color="primary" type="submit" class="w-full">
+                Change Password
+            </v-btn>
+        </form>
+
+        <router-link
+            class="text-white underline transition-colors hover:!text-primary-100"
+            :to="{ name: 'signInView' }"
+        >
+            Go to Sign in
+        </router-link>
+    </div>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
-    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
-    import { authPasswordReset } from '@/api/auth/auth-password-reset.api.ts';
-    import { forgotPasswordSchema } from '@/validations/schemas/auth.schema.ts';
-    import type { EmailType } from '@/validations/types/auth';
+    import { setNewPasswordSchema } from '@/validations/schemas/auth.schema.ts';
+    import type { SetNewPasswordType } from '@/validations/types/auth';
 
-    const toast = useToast();
-
-    const { defineField, handleSubmit, resetForm, errors } = useForm<EmailType>(
-        {
-            validationSchema: forgotPasswordSchema,
+    const { defineField, handleSubmit, resetForm, errors } =
+        useForm<SetNewPasswordType>({
+            validationSchema: setNewPasswordSchema,
             initialValues: {
-                email: '',
+                password: '',
+                confirmPassword: '',
             },
-        }
-    );
+        });
 
-    const [email] = defineField('email');
+    const [password] = defineField('password');
+    const [confirmPassword] = defineField('confirmPassword');
 
-    const isRequestSent = ref(false);
-    const isLoading = ref(false);
-
-    const onSubmit = handleSubmit(async (values) => {
-        isLoading.value = true;
-
-        try {
-            await authPasswordReset(values.email);
-
-            isRequestSent.value = true;
-            resetForm();
-        } catch (e) {
-            toast.error('Reset link has not been sent');
-        } finally {
-            isLoading.value = false;
-        }
+    const onSubmit = handleSubmit(() => {
+        resetForm();
     });
 </script>
 

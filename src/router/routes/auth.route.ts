@@ -1,5 +1,3 @@
-import { useAuthStore } from '@/stores/auth.store.ts';
-
 export default {
     path: '/auth',
     name: 'auth',
@@ -25,17 +23,9 @@ export default {
             },
         },
         {
-            path: '/set-new-password',
-            name: 'setNewPasswordView',
-            component: () => import('@/views/auth/SetNewPasswordView.vue'),
-
-            beforeEnter: () => {
-                const { isEmailConfirmed } = useAuthStore();
-
-                if (!isEmailConfirmed) {
-                    return { name: 'main' };
-                }
-            },
+            path: '/forgot-password',
+            name: 'forgotPasswordView',
+            component: () => import('@/views/auth/ForgotPasswordView.vue'),
         },
     ],
 };
