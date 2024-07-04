@@ -144,6 +144,7 @@
                     :accept="['audio/mpeg']"
                     multiple
                     class="mb-5"
+                    :file-to-remove="audioToRemove"
                     @upload="selectAudioFiles"
                 >
                     <template #icon>
@@ -335,6 +336,8 @@
     const imageSrc = ref('');
 
     const audioFiles = ref<Set<Audio>>(new Set());
+    const audioUploadables = ref<Set<UploadableFile>>(new Set());
+    const audioToRemove = ref<UploadableFile>();
 
     const videoElement = ref<HTMLVideoElement | null>(null);
 
@@ -403,10 +406,14 @@
 
     const selectAudioFiles = (files: UploadableFile[]) => {
         files.forEach((item) => {
-            audioFiles.value.add({
-                file: item.file,
-                name: item.name,
-            });
+            if (!audioUploadables.value.has(item)) {
+                audioUploadables.value.add(item);
+
+                audioFiles.value.add({
+                    file: item.file,
+                    name: item.name,
+                });
+            }
         });
 
         tracks.value = Array.from(audioFiles.value);
@@ -428,7 +435,7 @@
 
     const onVideoCapture = () => {
         if (videoElement.value) {
-            const src = useCaptureImage(videoElement.value);
+            const src = useCaptureImage(videoElement.value as HTMLVideoElement);
 
             if (src) imageSrc.value = src;
 
@@ -447,15 +454,22 @@
     };
 
     const removeAudioFile = (file: Audio) => {
+        for (const item of audioUploadables.value) {
+            if (item.file === file.file) {
+                audioToRemove.value = item;
+            }
+        }
+
+        if (audioToRemove.value)
+            audioUploadables.value.delete(audioToRemove.value);
+
         audioFiles.value.delete(file);
     };
 
-    const onSubmit = handleSubmit((values) => {
+    const onSubmit = handleSubmit(() => {
         if (!props.content) {
             onVideoCapture();
         }
-
-        console.log(values);
 
         resetForm();
         topic.value = null;

@@ -64,15 +64,12 @@
                 </span>
             </div>
         </div>
-
-        <v-snackbar v-model="showAlert" :timeout="2000" color="red">
-            This file type is not supported
-        </v-snackbar>
     </drop-zone>
 </template>
 
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { computed, watch } from 'vue';
+    import { useToast } from 'vue-toastification';
 
     import DropZone from '@/components/drag-and-drop/DropZone.vue';
 
@@ -85,6 +82,7 @@
         error?: boolean;
         multiple?: boolean;
         accept?: string[];
+        fileToRemove?: UploadableFile;
     }
 
     interface Emits {
@@ -95,19 +93,28 @@
     const emits = defineEmits<Emits>();
     const props = defineProps<Props>();
 
+    const toast = useToast();
+
     const acceptFileTypes = computed(() =>
         props.accept ? props.accept.join(', ') : ''
     );
 
     const inputID = `file-input-${useGeneratedID()}`;
 
-    const showAlert = ref(false);
-
     const { files, addFiles, removeFile } = useFiles();
+
+    const checkFileAccept = (file: File) => {
+        if (props.accept?.includes(file.type)) {
+            return true;
+        } else {
+            toast.error(`File ${file.name} is not supported`);
+            return false;
+        }
+    };
 
     const checkFileType = (newFiles: FileList | File[]) => {
         if (!props.multiple && newFiles.length > 1) {
-            showAlert.value = true;
+            toast.error('Only 1 attachment is allowed');
             return;
         }
 
@@ -119,12 +126,40 @@
             return;
         }
 
+        // Check file type of multiple files
+        if (props.multiple) {
+            const accepted: File[] = [];
+
+            if (Array.isArray(newFiles)) {
+                newFiles.forEach((file) => {
+                    if (checkFileAccept(file)) {
+                        accepted.push(file);
+                    }
+                });
+            } else {
+                for (const file of newFiles) {
+                    if (checkFileAccept(file)) {
+                        accepted.push(file);
+                    }
+                }
+            }
+
+            if (accepted.length > 0) {
+                addFiles(accepted);
+
+                emits('upload', files.value);
+            }
+
+            return;
+        }
+
+        // Check file type
         if (props.accept.includes(newFiles[0].type)) {
             addFiles(newFiles);
 
             emits('upload', files.value);
         } else {
-            showAlert.value = true;
+            toast.error('This file type is not supported');
         }
     };
 
@@ -142,6 +177,13 @@
         removeFile(files.value[0]);
         emits('remove');
     };
+
+    watch(
+        () => props.fileToRemove,
+        (file) => {
+            if (file) removeFile(file);
+        }
+    );
 </script>
 
 <style scoped lang="postcss">
