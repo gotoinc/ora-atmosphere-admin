@@ -106,7 +106,7 @@
                                 ></v-checkbox>
 
                                 <v-checkbox
-                                    v-model="speech"
+                                    v-model="withNarration"
                                     hide-details
                                     color="primary"
                                     density="comfortable"
@@ -165,7 +165,7 @@
                             class="rounded bg-slate-600 p-4"
                         >
                             <span
-                                v-if="!isFile(audio.file)"
+                                v-if="!isFile(audio)"
                                 class="mb-4 inline-flex items-center rounded-full bg-grey-300 px-3 py-1 text-sm"
                             >
                                 Active
@@ -181,24 +181,20 @@
                                 preload="metadata"
                                 class="mb-2 w-full"
                                 controls
-                                :src="getSource(audio.file)"
+                                :src="getSource(audio)"
                             ></audio>
 
                             <div class="space-y-4">
                                 <h5 class="mb-2">
                                     File name:
                                     <span class="line-camp-1">
-                                        {{
-                                            isFile(audio.file)
-                                                ? audio.file.name
-                                                : audio.name
-                                        }}
+                                        {{ isFile(audio) ? audio.name : audio }}
                                     </span>
                                 </h5>
 
-                                <p v-if="isFile(audio.file)">
+                                <p v-if="isFile(audio)">
                                     File size:
-                                    {{ useFormatFileSize(audio.file.size) }}
+                                    {{ useFormatFileSize(audio.size) }}
                                 </p>
 
                                 <v-btn
@@ -249,15 +245,14 @@
                 <p class="mb-5">Please select theme of the content</p>
 
                 <v-select
-                    v-model="topic"
+                    v-model="selectedTopic"
                     label="Theme"
                     variant="outlined"
                     clearable
-                    :error-messages="errors.topic_id"
+                    :loading="isTopicsLoading"
                     :items="topics"
                     item-title="name"
                     return-object
-                    @update:model-value="selectTopicId"
                 />
             </div>
 
@@ -269,7 +264,7 @@
                     label="Languages"
                     variant="outlined"
                     clearable
-                    :error-messages="errors.language"
+                    :error-messages="errors.languages"
                     :items="['French', 'English', 'Spanish']"
                 >
                 </v-select>
@@ -292,7 +287,12 @@
                 </v-combobox>
             </div>
 
-            <v-btn type="submit" color="primary" class="text-none w-fit">
+            <v-btn
+                :loading="isLoading"
+                type="submit"
+                color="primary"
+                class="text-none w-fit"
+            >
                 {{ content ? 'Save changes' : 'Save' }}
             </v-btn>
         </form>
@@ -300,33 +300,32 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
     import { useForm } from 'vee-validate';
 
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
 
+    import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
+    import { postVideo } from '@/api/contens/post-video.api.ts';
     import { useCaptureImage } from '@/hooks/useCaptureImage.ts';
-    import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
-    import type { Topic } from '@/ts/catalog';
-    import type { Audio } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
-    import type { CreateContent } from '@/validations/types/content';
+    import type { CreateContent } from '@/validations/types/content.validation';
 
     const props = defineProps<{ content?: VideoContent | null }>();
 
     const isContentSelected = ref(!!props.content);
     const isVideoLoaded = ref(!!props.content);
     const showContentByDefault = ref(false);
+    const isLoading = ref(false);
 
-    const { defineField, handleSubmit, errors, resetForm, setValues } =
-        useForm<CreateContent>({
-            validationSchema: createContentSchema,
-            initialValues: {},
-        });
+    const { defineField, handleSubmit, errors } = useForm<CreateContent>({
+        validationSchema: createContentSchema,
+        initialValues: {},
+    });
 
     /**
      * Data for content sources
@@ -335,60 +334,52 @@
     const videoSrc = ref(props.content?.file ?? '');
     const imageSrc = ref('');
 
-    const audioFiles = ref<Set<Audio>>(new Set());
+    const audioFiles = ref<Set<File | string>>(new Set());
     const audioUploadables = ref<Set<UploadableFile>>(new Set());
     const audioToRemove = ref<UploadableFile>();
 
     const videoElement = ref<HTMLVideoElement | null>(null);
 
+    const requiresAuth = ref(false);
+    const withNarration = ref(false);
+    const withAudio = ref(false);
+    const duration = ref(0);
+
     /**
      * Define fields for form
      */
-    const topic = ref();
+    const topics = ref();
+    const isTopicsLoading = ref(true);
+    const selectedTopic = ref();
+
     const [title] = defineField('title');
     const [description] = defineField('description');
     const [contentFile] = defineField('file');
-    const [topicId] = defineField('topic_id');
-    const [language] = defineField('language');
+    // const [topicId] = defineField('topic_id');
+    const [language] = defineField('languages');
     const [tags] = defineField('tags');
-    const [requiresAuth] = defineField('requires_auth');
-    const [speech] = defineField('speech');
-    const [withAudio] = defineField('audio');
-    const [duration] = defineField('duration');
-    const [tracks] = defineField('tracks');
-
-    /**
-     * Test topics
-     */
-    const topics = [
-        {
-            id: 100,
-            name: 'Theme 1',
-        },
-        {
-            id: 101,
-            name: 'Theme 2',
-        },
-    ];
+    const [audios] = defineField('audios');
 
     if (props.content) {
-        topic.value = props.content.topic;
-        topicId.value = props.content.topic.id;
+        // topic.value = props.content.topic;
+        // topicId.value = props.content.topic.id;
 
-        if (props.content.tracks) {
-            audioFiles.value = new Set(props.content.tracks);
+        if (props.content.audios) {
+            audioFiles.value = new Set(
+                props.content.audios.map((item) => item.file)
+            );
         }
 
         // Set existing values to form
-        setValues(
-            useExcludeProperties({ ...props.content }, [
-                'id',
-                'date_created',
-                'image',
-                'language',
-                'tracks',
-            ])
-        );
+        // setValues(
+        //     useExcludeProperties({ ...props.content }, [
+        //         'id',
+        //         'date_created',
+        //         'image',
+        //         'languages',
+        //         'audios',
+        //     ])
+        // );
     }
 
     const getSource = (file: File | string) =>
@@ -409,21 +400,18 @@
             if (!audioUploadables.value.has(item)) {
                 audioUploadables.value.add(item);
 
-                audioFiles.value.add({
-                    file: item.file,
-                    name: item.name,
-                });
+                audioFiles.value.add(item.file);
             }
         });
 
-        tracks.value = Array.from(audioFiles.value);
+        audios.value = Array.from(audioFiles.value);
     };
 
-    const selectTopicId = (topic?: Topic) => {
-        if (topic) {
-            topicId.value = topic.id;
-        }
-    };
+    // const selectTopicId = (topic?: Topic) => {
+    //     if (topic) {
+    //         topicId.value = topic.id;
+    //     }
+    // };
 
     const loadVideoInfo = () => {
         if (videoElement.value) {
@@ -453,9 +441,9 @@
         contentFile.value = '';
     };
 
-    const removeAudioFile = (file: Audio) => {
+    const removeAudioFile = (file: File | string) => {
         for (const item of audioUploadables.value) {
-            if (item.file === file.file) {
+            if (item.file === file) {
                 audioToRemove.value = item;
             }
         }
@@ -466,13 +454,41 @@
         audioFiles.value.delete(file);
     };
 
-    const onSubmit = handleSubmit(() => {
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
+
+        try {
+            await postVideo({
+                file: uploadedVideoFile.value as File,
+                duration: Math.round(duration.value),
+                title: values.title,
+                description: values.description,
+                date_created: new Date().toISOString(),
+                languages: values.languages,
+                tags: tags.value?.join(', '),
+                audio_enabled: withAudio.value,
+                narration_enabled: withNarration.value,
+                requires_auth: requiresAuth.value,
+                show_on_main_banner: showContentByDefault.value,
+            });
+
+            // resetForm();
+            // topic.value = null;
+        } finally {
+            isLoading.value = false;
+        }
+
         if (!props.content) {
             onVideoCapture();
         }
+    });
 
-        resetForm();
-        topic.value = null;
+    onMounted(async () => {
+        try {
+            topics.value = (await getTopics()) ?? [];
+        } finally {
+            isTopicsLoading.value = false;
+        }
     });
 </script>
 

@@ -1,10 +1,10 @@
 import axios from '@/api/axios.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
-import type { Group } from '@/ts/catalog';
+import type { VideoContent } from '@/ts/contents';
 
-export const getGroups = async () => {
+export const getContents = async () => {
     try {
-        const res = await axios.get<Group[]>(`/groups`);
+        const res = await axios.get<VideoContent[]>(`/admin/videos`);
 
         return res.data;
     } catch (err) {

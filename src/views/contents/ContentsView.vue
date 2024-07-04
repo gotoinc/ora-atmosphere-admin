@@ -73,7 +73,12 @@
         </button>
     </div>
 
-    <contents-table :items="items" @delete="handleDelete" @edit="handleEdit" />
+    <contents-table
+        :loading="isLoading"
+        :items="items"
+        @delete="handleDelete"
+        @edit="handleEdit"
+    />
 
     <!--  Dialogs   -->
     <teleport to="body">
@@ -101,6 +106,7 @@
     import CreateContentForm from '@/components/forms/CreateContentForm.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
+    import { getContents } from '@/api/contens/get-contents.api.ts';
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
@@ -117,79 +123,12 @@
 
     const selectedContent = ref<VideoContent | null>(null);
 
+    const isLoading = ref(false);
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
 
-    const items: VideoContent[] = [
-        {
-            id: 1000,
-            file: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4',
-            image: '/images/example.jpg',
-            title: 'Сisco',
-            topic: {
-                id: 100,
-                name: 'Theme 1',
-            },
-            description:
-                'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            language: [
-                {
-                    name: 'English',
-                    id: 1,
-                },
-                {
-                    name: 'Spanish',
-                    id: 2,
-                },
-            ],
-            tracks: [
-                {
-                    file: '/audios/test-1.mp3',
-                    name: 'Test 1',
-                },
-                {
-                    file: '/audios/test-2.mp3',
-                    name: 'Test 2',
-                },
-            ],
-            tags: ['environment', 'museum', 'luxury', 'art'],
-            requires_auth: false,
-            duration: 13,
-            audio: true,
-            speech: true,
-            date_created: new Date().toISOString().split('T')[0],
-        },
-        {
-            id: 1001,
-            file: 'https://videos.pexels.com/video-files/4114797/4114797-hd_1280_720_50fps.mp4',
-            image: '/images/example.jpg',
-            title: 'Сisco 2',
-            topic: {
-                id: 100,
-                name: 'Theme 2',
-            },
-            description:
-                'Description Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-            language: [
-                {
-                    name: 'English',
-                    id: 1,
-                },
-                {
-                    name: 'Spanish',
-                    id: 2,
-                },
-            ],
-            tracks: [],
-            tags: ['environment', 'museum', 'luxury', 'art'],
-            requires_auth: true,
-            duration: 13,
-            audio: true,
-            speech: true,
-            date_created: new Date().toISOString().split('T')[0],
-        },
-    ];
+    const items = ref<VideoContent[]>([]);
 
     const isResetShow = computed(() =>
         [filters.search, filters.topic, filters.group, filters.category].some(
@@ -238,7 +177,18 @@
         void router.push({ query: {} });
     };
 
+    const loadContents = async () => {
+        isLoading.value = true;
+
+        try {
+            items.value = (await getContents()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     onMounted(() => {
+        // Filters
         const { search, category, group, topic } = route.query;
 
         if (search) filters.search = search as string;
@@ -254,6 +204,9 @@
         if (topic)
             filters.topic =
                 topics.value.find((item) => item.name === topic) ?? null;
+
+        // Get contents
+        void loadContents();
     });
 
     watch(filters, useUpdateQueryParams, { deep: true });

@@ -15,7 +15,7 @@
                 <v-img :src="item.image" class="h-full w-full" cover></v-img>
             </v-card>
 
-            <div v-else>No image</div>
+            <div v-else>No preview</div>
         </template>
 
         <template #[`item.description`]="{ item }">
@@ -23,7 +23,7 @@
                 {{ item.description }}
             </p>
 
-            <div v-else>No image</div>
+            <div v-else>No description</div>
         </template>
 
         <template #[`item.audio`]="{ item }">
@@ -60,24 +60,28 @@
 
         <template #[`item.date_created`]="{ item }">
             <p class="whitespace-nowrap">
-                {{ item.date_created }}
+                {{ useFormatDate(item.date_created) }}
+            </p>
+        </template>
+
+        <template #[`item.duration`]="{ item }">
+            <p class="whitespace-nowrap">
+                {{ useFormatVideoDuration(item.duration) }}
             </p>
         </template>
 
         <template #[`item.languages`]="{ item }">
             <div
-                v-if="item.languages"
+                v-if="item.languages.name"
                 class="flex flex-wrap items-center gap-2 py-2"
             >
-                <span
-                    v-for="lang in item.languages.slice(0, 2)"
-                    :key="lang.id"
-                    class="tag tag--lang tag--fill pointer-events-none"
-                >
-                    {{ lang.name }}
+                <span class="tag tag--lang tag--fill pointer-events-none">
+                    {{ item.languages.name }}
                 </span>
 
-                <span class="text-xs">+ {{ item.tags.length - 2 }} more</span>
+                <span v-if="false" class="text-xs">
+                    + {{ item.tags.length - 2 }} more
+                </span>
             </div>
 
             <div v-else>No languages</div>
@@ -89,14 +93,16 @@
                 class="flex flex-wrap items-center gap-2 py-2"
             >
                 <span
-                    v-for="tag in item.tags.slice(0, 2)"
+                    v-for="tag in item.tags.split(', ').slice(0, 2)"
                     :key="tag"
                     class="tag tag--fill pointer-events-none"
                 >
                     {{ tag }}
                 </span>
 
-                <span class="text-xs">+ {{ item.tags.length - 2 }} more</span>
+                <span class="text-xs"
+                    >+ {{ item.tags.split(', ').length - 2 }} more</span
+                >
             </div>
 
             <div v-else>No tags</div>
@@ -120,6 +126,8 @@
 
     import TableActionButtons from '@/components/tables/TableActionButtons.vue';
 
+    import { useFormatDate } from '@/hooks/useFormatDate.ts';
+    import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import type { VideoContent } from '@/ts/contents';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 

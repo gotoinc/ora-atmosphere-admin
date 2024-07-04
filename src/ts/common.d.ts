@@ -1,10 +1,5 @@
-export interface CommonCatalogTypes {
-    id: number;
-    name: string;
-    image: string | null;
-    requires_auth: boolean;
-    is_active: boolean;
-}
+import type { CommonCatalogTypes } from '@/ts/catalog';
+import type { VideoContent } from '@/ts/contents';
 
 export interface DetailResponse {
     detail: string;
@@ -13,6 +8,10 @@ export interface DetailResponse {
 export interface Identifiable extends Pick<CommonCatalogTypes, 'id' | 'name'> {}
 
 export interface Audio {
+    id: number;
     name: string;
     file: File | string;
+    video: VideoContent;
+    duration: number;
+    size: number;
 }

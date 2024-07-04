@@ -76,15 +76,12 @@ export const fileSchema = mixed<File | string>()
     });
 
 // Audio schema
-export const audioSchema = object({
-    name: string().required('Please enter the name'),
-    file: mixed<File | string>()
-        .test(
-            'is-file-or-string',
-            'File must be a valid file or a string',
-            (value) => {
-                return typeof value === 'string' || value instanceof File;
-            }
-        )
-        .required('Please upload'),
-});
+export const audioSchema = mixed<File | string>()
+    .test(
+        'is-file-or-string',
+        'Audio must be a valid file or a string',
+        (value) => {
+            return typeof value === 'string' || value instanceof File;
+        }
+    )
+    .required('Please upload a file or provide a file URL');

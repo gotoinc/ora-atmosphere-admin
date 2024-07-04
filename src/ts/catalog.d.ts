@@ -1,5 +1,10 @@
-import type { CommonCatalogTypes } from '@/ts/common';
-import type { VideoContent } from '@/ts/contents';
+export interface CommonCatalogTypes {
+    id: number;
+    name: string;
+    image: string | null;
+    requires_auth: boolean;
+    is_active: boolean;
+}
 
 export interface Category extends CommonCatalogTypes {
     groups: Group[];
@@ -11,7 +16,6 @@ export interface Group extends CommonCatalogTypes {
 }
 
 export interface Topic extends CommonCatalogTypes {
-    videos: VideoContent[];
     group: Group;
 }
 
