@@ -17,7 +17,7 @@ export default {
             },
         },
         {
-            path: '/reset-password',
+            path: '/reset-password/:uid/:token/',
             name: 'resetPasswordView',
             component: () => import('@/views/auth/ResetPasswordView.vue'),
             meta: {
