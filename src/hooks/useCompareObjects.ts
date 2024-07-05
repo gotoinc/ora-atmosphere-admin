@@ -1,12 +1,15 @@
-export const useCompareObjects = (
-    first: Record<string, unknown>,
-    second: Record<string, unknown>
+// eslint-disable-next-line
+export const useCompareObjects = <T extends Record<string, any>>(
+    first: T,
+    second: T
 ) => {
-    const differentValues: Record<string, unknown> = {};
+    // eslint-disable-next-line
+    const differentValues: Record<string, any> = {};
     const keys = Object.keys(first);
 
     for (const key of keys) {
         if (first[key] !== second[key]) {
+            // eslint-disable-next-line
             differentValues[key] = second[key];
         }
     }

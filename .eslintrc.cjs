@@ -37,6 +37,7 @@ module.exports = {
         '@typescript-eslint/prefer-promise-reject-errors': 'off',
         '@typescript-eslint/no-for-in-array': 'error',
         '@typescript-eslint/no-non-null-asserted-optional-chain': 'error',
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/array-type': [
             'error',
             { default: 'array-simple', readonly: 'array-simple' },

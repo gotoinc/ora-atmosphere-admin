@@ -11,5 +11,5 @@ export interface AdminUser {
     last_name: string;
     email: string;
     company: string;
-    role: 'admin' | 'super admin';
+    role: string;
 }

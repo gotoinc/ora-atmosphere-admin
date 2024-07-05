@@ -12,7 +12,7 @@ export const createUserSchema: ObjectSchema<AdminUser> = object({
     first_name: string().required('Please enter first name'),
     last_name: string().required('Please enter last name'),
     email: emailValidation,
-    company_name: string().required('Please enter company name'),
+    company: string().required('Please enter company name'),
     role: string().required('Please select a role'),
 });
 
@@ -23,7 +23,7 @@ export const editUserSchema: ObjectSchema<UserProfile> = object({
     first_name: string().required('Please enter first name'),
     last_name: string().required('Please enter last name'),
     email: emailValidation,
-    company_name: string().required('Please enter company name'),
+    company: string().required('Please enter company name'),
     activity: string().required('Please choose activity'),
     job_title: string(),
     company_website: string().url('Please enter a valid URL'),

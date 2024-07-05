@@ -59,7 +59,6 @@
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Category } from '@/ts/catalog';
-    import type { KeysToString } from '@/ts/types/types';
     import { createCategorySchema } from '@/validations/schemas/catalog.schema.ts';
     import type { CreateCategory } from '@/validations/types/catalog';
 
@@ -87,7 +86,7 @@
     const excludedProperties = useExcludeProperties({ ...props.category }, [
         'id',
         'groups',
-    ]);
+    ]) as CreateCategory;
 
     if (props.category) {
         setValues(excludedProperties);
@@ -115,10 +114,7 @@
     };
 
     const onSubmit = handleSubmit(async (values) => {
-        const editedValues = useCompareObjects(
-            excludedProperties,
-            values as KeysToString<CreateCategory>
-        );
+        const editedValues = useCompareObjects(excludedProperties, values);
 
         if (props.category && !editedValues) {
             toast.error('No changes were captured');

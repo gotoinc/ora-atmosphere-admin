@@ -17,6 +17,7 @@ export const createCategorySchema: ObjectSchema<CreateCategory> = object({
     name: string().required('Please enter name'),
     image: fileSchema.required('Please upload a file'),
     requires_auth: boolean(),
+    is_active: boolean(),
 });
 
 /**
@@ -25,8 +26,9 @@ export const createCategorySchema: ObjectSchema<CreateCategory> = object({
 export const createGroupSchema: ObjectSchema<CreateGroup> = object({
     name: string().required('Please enter name'),
     image: fileSchema.required('Please upload a file'),
-    category_id: number().required('Please select category'),
+    category: number().required('Please select category'),
     requires_auth: boolean(),
+    is_active: boolean(),
 });
 
 /**
@@ -37,4 +39,5 @@ export const createThemeSchema: ObjectSchema<CreateTheme> = object({
     image: fileSchema.required('Please upload a file'),
     group_id: number().required('Please select group'),
     requires_auth: boolean(),
+    is_active: boolean(),
 });

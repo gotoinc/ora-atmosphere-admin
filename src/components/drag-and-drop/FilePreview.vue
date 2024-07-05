@@ -10,17 +10,13 @@
             >In Progress</span
         >
 
-        <span
-            v-show="file.status == true"
-            class="status-indicator success-indicator"
-            >Uploaded</span
-        >
+        <span v-show="file.status" class="status-indicator success-indicator">
+            Uploaded
+        </span>
 
-        <span
-            v-show="file.status == false"
-            class="status-indicator failure-indicator"
-            >Error</span
-        >
+        <span v-show="!file.status" class="status-indicator failure-indicator">
+            Error
+        </span>
     </component>
 </template>
 

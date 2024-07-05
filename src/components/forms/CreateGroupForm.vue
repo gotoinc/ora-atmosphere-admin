@@ -75,12 +75,8 @@
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Category, Group } from '@/ts/catalog';
-    import type { KeysToString } from '@/ts/types/types';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type {
-        CreateCategory,
-        CreateGroup,
-    } from '@/validations/types/catalog';
+    import type { CreateGroup } from '@/validations/types/catalog';
 
     const props = defineProps<{ group?: Group | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -106,16 +102,16 @@
 
     const [name] = defineField('name');
     const [image] = defineField('image');
-    const [categoryId] = defineField('category_id');
+    const [categoryId] = defineField('category');
     const [requiresAuth] = defineField('requires_auth');
 
     const excludedProperties = useExcludeProperties({ ...props.group }, [
         'id',
         'topics',
-    ]);
+    ]) as CreateGroup;
 
     if (props.group) {
-        category.value = props.group.category;
+        // category.value = props.group.category;
 
         setValues(excludedProperties);
 
@@ -145,10 +141,7 @@
     };
 
     const onSubmit = handleSubmit(async (values) => {
-        const editedValues = useCompareObjects(
-            excludedProperties,
-            values as KeysToString<CreateCategory>
-        );
+        const editedValues = useCompareObjects(excludedProperties, values);
 
         if (props.group && !editedValues) {
             toast.error('No changes were captured');
@@ -168,7 +161,7 @@
             } else {
                 await postGroup({
                     ...values,
-                    category_id: categoryId.value,
+                    category: categoryId.value,
                 });
 
                 toast.success('Group successfully created');

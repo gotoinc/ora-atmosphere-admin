@@ -75,12 +75,8 @@
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Group, Topic } from '@/ts/catalog';
-    import type { KeysToString } from '@/ts/types/types';
     import { createThemeSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type {
-        CreateCategory,
-        CreateTheme,
-    } from '@/validations/types/catalog';
+    import type { CreateTheme } from '@/validations/types/catalog';
 
     const props = defineProps<{ topic?: Topic | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -111,8 +107,7 @@
 
     const excludedProperties = useExcludeProperties({ ...props.topic }, [
         'id',
-        'videos',
-    ]);
+    ]) as CreateTheme;
 
     if (props.topic) {
         group.value = props.topic.group;
@@ -144,10 +139,7 @@
     };
 
     const onSubmit = handleSubmit(async (values) => {
-        const editedValues = useCompareObjects(
-            excludedProperties,
-            values as KeysToString<CreateCategory>
-        );
+        const editedValues = useCompareObjects(excludedProperties, values);
 
         if (props.topic && !editedValues) {
             toast.error('No changes were captured');

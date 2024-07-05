@@ -20,8 +20,8 @@ export const updateGroup = async (
             formData.append('name', body.name);
         }
 
-        if (body.category_id) {
-            formData.append('name', String(body.category_id));
+        if (body.category) {
+            formData.append('name', String(body.category));
         }
 
         formData.append('requires_auth', String(!!body.requires_auth));

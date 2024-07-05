@@ -25,7 +25,7 @@
         <div>
             <v-text-field
                 v-model="company"
-                :error-messages="errors.company_name"
+                :error-messages="errors.company"
                 name="company_name"
                 label="Company name"
                 variant="outlined"
@@ -80,7 +80,7 @@
             validationSchema: createUserSchema,
             initialValues: {
                 email: '',
-                company_name: '',
+                company: '',
             },
         });
 
@@ -89,7 +89,7 @@
     );
 
     const [email] = defineField('email');
-    const [company] = defineField('company_name');
+    const [company] = defineField('company');
     const [role] = defineField('role');
     const [firstName] = defineField('first_name');
     const [lastName] = defineField('last_name');

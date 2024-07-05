@@ -12,7 +12,7 @@ export interface Category extends CommonCatalogTypes {
 
 export interface Group extends CommonCatalogTypes {
     topics: Topic[];
-    category: Category;
+    category: number;
 }
 
 export interface Topic extends CommonCatalogTypes {
