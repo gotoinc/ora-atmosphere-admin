@@ -139,6 +139,9 @@
     onMounted(async () => {
         try {
             dashboardStats.value = await getDashboardStats();
+
+            if (dashboardStats.value?.latest_videos)
+                items.value = dashboardStats.value.latest_videos;
         } catch (e) {
             toast.error('The dashboard statistics could not be found');
         } finally {

@@ -17,5 +17,5 @@ export interface VideoContent {
     date_created: string;
     topic: Topic;
     audios?: Audio[];
-    tags: string;
+    tags?: string;
 }

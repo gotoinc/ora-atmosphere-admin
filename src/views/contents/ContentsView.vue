@@ -76,6 +76,7 @@
     <contents-table
         :loading="isLoading"
         :items="items"
+        editable
         @delete="handleDelete"
         @edit="handleEdit"
     />
@@ -83,29 +84,42 @@
     <!--  Dialogs   -->
     <teleport to="body">
         <full-screen-dialog v-model="isDialogOpen" title="Add new content">
-            <create-content-form />
+            <create-content-form
+                @close="isDialogOpen = false"
+                @update="loadContents"
+            />
         </full-screen-dialog>
 
         <full-screen-dialog
             v-model="isEditOpen"
             :title="`Edit - ${selectedContent?.title}`"
         >
-            <create-content-form v-model:content="selectedContent" />
+            <create-content-form
+                v-model:content="selectedContent"
+                @close="isEditOpen = false"
+                @update="loadContents"
+            />
         </full-screen-dialog>
 
-        <delete-dialog v-model="isDeleteOpen" :title="selectedContent?.title" />
+        <delete-dialog
+            v-model="isDeleteOpen"
+            :title="selectedContent?.title"
+            @delete="confirmDelete"
+        />
     </teleport>
 </template>
 
 <script setup lang="ts">
     import { computed, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import { useToast } from 'vue-toastification';
 
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
     import FullScreenDialog from '@/components/dialogs/FullScreenDialog.vue';
     import CreateContentForm from '@/components/forms/CreateContentForm.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
+    import { deleteContent } from '@/api/contens/delete-content.api.ts';
     import { getContents } from '@/api/contens/get-contents.api.ts';
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
     import type { Identifiable } from '@/ts/common';
@@ -121,9 +135,12 @@
     const router = useRouter();
     const route = useRoute();
 
+    const toast = useToast();
+
     const selectedContent = ref<VideoContent | null>(null);
 
     const isLoading = ref(false);
+    const isDeleteLoading = ref(false);
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
@@ -184,6 +201,27 @@
             items.value = (await getContents()) ?? [];
         } finally {
             isLoading.value = false;
+        }
+    };
+
+    const confirmDelete = async () => {
+        const content = selectedContent.value as VideoContent;
+
+        isDeleteLoading.value = true;
+
+        try {
+            await deleteContent(content.id);
+
+            toast.success('Content successfully deleted');
+
+            isDeleteOpen.value = false;
+
+            void loadContents();
+        } catch (e) {
+            toast.error('Content is not deleted');
+        } finally {
+            isLoading.value = false;
+            isDeleteLoading.value = false;
         }
     };
 

@@ -114,7 +114,7 @@
                                 ></v-checkbox>
 
                                 <v-checkbox
-                                    v-model="showContentByDefault"
+                                    v-model="isShowContentOnBanner"
                                     hide-details
                                     color="primary"
                                     density="comfortable"
@@ -245,12 +245,13 @@
                 <p class="mb-5">Please select theme of the content</p>
 
                 <v-select
-                    v-model="selectedTopic"
+                    v-model="topic"
                     label="Theme"
                     variant="outlined"
                     clearable
                     :loading="isTopicsLoading"
                     :items="topics"
+                    :error-messages="errors.topic"
                     item-title="name"
                     return-object
                 />
@@ -265,7 +266,10 @@
                     variant="outlined"
                     clearable
                     :error-messages="errors.languages"
-                    :items="['French', 'English', 'Spanish']"
+                    item-title="name"
+                    :loading="isLanguagesLoading"
+                    :items="languagesList"
+                    return-object
                 >
                 </v-select>
             </div>
@@ -301,31 +305,42 @@
 
 <script setup lang="ts">
     import { onMounted, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
     import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
+    import { getLanguages } from '@/api/contens/get-languages.api.ts';
     import { postVideo } from '@/api/contens/post-video.api.ts';
+    import { updateVideo } from '@/api/contens/update-video.api.ts';
     import { useCaptureImage } from '@/hooks/useCaptureImage.ts';
+    import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
+    import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
-    import type { CreateContent } from '@/validations/types/content.validation';
+    import type { CreateContentSchema } from '@/validations/types/content.validation';
 
     const props = defineProps<{ content?: VideoContent | null }>();
+    const emits = defineEmits<CreateFormEmits>();
+
+    const toast = useToast();
 
     const isContentSelected = ref(!!props.content);
     const isVideoLoaded = ref(!!props.content);
-    const showContentByDefault = ref(false);
     const isLoading = ref(false);
 
-    const { defineField, handleSubmit, errors } = useForm<CreateContent>({
-        validationSchema: createContentSchema,
-        initialValues: {},
-    });
+    const { defineField, handleSubmit, errors, resetForm, setValues } =
+        useForm<CreateContentSchema>({
+            validationSchema: createContentSchema,
+            initialValues: {
+                audios: [],
+            },
+        });
 
     /**
      * Data for content sources
@@ -339,10 +354,6 @@
     const audioToRemove = ref<UploadableFile>();
 
     const videoElement = ref<HTMLVideoElement | null>(null);
-
-    const requiresAuth = ref(false);
-    const withNarration = ref(false);
-    const withAudio = ref(false);
     const duration = ref(0);
 
     /**
@@ -350,36 +361,42 @@
      */
     const topics = ref();
     const isTopicsLoading = ref(true);
-    const selectedTopic = ref();
+
+    const languagesList = ref<Identifiable[]>([]);
+    const isLanguagesLoading = ref(true);
 
     const [title] = defineField('title');
     const [description] = defineField('description');
     const [contentFile] = defineField('file');
-    // const [topicId] = defineField('topic_id');
+    const [topic] = defineField('topic');
     const [language] = defineField('languages');
     const [tags] = defineField('tags');
     const [audios] = defineField('audios');
+    const [requiresAuth] = defineField('requires_auth');
+    const [withAudio] = defineField('audio_enabled');
+    const [withNarration] = defineField('narration_enabled');
+    const [isShowContentOnBanner] = defineField('show_on_main_banner');
 
     if (props.content) {
-        // topic.value = props.content.topic;
-        // topicId.value = props.content.topic.id;
-
         if (props.content.audios) {
             audioFiles.value = new Set(
                 props.content.audios.map((item) => item.file)
             );
         }
 
+        tags.value = props.content.tags?.split(', ');
+
         // Set existing values to form
-        // setValues(
-        //     useExcludeProperties({ ...props.content }, [
-        //         'id',
-        //         'date_created',
-        //         'image',
-        //         'languages',
-        //         'audios',
-        //     ])
-        // );
+        setValues(
+            useExcludeProperties({ ...props.content }, [
+                'id',
+                'date_created',
+                'image',
+                'languages',
+                'audios',
+                'tags',
+            ])
+        );
     }
 
     const getSource = (file: File | string) =>
@@ -401,17 +418,20 @@
                 audioUploadables.value.add(item);
 
                 audioFiles.value.add(item.file);
+
+                const audio = new Audio(getSource(item.file));
+
+                audio.addEventListener('loadedmetadata', () => {
+                    audios.value?.push({
+                        file: item.file,
+                        name: item.name,
+                        size: item.file.size,
+                        duration: Math.round(audio.duration),
+                    });
+                });
             }
         });
-
-        audios.value = Array.from(audioFiles.value);
     };
-
-    // const selectTopicId = (topic?: Topic) => {
-    //     if (topic) {
-    //         topicId.value = topic.id;
-    //     }
-    // };
 
     const loadVideoInfo = () => {
         if (videoElement.value) {
@@ -457,23 +477,38 @@
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
 
-        try {
-            await postVideo({
-                file: uploadedVideoFile.value as File,
-                duration: Math.round(duration.value),
-                title: values.title,
-                description: values.description,
-                date_created: new Date().toISOString(),
-                languages: values.languages,
-                tags: tags.value?.join(', '),
-                audio_enabled: withAudio.value,
-                narration_enabled: withNarration.value,
-                requires_auth: requiresAuth.value,
-                show_on_main_banner: showContentByDefault.value,
-            });
+        const body = {
+            ...values,
+            file: uploadedVideoFile.value as File,
+            duration: Math.round(duration.value),
+            languages: language.value.id,
+            tags: tags.value?.join(', '),
+            topic: topic.value.id,
+        };
 
-            // resetForm();
-            // topic.value = null;
+        try {
+            if (props.content) {
+                await updateVideo(props.content.id, body);
+
+                toast.success('Content has been successfully updated');
+            } else {
+                await postVideo({
+                    ...body,
+                    date_created: new Date().toISOString(),
+                });
+
+                toast.success('Content has been successfully uploaded');
+            }
+
+            emits('update');
+            emits('close');
+            resetForm();
+        } catch (e) {
+            if (props.content) {
+                toast.error('Content is not updated');
+            } else {
+                toast.error('Content is not uploaded');
+            }
         } finally {
             isLoading.value = false;
         }
@@ -488,6 +523,12 @@
             topics.value = (await getTopics()) ?? [];
         } finally {
             isTopicsLoading.value = false;
+        }
+
+        try {
+            languagesList.value = (await getLanguages()) ?? [];
+        } finally {
+            isLanguagesLoading.value = false;
         }
     });
 </script>

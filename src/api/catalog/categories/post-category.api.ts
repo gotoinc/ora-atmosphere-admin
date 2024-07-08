@@ -7,16 +7,10 @@ import type { CreateCategory } from '@/validations/types/catalog';
 
 export const postCategories = async (body: CreateCategory) => {
     try {
-        const formData = new FormData();
-
-        formData.append('image', body.image as File);
-        formData.append('name', body.name);
-        formData.append('requires_auth', String(body.requires_auth));
-
-        const res = await axios.post<CreateCategory, AxiosResponse<Category>>(
-            `/admin/categories/`,
-            formData
-        );
+        const res = await axios.postForm<
+            CreateCategory,
+            AxiosResponse<Category>
+        >(`/admin/categories/`, body);
 
         return res.data;
     } catch (err) {

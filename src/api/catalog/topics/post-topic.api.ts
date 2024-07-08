@@ -7,16 +7,9 @@ import type { CreateTheme } from '@/validations/types/catalog';
 
 export const postTopic = async (body: CreateTheme) => {
     try {
-        const formData = new FormData();
-
-        formData.append('image', body.image as File);
-        formData.append('name', body.name);
-        formData.append('requires_auth', String(body.requires_auth));
-        formData.append('group_id', String(body.group_id));
-
-        const res = await axios.post<CreateTheme, AxiosResponse<Topic>>(
+        const res = await axios.postForm<CreateTheme, AxiosResponse<Topic>>(
             `/admin/topics/`,
-            formData
+            body
         );
 
         return res.data;

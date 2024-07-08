@@ -10,22 +10,10 @@ export const updateCategory = async (
     body: Partial<CreateCategory>
 ) => {
     try {
-        const formData = new FormData();
-
-        if (body.image) {
-            formData.append('image', body.image);
-        }
-
-        if (body.name) {
-            formData.append('name', body.name);
-        }
-
-        formData.append('requires_auth', String(!!body.requires_auth));
-
-        const res = await axios.patch<
+        const res = await axios.patchForm<
             Partial<CreateCategory>,
             AxiosResponse<Category>
-        >(`/admin/categories/${id}/`, formData);
+        >(`/admin/categories/${id}/`, body);
 
         return res.data;
     } catch (err) {

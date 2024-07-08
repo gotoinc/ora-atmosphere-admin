@@ -110,7 +110,7 @@
     ]) as CreateTheme;
 
     if (props.topic) {
-        group.value = props.topic.group;
+        groupId.value = props.topic.group;
 
         if (props.topic.image) {
             imageSrc.value = props.topic.image;

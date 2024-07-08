@@ -1,5 +1,11 @@
 <template>
     <v-data-table
+        :sort-by="[
+            {
+                key: 'date_created',
+                order: 'desc',
+            },
+        ]"
         :loading="loading"
         class="!rounded-lg"
         :headers="headers"
@@ -24,6 +30,14 @@
             </p>
 
             <div v-else>No description</div>
+        </template>
+
+        <template #[`item.topic`]="{ item }">
+            <p v-if="item.topic" class="line-camp-2">
+                {{ item.topic.name }}
+            </p>
+
+            <div v-else>No theme</div>
         </template>
 
         <template #[`item.audio`]="{ item }">
@@ -93,22 +107,22 @@
                 class="flex flex-wrap items-center gap-2 py-2"
             >
                 <span
-                    v-for="tag in item.tags.split(', ').slice(0, 2)"
+                    v-for="tag in splitTags(item.tags).slice(0, 2)"
                     :key="tag"
                     class="tag tag--fill pointer-events-none"
                 >
                     {{ tag }}
                 </span>
 
-                <span class="text-xs"
-                    >+ {{ item.tags.split(', ').length - 2 }} more</span
-                >
+                <span v-if="splitTags(item.tags).length > 2" class="text-xs">
+                    + {{ splitTags(item.tags).length - 2 }} more
+                </span>
             </div>
 
             <div v-else>No tags</div>
         </template>
 
-        <template #[`item.actions`]="{ item }">
+        <template v-if="editable" #[`item.actions`]="{ item }">
             <table-action-buttons
                 @edit="emits('edit', item)"
                 @delete="emits('delete', item)"
@@ -142,7 +156,7 @@
         (e: 'edit', value: VideoContent): void;
     }
 
-    defineProps<Props>();
+    const props = defineProps<Props>();
     const emits = defineEmits<Emits>();
 
     const headers = ref<ReadonlyHeaders>([
@@ -158,7 +172,7 @@
         },
         {
             title: 'Theme',
-            key: 'topic.name',
+            key: 'topic',
         },
         {
             title: 'Description',
@@ -191,13 +205,22 @@
             title: 'Tags',
             key: 'tags',
         },
-        {
+    ]);
+
+    type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+    if (props.editable) {
+        const tableHeaders = headers.value as Writeable<ReadonlyHeaders>;
+
+        tableHeaders?.push({
             align: 'end',
             title: 'Actions',
             key: 'actions',
             sortable: false,
-        },
-    ]);
+        });
+    }
+
+    const splitTags = (tags: string) => tags.split(', ');
 </script>
 
 <style scoped></style>

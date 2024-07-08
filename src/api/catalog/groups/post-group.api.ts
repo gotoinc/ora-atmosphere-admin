@@ -7,16 +7,9 @@ import type { CreateGroup } from '@/validations/types/catalog';
 
 export const postGroup = async (body: CreateGroup) => {
     try {
-        const formData = new FormData();
-
-        formData.append('image', body.image as File);
-        formData.append('name', body.name);
-        formData.append('requires_auth', String(body.requires_auth));
-        formData.append('category_id', String(body.category));
-
-        const res = await axios.post<CreateGroup, AxiosResponse<Group>>(
+        const res = await axios.postForm<CreateGroup, AxiosResponse<Group>>(
             `/admin/groups/`,
-            formData
+            body
         );
 
         return res.data;

@@ -1,7 +1,7 @@
-import type { Content } from '@/ts/contents';
+import type { VideoContent } from '@/ts/contents';
 
 export interface DashboardStats {
-    latest_videos: Content[];
+    latest_videos: VideoContent[];
     total_admins: number;
     total_super_admins: number;
     total_users: number;

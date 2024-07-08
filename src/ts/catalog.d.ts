@@ -1,7 +1,7 @@
 export interface CommonCatalogTypes {
     id: number;
     name: string;
-    image: string | null;
+    image?: string | null;
     requires_auth: boolean;
     is_active: boolean;
 }
@@ -12,11 +12,10 @@ export interface Category extends CommonCatalogTypes {
 
 export interface Group extends CommonCatalogTypes {
     topics: Topic[];
-    category: number;
 }
 
 export interface Topic extends CommonCatalogTypes {
-    group: Group;
+    group: number;
 }
 
 export type CatalogItem = Category | Group | Topic;
