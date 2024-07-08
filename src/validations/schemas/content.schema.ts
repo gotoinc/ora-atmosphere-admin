@@ -1,9 +1,13 @@
 import type { ObjectSchema } from 'yup';
 import { boolean } from 'yup';
-import { mixed } from 'yup';
 import { array, object, string } from 'yup';
 
-import { audioSchema, languageSchema, topicSchema } from '@/validations';
+import {
+    audioSchema,
+    fileSchema,
+    languageSchema,
+    topicSchema,
+} from '@/validations';
 import type { CreateContentSchema } from '@/validations/types/content.validation';
 
 /**
@@ -11,15 +15,8 @@ import type { CreateContentSchema } from '@/validations/types/content.validation
  */
 export const createContentSchema: ObjectSchema<CreateContentSchema> = object({
     title: string().required('Please enter the title'),
-    file: mixed<File | string>()
-        .test(
-            'is-file-or-string',
-            'File must be a valid file or a string',
-            (value) => {
-                return typeof value === 'string' || value instanceof File;
-            }
-        )
-        .required('Please select file'),
+    file: fileSchema.required('Please select file'),
+    image: fileSchema,
     description: string(),
     audios: array().of(audioSchema),
     languages: languageSchema,

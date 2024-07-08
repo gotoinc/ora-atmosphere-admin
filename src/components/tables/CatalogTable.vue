@@ -21,7 +21,7 @@
         <template #[`item.image`]="{ item }">
             <v-card
                 v-if="item.image"
-                class="my-2 h-20 w-20"
+                class="my-2 h-20 w-32"
                 elevation="2"
                 rounded
             >

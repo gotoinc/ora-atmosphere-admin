@@ -1,7 +1,9 @@
 <template>
     <div>
         <template v-if="!background && !showCard">
-            <p class="mb-3">Please choose a file of background</p>
+            <p class="mb-3">
+                {{ label }}
+            </p>
 
             <drag-and-drop
                 :accept="acceptedImages"
@@ -14,7 +16,7 @@
         <template v-else>
             <p class="mb-2 font-semibold">Card preview:</p>
 
-            <div class="relative max-w-[347px]">
+            <div class="relative z-10 max-w-card">
                 <category-card class="w-full" :img="background" :name="name" />
 
                 <button
@@ -49,6 +51,7 @@
         name: string;
         background: string;
         error?: string;
+        label?: string;
     }
 
     interface Emits {
@@ -57,7 +60,10 @@
     }
 
     const emits = defineEmits<Emits>();
-    defineProps<Props>();
+
+    withDefaults(defineProps<Props>(), {
+        label: 'Please choose a file of background',
+    });
 </script>
 
 <style scoped></style>

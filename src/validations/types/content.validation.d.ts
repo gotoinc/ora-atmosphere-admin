@@ -19,6 +19,7 @@ type OmitContent = Omit<
 export interface CreateContentSchema extends Partial<PickBooleanValues> {
     title: string;
     file: File | string;
+    image?: File | string;
     description?: string;
     audios?: CreateAudio[];
     languages: Identifiable;

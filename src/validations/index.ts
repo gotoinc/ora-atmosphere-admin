@@ -84,12 +84,12 @@ export const languageSchema = object({
 });
 
 export const topicSchema: ObjectSchema<Topic> = object({
-    id: number().required('ID is required'),
-    name: string().required('Name is required'),
+    id: number().required('Please select topic'),
+    name: string().required('Please select topic'),
     image: string().nullable(),
-    requires_auth: boolean().required('Requires auth is required'),
-    is_active: boolean().required('Is active is required'),
-    group: number().required('Please select group'),
+    requires_auth: boolean().required('Please select topic'),
+    is_active: boolean().required('Please select topic'),
+    group: number().required('Please select topic'),
 });
 
 /**

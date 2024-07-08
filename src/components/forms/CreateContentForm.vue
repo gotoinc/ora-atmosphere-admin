@@ -123,7 +123,19 @@
                             </div>
                         </div>
 
-                        <div class="mt-auto text-right">
+                        <div class="mb-4">
+                            <catalog-image-upload
+                                :background="imageSrc"
+                                :name="title"
+                                :show-card="isShowCard"
+                                class="z-10"
+                                label="Select a file of background (optional)"
+                                @upload="selectPreviewImage"
+                                @remove="removeImage"
+                            />
+                        </div>
+
+                        <div class="flex justify-end gap-3">
                             <v-btn
                                 type="submit"
                                 color="red"
@@ -308,6 +320,7 @@
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
+    import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
     import type { CreateFormEmits } from '@/components/forms/types';
 
@@ -334,6 +347,8 @@
     const isVideoLoaded = ref(!!props.content);
     const isLoading = ref(false);
 
+    const isShowCard = ref(false);
+
     const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateContentSchema>({
             validationSchema: createContentSchema,
@@ -348,6 +363,7 @@
     const uploadedVideoFile = ref<File | null>(null);
     const videoSrc = ref(props.content?.file ?? '');
     const imageSrc = ref('');
+    const initialImageSrc = ref('');
 
     const audioFiles = ref<Set<File | string>>(new Set());
     const audioUploadables = ref<Set<UploadableFile>>(new Set());
@@ -367,7 +383,8 @@
 
     const [title] = defineField('title');
     const [description] = defineField('description');
-    const [contentFile] = defineField('file');
+    const [videoFile] = defineField('file');
+    const [image] = defineField('image');
     const [topic] = defineField('topic');
     const [language] = defineField('languages');
     const [tags] = defineField('tags');
@@ -397,6 +414,8 @@
                 'tags',
             ])
         );
+
+        image.value = '';
     }
 
     const getSource = (file: File | string) =>
@@ -407,9 +426,11 @@
 
     const selectVideoFile = (files: UploadableFile[]) => {
         uploadedVideoFile.value = files[0].file;
-        contentFile.value = files[0].name;
+        videoFile.value = files[0].name;
 
         videoSrc.value = getSource(uploadedVideoFile.value);
+
+        image.value = '';
     };
 
     const selectAudioFiles = (files: UploadableFile[]) => {
@@ -445,9 +466,19 @@
         if (videoElement.value) {
             const src = useCaptureImage(videoElement.value as HTMLVideoElement);
 
-            if (src) imageSrc.value = src;
+            if (src) {
+                imageSrc.value = src;
+                initialImageSrc.value = src;
+            }
 
             duration.value = videoElement.value.duration;
+        }
+    };
+
+    const selectPreviewImage = (value: UploadableFile[] | UploadableFile) => {
+        if (Array.isArray(value)) {
+            image.value = value[0].file;
+            imageSrc.value = URL.createObjectURL(value[0].file);
         }
     };
 
@@ -458,7 +489,13 @@
 
     const removeVideoFile = () => {
         uploadedVideoFile.value = null;
-        contentFile.value = '';
+        videoFile.value = '';
+    };
+
+    const removeImage = () => {
+        imageSrc.value = '';
+        image.value = '';
+        isShowCard.value = false;
     };
 
     const removeAudioFile = (file: File | string) => {
@@ -476,6 +513,10 @@
 
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
+
+        if (!image.value && !props.content) {
+            onVideoCapture();
+        }
 
         const body = {
             ...values,
@@ -511,10 +552,6 @@
             }
         } finally {
             isLoading.value = false;
-        }
-
-        if (!props.content) {
-            onVideoCapture();
         }
     });
 

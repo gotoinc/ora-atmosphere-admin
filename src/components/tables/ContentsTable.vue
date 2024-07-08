@@ -11,6 +11,12 @@
         :headers="headers"
         :items="items"
     >
+        <template #[`item.title`]="{ item }">
+            <p class="min-w-28">
+                {{ item.title }}
+            </p>
+        </template>
+
         <template #[`item.image`]="{ item }">
             <v-card
                 v-if="item.image"
@@ -104,7 +110,7 @@
         <template #[`item.tags`]="{ item }">
             <div
                 v-if="item.tags"
-                class="flex flex-wrap items-center gap-2 py-2"
+                class="flex min-w-40 flex-wrap items-center gap-2 py-2"
             >
                 <span
                     v-for="tag in splitTags(item.tags).slice(0, 2)"
@@ -223,4 +229,8 @@
     const splitTags = (tags: string) => tags.split(', ');
 </script>
 
-<style scoped></style>
+<style>
+    /* .v-table > .v-table__wrapper > table {
+        min-width: 1240px;
+    }*/
+</style>
