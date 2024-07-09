@@ -23,7 +23,7 @@ export const useAuthStore = defineStore(
             first_name: 'Joe',
             last_name: 'Doe',
             email: 'admin1@example.com',
-            company: 'Tech Solutions',
+            company_name: 'Tech Solutions',
             role: 'super admin',
         });
 

@@ -48,7 +48,7 @@
 
         <template #[`item.audio`]="{ item }">
             <img
-                v-if="item.audio"
+                v-if="item.audios"
                 src="@img/volume-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -64,7 +64,7 @@
 
         <template #[`item.speech`]="{ item }">
             <img
-                v-if="item.speech"
+                v-if="item.narration_enabled"
                 src="@img/narration-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -99,7 +99,7 @@
                     {{ item.languages.name }}
                 </span>
 
-                <span v-if="false" class="text-xs">
+                <span v-if="item.tags" class="text-xs">
                     + {{ item.tags.length - 2 }} more
                 </span>
             </div>

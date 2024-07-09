@@ -26,7 +26,10 @@
             />
         </full-screen-dialog>
 
-        <delete-dialog v-model="isDeleteOpen" :title="selectedUser?.company" />
+        <delete-dialog
+            v-model="isDeleteOpen"
+            :title="selectedUser?.company_name"
+        />
     </teleport>
 </template>
 

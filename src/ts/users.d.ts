@@ -10,6 +10,6 @@ export interface AdminUser {
     first_name: string;
     last_name: string;
     email: string;
-    company: string;
+    company_name: string;
     role: string;
 }

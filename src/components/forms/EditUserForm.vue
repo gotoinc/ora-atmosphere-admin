@@ -136,8 +136,8 @@
             validationSchema: editUserSchema,
         });
 
-    const isButtonDisabled = computed(() =>
-        useCompareObjects(controlledValues.value, props.user)
+    const isButtonDisabled = computed(
+        () => !!useCompareObjects(controlledValues.value, props.user)
     );
 
     const [firstName] = defineField('first_name');

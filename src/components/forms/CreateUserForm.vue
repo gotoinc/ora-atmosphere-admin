@@ -43,7 +43,7 @@
 
                 <v-text-field
                     v-model="company"
-                    :error-messages="errors.company"
+                    :error-messages="errors.company_name"
                     name="company"
                     label="Company"
                     variant="outlined"
@@ -90,8 +90,10 @@
 
     const isButtonDisabled = computed(
         () =>
-            props.admin &&
-            useCompareObjects(controlledValues.value, props.admin)
+            !!(
+                props.admin &&
+                useCompareObjects(controlledValues.value, props.admin)
+            )
     );
 
     const {
@@ -105,12 +107,12 @@
         validationSchema: createUserSchema,
         initialValues: {
             email: '',
-            company: '',
+            company_name: '',
         },
     });
 
     const [email] = defineField('email');
-    const [company] = defineField('company');
+    const [company] = defineField('company_name');
     const [role] = defineField('role');
     const [firstName] = defineField('first_name');
     const [lastName] = defineField('last_name');
