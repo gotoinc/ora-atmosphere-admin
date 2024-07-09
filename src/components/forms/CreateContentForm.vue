@@ -27,6 +27,7 @@
                             ref="videoElement"
                             class="h-full w-full rounded-lg object-cover"
                             controls
+                            crossorigin="anonymous"
                             @loadedmetadata="loadVideoInfo"
                         >
                             <source
@@ -86,7 +87,18 @@
                             type="paragraph"
                         ></v-skeleton-loader>
 
-                        <div class="my-4">
+                        <div class="mb-4">
+                            <v-btn
+                                type="submit"
+                                color="red"
+                                class="text-none w-fit"
+                                @click="changeVideo"
+                            >
+                                Change video
+                            </v-btn>
+                        </div>
+
+                        <div class="mb-4">
                             <h3 class="text-xl">Settings</h3>
 
                             <v-divider class="my-3"></v-divider>
@@ -136,17 +148,6 @@
                                 @upload="selectPreviewImage"
                                 @remove="removeImage"
                             />
-                        </div>
-
-                        <div class="flex justify-end gap-3">
-                            <v-btn
-                                type="submit"
-                                color="red"
-                                class="text-none w-fit"
-                                @click="changeVideo"
-                            >
-                                Change video
-                            </v-btn>
                         </div>
                     </div>
                 </div>

@@ -61,7 +61,7 @@
             <img
                 v-else
                 src="@img/volume-off.svg"
-                class="h-10 w-10 object-contain"
+                class="h-10 w-10 object-contain opacity-60"
                 alt=""
             />
         </template>
@@ -77,7 +77,7 @@
             <img
                 v-else
                 src="@img/narration-off.svg"
-                class="h-10 w-10 object-contain"
+                class="h-10 w-10 object-contain opacity-60"
                 alt=""
             />
         </template>
