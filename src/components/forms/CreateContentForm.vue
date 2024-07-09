@@ -464,7 +464,7 @@
 
     const onVideoCapture = () => {
         if (videoElement.value) {
-            const src = useCaptureImage(videoElement.value as HTMLVideoElement);
+            const src = useCaptureImage(videoElement.value);
 
             if (src) {
                 imageSrc.value = src;
