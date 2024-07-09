@@ -23,49 +23,28 @@
                 >
                     <div class="mb-4 h-80 max-tab:h-[45vw]">
                         <video
+                            v-if="isVideoLoaded"
                             ref="videoElement"
                             class="h-full w-full object-cover"
                             controls
                             @loadedmetadata="loadVideoInfo"
                         >
-                            <source :src="videoSrc ?? content?.file" />
+                            <source
+                                :type="videoType"
+                                :src="videoSrc ?? content?.file"
+                            />
                         </video>
+
+                        <v-skeleton-loader
+                            v-else
+                            class="h-full"
+                        ></v-skeleton-loader>
                     </div>
 
                     <div class="flex flex-col">
                         <!-- Video info -->
                         <div v-if="isVideoLoaded">
-                            <template v-if="uploadedVideoFile">
-                                <div class="mb-2">
-                                    <span class="text-sm">File name:</span>
-
-                                    <p class="block truncate font-semibold">
-                                        {{ uploadedVideoFile.name }}
-                                    </p>
-                                </div>
-
-                                <div class="mb-2">
-                                    <span class="text-sm">File size:</span>
-
-                                    <p class="font-semibold">
-                                        {{
-                                            useFormatFileSize(
-                                                uploadedVideoFile.size
-                                            )
-                                        }}
-                                    </p>
-                                </div>
-
-                                <div class="mb-5">
-                                    <span class="text-sm">Duration:</span>
-
-                                    <p class="font-semibold">
-                                        {{ useFormatVideoDuration(duration) }}
-                                    </p>
-                                </div>
-                            </template>
-
-                            <div v-else-if="content" class="mb-5">
+                            <div v-if="content" class="mb-5">
                                 <span class="block text-sm">Video link:</span>
 
                                 <a
@@ -76,6 +55,30 @@
                                     {{ content.file }}
                                 </a>
                             </div>
+
+                            <div v-else-if="uploadedVideoFile" class="mb-2">
+                                <span class="text-sm">File name:</span>
+
+                                <p class="block truncate font-semibold">
+                                    {{ uploadedVideoFile.name }}
+                                </p>
+                            </div>
+
+                            <div class="mb-2">
+                                <span class="text-sm">File size:</span>
+
+                                <p class="font-semibold">
+                                    {{ useFormatFileSize(videoSize) }}
+                                </p>
+                            </div>
+
+                            <div class="mb-5">
+                                <span class="text-sm">Duration:</span>
+
+                                <p class="font-semibold">
+                                    {{ useFormatVideoDuration(duration) }}
+                                </p>
+                            </div>
                         </div>
 
                         <v-skeleton-loader
@@ -83,7 +86,7 @@
                             type="paragraph"
                         ></v-skeleton-loader>
 
-                        <div class="mb-4">
+                        <div class="my-4">
                             <h3 class="text-xl">Settings</h3>
 
                             <v-divider class="my-3"></v-divider>
@@ -316,7 +319,7 @@
 </template>
 
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
+    import { ref } from 'vue';
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
@@ -325,6 +328,7 @@
     import type { CreateFormEmits } from '@/components/forms/types';
 
     import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
+    import { getBlobFile } from '@/api/contens/get-file.api.ts';
     import { getLanguages } from '@/api/contens/get-languages.api.ts';
     import { postVideo } from '@/api/contens/post-video.api.ts';
     import { updateVideo } from '@/api/contens/update-video.api.ts';
@@ -335,6 +339,7 @@
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
+    import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
     import type { CreateContentSchema } from '@/validations/types/content.validation';
 
@@ -344,7 +349,7 @@
     const toast = useToast();
 
     const isContentSelected = ref(!!props.content);
-    const isVideoLoaded = ref(!!props.content);
+    const isVideoLoaded = ref(!props.content);
     const isLoading = ref(false);
 
     const isShowCard = ref(false);
@@ -361,7 +366,6 @@
      * Data for content sources
      */
     const uploadedVideoFile = ref<File | null>(null);
-    const videoSrc = ref(props.content?.file ?? '');
     const imageSrc = ref('');
     const initialImageSrc = ref('');
 
@@ -370,6 +374,9 @@
     const audioToRemove = ref<UploadableFile>();
 
     const videoElement = ref<HTMLVideoElement | null>(null);
+    const videoSrc = ref('');
+    const videoSize = ref(0);
+    const videoType = ref('');
     const duration = ref(0);
 
     /**
@@ -394,6 +401,9 @@
     const [withNarration] = defineField('narration_enabled');
     const [isShowContentOnBanner] = defineField('show_on_main_banner');
 
+    /*
+     * Fill existing data for content
+     */
     if (props.content) {
         if (props.content.audios) {
             audioFiles.value = new Set(
@@ -421,15 +431,63 @@
     const getSource = (file: File | string) =>
         isFile(file) ? URL.createObjectURL(file) : file;
 
-    const isFile = (file: File | string): file is File =>
-        typeof file !== 'string';
+    /*
+     * Functions to manage video
+     */
+    const loadVideoInfo = () => {
+        if (videoElement.value) {
+            duration.value = videoElement.value.duration;
 
+            isVideoLoaded.value = true;
+        }
+    };
+
+    const onVideoCapture = () => {
+        if (videoElement.value) {
+            const src = useCaptureImage(videoElement.value);
+
+            if (src) {
+                imageSrc.value = src;
+                initialImageSrc.value = src;
+            }
+
+            duration.value = videoElement.value.duration;
+        }
+    };
+
+    const changeVideo = () => {
+        videoSrc.value = '';
+        isContentSelected.value = false;
+    };
+
+    const loadVideoFile = async () => {
+        if (props.content) {
+            try {
+                const res = await getBlobFile(props.content.file);
+
+                if (res) {
+                    videoSrc.value = URL.createObjectURL(res);
+                    videoType.value = res.type;
+                    videoSize.value = res.size;
+                }
+            } finally {
+                isVideoLoaded.value = true;
+            }
+        }
+    };
+
+    /*
+     * Functions for file selection
+     */
     const selectVideoFile = (files: UploadableFile[]) => {
-        uploadedVideoFile.value = files[0].file;
-        videoFile.value = files[0].name;
+        const { file, name } = files[0];
 
-        videoSrc.value = getSource(uploadedVideoFile.value);
+        uploadedVideoFile.value = file;
+        videoFile.value = name;
+        videoType.value = file.type;
+        videoSize.value = file.size;
 
+        videoSrc.value = getSource(file);
         image.value = '';
     };
 
@@ -454,27 +512,6 @@
         });
     };
 
-    const loadVideoInfo = () => {
-        if (videoElement.value) {
-            duration.value = videoElement.value.duration;
-
-            isVideoLoaded.value = true;
-        }
-    };
-
-    const onVideoCapture = () => {
-        if (videoElement.value) {
-            const src = useCaptureImage(videoElement.value);
-
-            if (src) {
-                imageSrc.value = src;
-                initialImageSrc.value = src;
-            }
-
-            duration.value = videoElement.value.duration;
-        }
-    };
-
     const selectPreviewImage = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
             image.value = value[0].file;
@@ -482,11 +519,9 @@
         }
     };
 
-    const changeVideo = () => {
-        videoSrc.value = '';
-        isContentSelected.value = false;
-    };
-
+    /*
+     * Remove operations
+     */
     const removeVideoFile = () => {
         uploadedVideoFile.value = null;
         videoFile.value = '';
@@ -511,6 +546,28 @@
         audioFiles.value.delete(file);
     };
 
+    /*
+     * Loading data for selection
+     */
+    const loadTopics = async () => {
+        try {
+            topics.value = (await getTopics()) ?? [];
+        } finally {
+            isTopicsLoading.value = false;
+        }
+    };
+
+    const loadLanguages = async () => {
+        try {
+            languagesList.value = (await getLanguages()) ?? [];
+        } finally {
+            isLanguagesLoading.value = false;
+        }
+    };
+
+    /*
+     * Submit create/update operation for the content
+     */
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
 
@@ -555,19 +612,9 @@
         }
     });
 
-    onMounted(async () => {
-        try {
-            topics.value = (await getTopics()) ?? [];
-        } finally {
-            isTopicsLoading.value = false;
-        }
-
-        try {
-            languagesList.value = (await getLanguages()) ?? [];
-        } finally {
-            isLanguagesLoading.value = false;
-        }
-    });
+    void loadVideoFile();
+    void loadTopics();
+    void loadLanguages();
 </script>
 
 <style scoped></style>
