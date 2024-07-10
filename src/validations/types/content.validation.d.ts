@@ -1,37 +1,41 @@
-import type { Topic } from '@/ts/catalog';
 import type { Audio, Identifiable } from '@/ts/common';
 import type { VideoContent } from '@/ts/contents';
 
-type BooleanKeys =
-    | 'requires_auth'
-    | 'narration_enabled'
-    | 'audio_enabled'
-    | 'show_on_main_banner'
-    | 'visible_for_unregistered';
-
-type PickBooleanValues = Pick<VideoContent, BooleanKeys>;
-
-type OmitContent = Omit<
+type BooleanValues = Pick<
     VideoContent,
-    'id' | 'file' | 'languages' | 'image' | 'audios' | 'topic' | BooleanKeys
+    'requiresAuth' | 'narrationEnabled' | 'audioEnabled'
 >;
 
-export interface CreateContentSchema extends Partial<PickBooleanValues> {
-    title: string;
-    file: File | string;
-    image?: File | string;
-    description?: string;
-    audios?: CreateAudio[];
-    languages: Identifiable;
-    tags?: string[];
-    topic: Topic;
+type EditableValues = Pick<
+    VideoContent,
+    'title' | 'description' | 'duration' | 'dateCreated' | 'tags'
+>;
+
+/**
+ * Types for creating category
+ */
+export interface ContentInput extends EditableValues, Partial<BooleanValues> {
+    file: File;
+    previewImage: File;
+    languages: number;
+    audios?: AudioInput[];
+    topic: number;
 }
 
-export interface ContentInput extends OmitContent, Partial<PickBooleanValues> {
-    file: File;
-    languages: number;
-    audios?: CreateAudio[];
-    topic: number;
+export interface AudioInput extends Omit<Audio, 'id' | 'file'> {
+    file: File | string;
+}
+
+export interface CreateContentSchema
+    extends Partial<BooleanValues>,
+        Pick<VideoContent, 'topic'> {
+    title: string;
+    file: File | string;
+    previewImage?: File | string;
+    description?: string | null;
+    audios?: AudioInput[];
+    languages: Identifiable;
+    tags?: string[];
 }
 
 export interface CreateAudio extends Omit<Audio, 'id' | 'video'> {}

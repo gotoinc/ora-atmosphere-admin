@@ -24,10 +24,10 @@
                 label="Category"
                 variant="outlined"
                 clearable
+                :error-messages="errors.category"
                 :items="categories"
                 return-object
                 item-title="name"
-                @update:model-value="selectCategoryId"
             />
         </div>
 
@@ -46,7 +46,7 @@
             color="primary"
             class="mb-5"
             density="comfortable"
-            label="Visible for all users"
+            label="Disable for unregistered users"
         ></v-checkbox>
 
         <v-btn
@@ -74,9 +74,10 @@
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
-    import type { Category, Group } from '@/ts/catalog';
+    import type { Group } from '@/ts/catalog';
+    import type { Identifiable } from '@/ts/common';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateGroup } from '@/validations/types/catalog';
+    import type { CreateGroupSchema } from '@/validations/types/catalog.validation';
 
     const props = defineProps<{ group?: Group | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -89,30 +90,34 @@
     const isLoading = ref(false);
     const isCategoriesLoading = ref(true);
 
+    /**
+     * Define schema
+     */
     const { defineField, handleSubmit, errors, resetForm, setValues } =
-        useForm<CreateGroup>({
+        useForm<CreateGroupSchema>({
             validationSchema: createGroupSchema,
             initialValues: {
                 name: '',
             },
         });
 
-    const category = ref<Category | null>();
-    const categories = ref<Category[]>([]);
-
     const [name] = defineField('name');
     const [image] = defineField('image');
-    const [categoryId] = defineField('category');
-    const [requiresAuth] = defineField('requires_auth');
+    const [category] = defineField('category');
+    const [requiresAuth] = defineField('requiresAuth');
 
+    const categories = ref<Identifiable[]>([]);
+
+    /**
+     * Choose properties only for edit
+     */
     const excludedProperties = useExcludeProperties({ ...props.group }, [
         'id',
-        'topics',
-    ]) as CreateGroup;
+        'contentsAmount',
+        'dateCreated',
+    ]) as CreateGroupSchema;
 
     if (props.group) {
-        // category.value = props.group.category;
-
         setValues(excludedProperties);
 
         if (props.group.image) {
@@ -120,6 +125,9 @@
         }
     }
 
+    /**
+     * Manage image file
+     */
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
             imageSrc.value = URL.createObjectURL(value[0].file);
@@ -127,20 +135,17 @@
         }
     };
 
-    const selectCategoryId = (category?: Category) => {
-        if (category) {
-            console.log(category);
-            categoryId.value = category.id;
-        }
-    };
-
     const removeFile = () => {
         isFileSelected.value = false;
-        image.value = null;
+        image.value = '';
         imageSrc.value = '';
     };
 
+    /**
+     * Submit form
+     */
     const onSubmit = handleSubmit(async (values) => {
+        // Check if something was edited
         const editedValues = useCompareObjects(excludedProperties, values);
 
         if (props.group && !editedValues) {
@@ -155,18 +160,19 @@
             if (props.group) {
                 await updateGroup(props.group.id, {
                     ...editedValues,
+                    category: category.value.id,
                 });
 
                 toast.success('Group successfully updated');
             } else {
                 await postGroup({
                     ...values,
-                    category: categoryId.value,
+                    category: category.value.id,
+                    image: image.value as File,
                 });
 
                 toast.success('Group successfully created');
 
-                category.value = null;
                 removeFile();
                 resetForm();
             }
@@ -186,7 +192,16 @@
 
     onMounted(async () => {
         try {
-            categories.value = (await getCategories()) ?? [];
+            const items = (await getCategories()) ?? [];
+
+            if (items.length > 0) {
+                categories.value = items.map((item) => {
+                    return {
+                        name: item.name,
+                        id: item.id,
+                    };
+                });
+            }
         } finally {
             isCategoriesLoading.value = false;
         }

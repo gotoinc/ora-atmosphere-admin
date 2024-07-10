@@ -7,7 +7,6 @@ export const useExcludeProperties = <
 ): Omit<T, K> => {
     const newObject = Object.keys(obj).reduce<Partial<T>>((result, key) => {
         if (!properties.includes(key as K)) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             (result as T)[key as K] = obj[key as K];
         }
         return result;

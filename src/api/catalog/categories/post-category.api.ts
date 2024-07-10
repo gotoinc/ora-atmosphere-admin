@@ -3,12 +3,12 @@ import type { AxiosResponse } from 'axios';
 import axios from '@/api/axios.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
 import type { Category } from '@/ts/catalog';
-import type { CreateCategory } from '@/validations/types/catalog';
+import type { CategoryInput } from '@/validations/types/catalog.validation';
 
-export const postCategories = async (body: CreateCategory) => {
+export const postCategories = async (body: CategoryInput) => {
     try {
         const res = await axios.postForm<
-            CreateCategory,
+            CategoryInput,
             AxiosResponse<Category>
         >(`/admin/categories/`, body);
 

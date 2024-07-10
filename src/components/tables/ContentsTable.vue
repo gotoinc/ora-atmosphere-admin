@@ -2,7 +2,7 @@
     <v-data-table
         :sort-by="[
             {
-                key: 'date_created',
+                key: 'dateCreated',
                 order: 'desc',
             },
         ]"
@@ -17,14 +17,18 @@
             </p>
         </template>
 
-        <template #[`item.image`]="{ item }">
+        <template #[`item.previewImage`]="{ item }">
             <v-card
-                v-if="item.image"
+                v-if="item.previewImage"
                 class="my-2 h-20 w-20"
                 elevation="2"
                 rounded
             >
-                <v-img :src="item.image" class="h-full w-full" cover></v-img>
+                <v-img
+                    :src="item.previewImage"
+                    class="h-full w-full"
+                    cover
+                ></v-img>
             </v-card>
 
             <div v-else>No preview</div>
@@ -64,7 +68,7 @@
 
         <template #[`item.speech`]="{ item }">
             <img
-                v-if="item.narration_enabled"
+                v-if="item.narrationEnabled"
                 src="@img/narration-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -78,9 +82,9 @@
             />
         </template>
 
-        <template #[`item.date_created`]="{ item }">
+        <template #[`item.dateCreated`]="{ item }">
             <p class="whitespace-nowrap">
-                {{ useFormatDate(item.date_created) }}
+                {{ useFormatDate(item.dateCreated) }}
             </p>
         </template>
 
@@ -173,7 +177,7 @@
         },
         {
             title: 'Preview',
-            key: 'image',
+            key: 'previewImage',
             sortable: false,
         },
         {
@@ -201,7 +205,7 @@
         },
         {
             title: 'Date',
-            key: 'date_created',
+            key: 'dateCreated',
         },
         {
             title: 'Languages',

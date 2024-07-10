@@ -1,43 +1,39 @@
 import type { ObjectSchema } from 'yup';
 import { boolean } from 'yup';
-import { number } from 'yup';
 import { object, string } from 'yup';
 
-import { fileSchema } from '@/validations';
+import { fileSchema, identifiableSchema } from '@/validations';
 import type {
-    CreateCategory,
-    CreateGroup,
-    CreateTheme,
-} from '@/validations/types/catalog';
+    CreateCategorySchema,
+    CreateGroupSchema,
+    CreateTopicSchema,
+} from '@/validations/types/catalog.validation';
 
 /**
  * Define schema for create category form
  */
-export const createCategorySchema: ObjectSchema<CreateCategory> = object({
+export const createCategorySchema: ObjectSchema<CreateCategorySchema> = object({
     name: string().required('Please enter name'),
     image: fileSchema.required('Please upload a file'),
-    requires_auth: boolean(),
-    is_active: boolean(),
+    requiresAuth: boolean(),
 });
 
 /**
  * Define schema for create group form
  */
-export const createGroupSchema: ObjectSchema<CreateGroup> = object({
+export const createGroupSchema: ObjectSchema<CreateGroupSchema> = object({
     name: string().required('Please enter name'),
     image: fileSchema.required('Please upload a file'),
-    category: number().required('Please select category'),
-    requires_auth: boolean(),
-    is_active: boolean(),
+    category: identifiableSchema.required('Please select a category'),
+    requiresAuth: boolean(),
 });
 
 /**
  * Define schema for create group form
  */
-export const createThemeSchema: ObjectSchema<CreateTheme> = object({
+export const createThemeSchema: ObjectSchema<CreateTopicSchema> = object({
     name: string().required('Please enter name'),
     image: fileSchema.required('Please upload a file'),
-    group_id: number().required('Please select group'),
-    requires_auth: boolean(),
-    is_active: boolean(),
+    group: identifiableSchema.required('Please select a group'),
+    requiresAuth: boolean(),
 });

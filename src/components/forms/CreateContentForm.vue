@@ -25,7 +25,7 @@
                         <video
                             v-if="isVideoLoaded"
                             ref="videoElement"
-                            class="h-full w-full object-cover"
+                            class="h-full w-full rounded-lg object-cover"
                             controls
                             @loadedmetadata="loadVideoInfo"
                         >
@@ -97,7 +97,7 @@
                                     hide-details
                                     color="primary"
                                     density="comfortable"
-                                    label="Visible for all users"
+                                    label="Disable for unregistered users"
                                 ></v-checkbox>
 
                                 <v-checkbox
@@ -337,6 +337,7 @@
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
     import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
+    import { useThrowError } from '@/hooks/useThrowError.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
@@ -354,13 +355,31 @@
 
     const isShowCard = ref(false);
 
+    /**
+     * Define schema
+     */
     const { defineField, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateContentSchema>({
             validationSchema: createContentSchema,
             initialValues: {
                 audios: [],
+                description: '',
             },
         });
+
+    const [title] = defineField('title');
+    const [description] = defineField('description');
+    const [videoFile] = defineField('file');
+    const [image] = defineField('previewImage');
+    const [topic] = defineField('topic');
+    const [language] = defineField('languages');
+    const [tags] = defineField('tags');
+    const [audios] = defineField('audios');
+    const [requiresAuth] = defineField('requiresAuth');
+    const [withAudio] = defineField('audioEnabled');
+    const [withNarration] = defineField('narrationEnabled');
+
+    const isShowContentOnBanner = ref(false);
 
     /**
      * Data for content sources
@@ -382,24 +401,11 @@
     /**
      * Define fields for form
      */
-    const topics = ref();
+    const topics = ref<Identifiable[]>();
     const isTopicsLoading = ref(true);
 
     const languagesList = ref<Identifiable[]>([]);
     const isLanguagesLoading = ref(true);
-
-    const [title] = defineField('title');
-    const [description] = defineField('description');
-    const [videoFile] = defineField('file');
-    const [image] = defineField('image');
-    const [topic] = defineField('topic');
-    const [language] = defineField('languages');
-    const [tags] = defineField('tags');
-    const [audios] = defineField('audios');
-    const [requiresAuth] = defineField('requires_auth');
-    const [withAudio] = defineField('audio_enabled');
-    const [withNarration] = defineField('narration_enabled');
-    const [isShowContentOnBanner] = defineField('show_on_main_banner');
 
     /*
      * Fill existing data for content
@@ -411,21 +417,19 @@
             );
         }
 
-        tags.value = props.content.tags?.split(', ');
+        if (props.content.tags) {
+            tags.value = props.content.tags.split(', ');
+        }
 
         // Set existing values to form
         setValues(
             useExcludeProperties({ ...props.content }, [
                 'id',
-                'date_created',
-                'image',
+                'dateCreated',
                 'languages',
-                'audios',
                 'tags',
             ])
         );
-
-        image.value = '';
     }
 
     const getSource = (file: File | string) =>
@@ -442,13 +446,26 @@
         }
     };
 
-    const onVideoCapture = () => {
+    const onVideoCapture = async () => {
         if (videoElement.value) {
-            const src = useCaptureImage(videoElement.value);
+            try {
+                const src = useCaptureImage(videoElement.value);
 
-            if (src) {
-                imageSrc.value = src;
-                initialImageSrc.value = src;
+                if (src) {
+                    imageSrc.value = src;
+                    initialImageSrc.value = src;
+
+                    const blob = await getBlobFile(src);
+
+                    if (blob) {
+                        image.value = new File([blob], 'preview.jpg', {
+                            type: 'image/jpg',
+                            lastModified: new Date().getTime(),
+                        });
+                    }
+                }
+            } catch (e) {
+                useThrowError(e);
             }
 
             duration.value = videoElement.value.duration;
@@ -488,7 +505,6 @@
         videoSize.value = file.size;
 
         videoSrc.value = getSource(file);
-        image.value = '';
     };
 
     const selectAudioFiles = (files: UploadableFile[]) => {
@@ -503,9 +519,9 @@
                 audio.addEventListener('loadedmetadata', () => {
                     audios.value?.push({
                         file: item.file,
-                        name: item.name,
+                        name: item.file.name,
+                        duration: audio.duration,
                         size: item.file.size,
-                        duration: Math.round(audio.duration),
                     });
                 });
             }
@@ -515,7 +531,7 @@
     const selectPreviewImage = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
             image.value = value[0].file;
-            imageSrc.value = URL.createObjectURL(value[0].file);
+            imageSrc.value = getSource(value[0].file);
         }
     };
 
@@ -551,7 +567,16 @@
      */
     const loadTopics = async () => {
         try {
-            topics.value = (await getTopics()) ?? [];
+            const items = (await getTopics()) ?? [];
+
+            if (items.length > 0) {
+                topics.value = items.map((item) => {
+                    return {
+                        name: item.name,
+                        id: item.id,
+                    };
+                });
+            }
         } finally {
             isTopicsLoading.value = false;
         }
@@ -571,8 +596,8 @@
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
 
-        if (!image.value && !props.content) {
-            onVideoCapture();
+        if (!image.value) {
+            await onVideoCapture();
         }
 
         const body = {
@@ -582,6 +607,7 @@
             languages: language.value.id,
             tags: tags.value?.join(', '),
             topic: topic.value.id,
+            previewImage: image.value as File,
         };
 
         try {
@@ -592,7 +618,7 @@
             } else {
                 await postVideo({
                     ...body,
-                    date_created: new Date().toISOString(),
+                    dateCreated: new Date().toISOString(),
                 });
 
                 toast.success('Content has been successfully uploaded');
@@ -600,6 +626,7 @@
 
             emits('update');
             emits('close');
+
             resetForm();
         } catch (e) {
             if (props.content) {

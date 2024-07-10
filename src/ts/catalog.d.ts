@@ -1,21 +1,22 @@
+import type { Identifiable } from '@/ts/common';
+
 export interface CommonCatalogTypes {
     id: number;
     name: string;
-    image?: string | null;
-    requires_auth: boolean;
-    is_active: boolean;
+    image: string | null;
+    requiresAuth?: boolean;
+    dateCreated: string;
+    contentsAmount: number;
 }
 
-export interface Category extends CommonCatalogTypes {
-    groups: Group[];
-}
+export interface Category extends CommonCatalogTypes {}
 
 export interface Group extends CommonCatalogTypes {
-    topics: Topic[];
+    category: Identifiable;
 }
 
 export interface Topic extends CommonCatalogTypes {
-    group: number;
+    group: Identifiable;
 }
 
 export type CatalogItem = Category | Group | Topic;

@@ -92,6 +92,7 @@
             title: 'Image',
             key: 'image',
             sortable: false,
+            align: 'center',
         },
         {
             title: 'Category',
@@ -99,15 +100,17 @@
         },
         {
             title: 'Contents amount',
-            key: 'contents_amount',
+            key: 'contentsAmount',
         },
         {
             title: 'Date',
-            key: 'date_created',
+            key: 'dateCreated',
         },
         {
             title: 'Visible for all',
-            key: 'requires_auth',
+            key: 'requiresAuth',
+            align: 'center',
+            sortable: false,
         },
         {
             align: 'end',
@@ -156,7 +159,8 @@
         isLoading.value = true;
 
         try {
-            items.value = (await getGroups()) ?? [];
+            const groups = (await getGroups()) ?? [];
+            items.value = [...groups].reverse();
         } finally {
             isLoading.value = false;
         }

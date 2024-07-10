@@ -31,7 +31,7 @@
             color="primary"
             class="mb-5"
             density="comfortable"
-            label="Visible for all users"
+            label="Disable for unregistered users"
         ></v-checkbox>
 
         <v-btn
@@ -60,7 +60,7 @@
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Category } from '@/ts/catalog';
     import { createCategorySchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateCategory } from '@/validations/types/catalog';
+    import type { CreateCategorySchema } from '@/validations/types/catalog.validation';
 
     interface Props {
         category?: Category | null;
@@ -75,19 +75,35 @@
     const isLoading = ref(false);
     const imageSrc = ref('');
 
+    /**
+     * Define schema
+     */
     const { defineField, handleSubmit, errors, resetForm, setValues } =
-        useForm<CreateCategory>({
+        useForm<CreateCategorySchema>({
             validationSchema: createCategorySchema,
             initialValues: {
                 name: '',
+                requiresAuth: false,
+                image: '',
             },
         });
 
+    const [name] = defineField('name');
+    const [image] = defineField('image');
+    const [requiresAuth] = defineField('requiresAuth');
+
+    /**
+     * Choose properties only for edit
+     */
     const excludedProperties = useExcludeProperties({ ...props.category }, [
         'id',
-        'groups',
-    ]) as CreateCategory;
+        'contentsAmount',
+        'dateCreated',
+    ]) as CreateCategorySchema;
 
+    /**
+     * Set existing values
+     */
     if (props.category) {
         setValues(excludedProperties);
 
@@ -96,10 +112,9 @@
         }
     }
 
-    const [name] = defineField('name');
-    const [image] = defineField('image');
-    const [requiresAuth] = defineField('requires_auth');
-
+    /**
+     * Manage image file
+     */
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
             image.value = value[0].file;
@@ -110,10 +125,14 @@
     const removeFile = () => {
         isFileSelected.value = false;
         imageSrc.value = '';
-        image.value = null;
+        image.value = '';
     };
 
+    /**
+     * Submit form
+     */
     const onSubmit = handleSubmit(async (values) => {
+        // Check if something was edited
         const editedValues = useCompareObjects(excludedProperties, values);
 
         if (props.category && !editedValues) {
@@ -125,6 +144,7 @@
         isLoading.value = true;
 
         try {
+            // Update category
             if (props.category) {
                 await updateCategory(props.category.id, {
                     ...editedValues,
@@ -132,7 +152,11 @@
 
                 toast.success('Category successfully updated');
             } else {
-                await postCategories(values);
+                // Create category
+                await postCategories({
+                    ...values,
+                    image: image.value as File,
+                });
 
                 toast.success('Category successfully created');
 

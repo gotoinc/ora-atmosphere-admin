@@ -5,7 +5,7 @@
 /* Tailwind common styles */
 @layer base {
     html {
-        font-family: "Mulish", system-ui, sans-serif !important;
+        font-family: 'Mulish', system-ui, sans-serif !important;
     }
 
     .container {
@@ -20,15 +20,15 @@
     }
 
     body {
-        @apply text-white !right-0
+        @apply !right-0 text-white;
     }
 
     .v-tooltip > .v-overlay__content {
-        @apply !bg-white font-semibold
+        @apply !bg-white font-semibold;
     }
 
     .v-table > .v-table__wrapper > table {
-        min-width: 1240px;
+        min-width: 550px;
     }
 
     .line-camp-1 {
@@ -48,14 +48,14 @@
     }
 
     .tag {
-        @apply rounded-3xl border border-solid border-white cursor-pointer overflow-hidden px-4 py-1 text-xs font-semibold lowercase transition-colors xl:hover:bg-white xl:hover:text-dark;
+        @apply cursor-pointer overflow-hidden rounded-3xl border border-solid border-white px-4 py-1 text-xs font-semibold lowercase transition-colors xl:hover:bg-white xl:hover:text-dark;
 
         &.tag--lang {
-            @apply rounded-md px-2 py-[3px]
+            @apply rounded-md px-2 py-[3px];
         }
 
         &.tag--fill {
-            @apply bg-white text-dark
+            @apply bg-white text-dark;
         }
     }
 
@@ -78,6 +78,4 @@
             margin: 0;
         }
     }
-
 }
-

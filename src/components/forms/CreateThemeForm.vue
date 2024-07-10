@@ -3,12 +3,12 @@
 
     <form class="grid gap-2" @submit.prevent="onSubmit">
         <div>
-            <p class="mb-3">Please enter a group name</p>
+            <p class="mb-3">Please enter a theme name</p>
 
             <v-text-field
                 v-model="name"
                 name="name"
-                label="Group name"
+                label="Theme name"
                 type="name"
                 :error-messages="errors.name"
                 variant="outlined"
@@ -24,10 +24,9 @@
                 variant="outlined"
                 clearable
                 return-object
-                :error-messages="errors.group_id"
+                :error-messages="errors.group"
                 item-title="name"
                 :items="groups"
-                @update:model-value="selectGroupId"
             />
         </div>
 
@@ -46,7 +45,7 @@
             color="primary"
             class="mb-5"
             density="comfortable"
-            label="Visible for all users"
+            label="Disable for unregistered users"
         ></v-checkbox>
 
         <v-btn
@@ -61,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
+    import { ref } from 'vue';
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
@@ -74,9 +73,10 @@
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
-    import type { Group, Topic } from '@/ts/catalog';
+    import type { Topic } from '@/ts/catalog';
+    import type { Identifiable } from '@/ts/common';
     import { createThemeSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateTheme } from '@/validations/types/catalog';
+    import type { CreateTopicSchema } from '@/validations/types/catalog.validation';
 
     const props = defineProps<{ topic?: Topic | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -89,29 +89,32 @@
     const isLoading = ref(false);
     const isGroupsLoading = ref(true);
 
+    /**
+     * Define schema
+     */
     const { defineField, handleSubmit, errors, resetForm, setValues } =
-        useForm<CreateTheme>({
+        useForm<CreateTopicSchema>({
             validationSchema: createThemeSchema,
             initialValues: {
                 name: '',
             },
         });
 
-    const group = ref<Group | null>();
-    const groups = ref<Group[]>([]);
-
     const [name] = defineField('name');
     const [image] = defineField('image');
-    const [groupId] = defineField('group_id');
-    const [requiresAuth] = defineField('requires_auth');
+    const [group] = defineField('group');
+    const [requiresAuth] = defineField('requiresAuth');
 
+    const groups = ref<Identifiable[]>([]);
+
+    /**
+     * Choose properties only for edit
+     */
     const excludedProperties = useExcludeProperties({ ...props.topic }, [
         'id',
-    ]) as CreateTheme;
+    ]) as CreateTopicSchema;
 
     if (props.topic) {
-        groupId.value = props.topic.group;
-
         if (props.topic.image) {
             imageSrc.value = props.topic.image;
         }
@@ -119,6 +122,9 @@
         setValues(excludedProperties);
     }
 
+    /**
+     * Manage image file
+     */
     const selectFile = (value: UploadableFile[] | UploadableFile) => {
         if (Array.isArray(value)) {
             imageSrc.value = URL.createObjectURL(value[0].file);
@@ -126,18 +132,40 @@
         }
     };
 
-    const selectGroupId = (group?: Group) => {
-        if (group) {
-            groupId.value = group.id;
-        }
-    };
-
     const removeFile = () => {
         isFileSelected.value = false;
-        image.value = null;
+        image.value = '';
         imageSrc.value = '';
     };
 
+    const loadGroups = async () => {
+        isGroupsLoading.value = true;
+
+        try {
+            const items = (await getGroups()) ?? [];
+
+            if (items.length > 0) {
+                groups.value = items.map((item) => {
+                    return {
+                        name: item.name,
+                        id: item.id,
+                    };
+                });
+
+                const selected = items.find(
+                    (item) => item.id === props.topic?.group.id
+                );
+
+                if (selected) group.value = selected;
+            }
+        } finally {
+            isGroupsLoading.value = false;
+        }
+    };
+
+    /**
+     * Submit form
+     */
     const onSubmit = handleSubmit(async (values) => {
         const editedValues = useCompareObjects(excludedProperties, values);
 
@@ -153,18 +181,19 @@
             if (props.topic) {
                 await updateTopic(props.topic.id, {
                     ...editedValues,
-                    group_id: groupId.value,
+                    group: group.value.id,
                 });
 
                 toast.success('Topic successfully updated');
             } else {
                 await postTopic({
                     ...values,
+                    group: group.value.id,
+                    image: image.value as File,
                 });
 
                 toast.success('Topic successfully created');
 
-                group.value = null;
                 removeFile();
                 resetForm();
             }
@@ -182,13 +211,7 @@
         }
     });
 
-    onMounted(async () => {
-        try {
-            groups.value = (await getGroups()) ?? [];
-        } finally {
-            isGroupsLoading.value = false;
-        }
-    });
+    void loadGroups();
 </script>
 
 <style scoped></style>

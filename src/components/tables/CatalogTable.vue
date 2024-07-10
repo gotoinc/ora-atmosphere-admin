@@ -13,7 +13,7 @@
         </template>
 
         <template #[`item.name`]="{ item }">
-            <p class="min-w-44">
+            <p>
                 {{ item.name }}
             </p>
         </template>
@@ -21,7 +21,7 @@
         <template #[`item.image`]="{ item }">
             <v-card
                 v-if="item.image"
-                class="my-2 h-20 w-32"
+                class="mx-auto my-2 h-20 w-32"
                 elevation="2"
                 rounded
             >
@@ -31,9 +31,9 @@
             <div v-else>No image</div>
         </template>
 
-        <template #[`item.requires_auth`]="{ item }">
+        <template #[`item.requiresAuth`]="{ item }">
             <v-icon
-                v-if="item.requires_auth"
+                v-if="!item.requiresAuth"
                 icon="mdi mdi-check-circle"
                 color="green"
             />

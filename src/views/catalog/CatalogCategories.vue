@@ -90,18 +90,21 @@
             title: 'Image',
             key: 'image',
             sortable: false,
+            align: 'center',
         },
         {
             title: 'Contents amount',
-            key: 'contents_amount',
+            key: 'contentsAmount',
         },
         {
             title: 'Date',
-            key: 'date_created',
+            key: 'dateCreated',
         },
         {
             title: 'Visible for all',
-            key: 'requires_auth',
+            key: 'requiresAuth',
+            align: 'center',
+            sortable: false,
         },
         {
             align: 'end',
@@ -123,7 +126,8 @@
         isLoading.value = true;
 
         try {
-            items.value = (await getCategories()) ?? [];
+            const categories = (await getCategories()) ?? [];
+            items.value = [...categories].reverse();
         } finally {
             isLoading.value = false;
         }

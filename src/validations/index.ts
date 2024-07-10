@@ -1,10 +1,6 @@
-import type { ObjectSchema } from 'yup';
-import { array } from 'yup';
 import { boolean, mixed, number, object, string } from 'yup';
 
-import type { Group, Topic } from '@/ts/catalog';
 import { isFile } from '@/ts/guards/file.guard.ts';
-// import { groupSchema } from '@/validations/schemas/catalog.schema.ts';
 
 /**
  * Define common validations
@@ -47,7 +43,7 @@ export const phoneValidation = string()
 // File schema
 export const fileSchema = mixed<File | string>()
     .test('value', 'Field is required', (value) => {
-        return isFile(value) || typeof value === 'string';
+        return isFile(value) || (typeof value === 'string' && !!value);
     })
     .test('fileSize', 'File size is too large', (value) => {
         if (value && isFile(value)) {
@@ -60,46 +56,37 @@ export const fileSchema = mixed<File | string>()
 // Audio schema
 export const audioSchema = object({
     name: string().required('Please enter the name'),
-    file: mixed<File | string>()
-        .test(
-            'is-file-or-string',
-            'File must be a valid file or a string',
-            (value) => {
-                return typeof value === 'string' || value instanceof File;
-            }
-        )
-        .required('Please upload a file or provide a file URL'),
-    duration: number()
-        .required('Please enter the duration')
-        .min(1, 'Duration must be at least 1 second')
-        .max(3600, 'Duration must be at most 3600 seconds (1 hour)'),
+    file: fileSchema.required('Please upload a file'),
+    duration: number().required('Please enter the duration'),
     size: number()
         .required('Please enter the size')
-        .max(50000000, 'Size must be at most 50MB'), // Example max size: 50MB
+        .max(50000000, 'Size must be at most 50MB'),
 });
 
-export const languageSchema = object({
-    id: number().required(),
-    name: string().required('Please select language'),
+// Common schema for catalog
+export const commonCatalogSchema = object({
+    id: number().required('ID is required').typeError('ID must be a number'),
+    name: string()
+        .required('Name is required')
+        .typeError('Name must be a string'),
+    image: string().nullable().typeError('Image must be a string or null'),
+    requiresAuth: boolean().notRequired().typeError('Must be a boolean'),
+    dateCreated: string()
+        .required('Date Created is required')
+        .typeError('Date Created must be a string'),
+    contentsAmount: number()
+        .required('Contents Amount is required')
+        .typeError('Contents Amount must be a number'),
 });
 
-export const topicSchema: ObjectSchema<Topic> = object({
-    id: number().required('Please select topic'),
-    name: string().required('Please select topic'),
-    image: string().nullable(),
-    requires_auth: boolean().required('Please select topic'),
-    is_active: boolean().required('Please select topic'),
-    group: number().required('Please select topic'),
+export const identifiableSchema = object({
+    id: number().required('Please select').typeError('ID must be a number'),
+    name: string().required('Please select').typeError('Name must be a string'),
 });
 
-/**
- * Define schema for group
- */
-export const groupSchema: ObjectSchema<Group> = object({
-    id: number().required('ID is required'),
-    name: string().required('Name is required'),
-    image: string().nullable().required(),
-    requires_auth: boolean().required(),
-    is_active: boolean().required(),
-    topics: array().of<Topic>(topicSchema).required(),
-});
+// Group schema
+export const groupSchema = commonCatalogSchema.concat(
+    object({
+        category: identifiableSchema,
+    })
+);
