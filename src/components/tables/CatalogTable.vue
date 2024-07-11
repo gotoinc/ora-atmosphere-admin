@@ -31,9 +31,9 @@
             <div v-else>No image</div>
         </template>
 
-        <template #[`item.requiresAuth`]="{ item }">
+        <template #[`item.requires_auth`]="{ item }">
             <v-icon
-                v-if="!item.requiresAuth"
+                v-if="!item.requires_auth"
                 icon="mdi mdi-check-circle"
                 color="green"
             />

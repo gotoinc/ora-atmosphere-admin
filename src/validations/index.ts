@@ -70,8 +70,8 @@ export const commonCatalogSchema = object({
         .required('Name is required')
         .typeError('Name must be a string'),
     image: string().nullable().typeError('Image must be a string or null'),
-    requiresAuth: boolean().notRequired().typeError('Must be a boolean'),
-    dateCreated: string()
+    requires_auth: boolean().notRequired().typeError('Must be a boolean'),
+    date_created: string()
         .required('Date Created is required')
         .typeError('Date Created must be a string'),
     contentsAmount: number()

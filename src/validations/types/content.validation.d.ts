@@ -3,12 +3,12 @@ import type { VideoContent } from '@/ts/contents';
 
 type BooleanValues = Pick<
     VideoContent,
-    'requiresAuth' | 'narrationEnabled' | 'audioEnabled'
+    'requires_auth' | 'narration_enabled' | 'audio_enabled'
 >;
 
 type EditableValues = Pick<
     VideoContent,
-    'title' | 'description' | 'duration' | 'dateCreated' | 'tags'
+    'title' | 'description' | 'duration' | 'date_created' | 'tags'
 >;
 
 /**
@@ -16,9 +16,9 @@ type EditableValues = Pick<
  */
 export interface ContentInput extends EditableValues, Partial<BooleanValues> {
     file: File;
-    previewImage: File;
-    languages: number;
-    audios?: AudioInput[];
+    preview_image: File;
+    languages: number[];
+    audios?: File[];
     topic: number;
 }
 
@@ -31,9 +31,9 @@ export interface CreateContentSchema
         Pick<VideoContent, 'topic'> {
     title: string;
     file: File | string;
-    previewImage?: File | string;
+    preview_image?: File | string;
     description?: string | null;
-    audios?: AudioInput[];
+    audios?: Array<File | string>;
     languages: Identifiable;
     tags?: string[];
 }

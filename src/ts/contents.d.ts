@@ -6,12 +6,12 @@ export interface VideoContent {
     description?: string | null;
     file: string;
     languages: Identifiable;
-    requiresAuth: boolean;
-    previewImage: string;
-    audioEnabled: boolean;
-    narrationEnabled: boolean;
+    requires_auth: boolean;
+    preview_image: string;
+    audio_enabled: boolean;
+    narration_enabled: boolean;
     duration: number;
-    dateCreated: string;
+    date_created: string;
     topic: Identifiable;
     audios?: Audio[];
     tags?: string;

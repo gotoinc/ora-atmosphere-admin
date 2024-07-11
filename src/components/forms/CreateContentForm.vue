@@ -370,14 +370,14 @@
     const [title] = defineField('title');
     const [description] = defineField('description');
     const [videoFile] = defineField('file');
-    const [image] = defineField('previewImage');
+    const [image] = defineField('preview_image');
     const [topic] = defineField('topic');
     const [language] = defineField('languages');
     const [tags] = defineField('tags');
     const [audios] = defineField('audios');
-    const [requiresAuth] = defineField('requiresAuth');
-    const [withAudio] = defineField('audioEnabled');
-    const [withNarration] = defineField('narrationEnabled');
+    const [requiresAuth] = defineField('requires_auth');
+    const [withAudio] = defineField('audio_enabled');
+    const [withNarration] = defineField('narration_enabled');
 
     const isShowContentOnBanner = ref(false);
 
@@ -401,7 +401,7 @@
     /**
      * Define fields for form
      */
-    const topics = ref<Identifiable[]>();
+    const topics = ref<Identifiable[]>([]);
     const isTopicsLoading = ref(true);
 
     const languagesList = ref<Identifiable[]>([]);
@@ -425,9 +425,10 @@
         setValues(
             useExcludeProperties({ ...props.content }, [
                 'id',
-                'dateCreated',
+                'date_created',
                 'languages',
                 'tags',
+                'audios',
             ])
         );
     }
@@ -517,12 +518,7 @@
                 const audio = new Audio(getSource(item.file));
 
                 audio.addEventListener('loadedmetadata', () => {
-                    audios.value?.push({
-                        file: item.file,
-                        name: item.file.name,
-                        duration: audio.duration,
-                        size: item.file.size,
-                    });
+                    audios.value?.push(item.file);
                 });
             }
         });
@@ -578,6 +574,11 @@
                 });
             }
         } finally {
+            topics.value.push({
+                name: 'Title',
+                id: 1,
+            });
+
             isTopicsLoading.value = false;
         }
     };
@@ -604,10 +605,11 @@
             ...values,
             file: uploadedVideoFile.value as File,
             duration: Math.round(duration.value),
-            languages: language.value.id,
+            languages: [language.value.id],
             tags: tags.value?.join(', '),
             topic: topic.value.id,
-            previewImage: image.value as File,
+            preview_image: image.value as File,
+            audios: audios.value as File[],
         };
 
         try {
@@ -618,7 +620,7 @@
             } else {
                 await postVideo({
                     ...body,
-                    dateCreated: new Date().toISOString(),
+                    date_created: new Date().toISOString(),
                 });
 
                 toast.success('Content has been successfully uploaded');

@@ -2,7 +2,7 @@
     <v-data-table
         :sort-by="[
             {
-                key: 'dateCreated',
+                key: 'date_created',
                 order: 'desc',
             },
         ]"
@@ -17,15 +17,15 @@
             </p>
         </template>
 
-        <template #[`item.previewImage`]="{ item }">
+        <template #[`item.preview_image`]="{ item }">
             <v-card
-                v-if="item.previewImage"
+                v-if="item.preview_image"
                 class="my-2 h-20 w-20"
                 elevation="2"
                 rounded
             >
                 <v-img
-                    :src="item.previewImage"
+                    :src="item.preview_image"
                     class="h-full w-full"
                     cover
                 ></v-img>
@@ -50,9 +50,9 @@
             <div v-else>No theme</div>
         </template>
 
-        <template #[`item.audio`]="{ item }">
+        <template #[`item.audio_enabled`]="{ item }">
             <img
-                v-if="item.audios"
+                v-if="item.audio_enabled"
                 src="@img/volume-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -66,9 +66,9 @@
             />
         </template>
 
-        <template #[`item.speech`]="{ item }">
+        <template #[`item.narration_enabled`]="{ item }">
             <img
-                v-if="item.narrationEnabled"
+                v-if="item.narration_enabled"
                 src="@img/narration-on.svg"
                 class="h-10 w-10 object-contain"
                 alt=""
@@ -82,9 +82,9 @@
             />
         </template>
 
-        <template #[`item.dateCreated`]="{ item }">
+        <template #[`item.date_created`]="{ item }">
             <p class="whitespace-nowrap">
-                {{ useFormatDate(item.dateCreated) }}
+                {{ useFormatDate(item.date_created) }}
             </p>
         </template>
 
@@ -177,7 +177,7 @@
         },
         {
             title: 'Preview',
-            key: 'previewImage',
+            key: 'preview_image',
             sortable: false,
         },
         {
@@ -195,17 +195,17 @@
         },
         {
             title: 'Sound',
-            key: 'audio',
+            key: 'audio_enabled',
             sortable: false,
         },
         {
             title: 'Narration',
-            key: 'speech',
+            key: 'narration_enabled',
             sortable: false,
         },
         {
             title: 'Date',
-            key: 'dateCreated',
+            key: 'date_created',
         },
         {
             title: 'Languages',

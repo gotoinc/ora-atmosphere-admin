@@ -104,11 +104,11 @@
         },
         {
             title: 'Date',
-            key: 'dateCreated',
+            key: 'date_created',
         },
         {
             title: 'Visible for all',
-            key: 'requiresAuth',
+            key: 'requires_auth',
             align: 'center',
             sortable: false,
         },

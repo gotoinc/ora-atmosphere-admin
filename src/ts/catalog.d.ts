@@ -4,8 +4,8 @@ export interface CommonCatalogTypes {
     id: number;
     name: string;
     image: string | null;
-    requiresAuth?: boolean;
-    dateCreated: string;
+    requires_auth?: boolean;
+    date_created: string;
     contentsAmount: number;
 }
 

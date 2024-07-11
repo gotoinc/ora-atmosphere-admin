@@ -83,14 +83,14 @@
             validationSchema: createCategorySchema,
             initialValues: {
                 name: '',
-                requiresAuth: false,
+                requires_auth: false,
                 image: '',
             },
         });
 
     const [name] = defineField('name');
     const [image] = defineField('image');
-    const [requiresAuth] = defineField('requiresAuth');
+    const [requiresAuth] = defineField('requires_auth');
 
     /**
      * Choose properties only for edit
@@ -98,7 +98,7 @@
     const excludedProperties = useExcludeProperties({ ...props.category }, [
         'id',
         'contentsAmount',
-        'dateCreated',
+        'date_created',
     ]) as CreateCategorySchema;
 
     /**

@@ -103,7 +103,7 @@
     const [name] = defineField('name');
     const [image] = defineField('image');
     const [group] = defineField('group');
-    const [requiresAuth] = defineField('requiresAuth');
+    const [requiresAuth] = defineField('requires_auth');
 
     const groups = ref<Identifiable[]>([]);
 

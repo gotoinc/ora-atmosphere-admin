@@ -104,7 +104,7 @@
     const [name] = defineField('name');
     const [image] = defineField('image');
     const [category] = defineField('category');
-    const [requiresAuth] = defineField('requiresAuth');
+    const [requiresAuth] = defineField('requires_auth');
 
     const categories = ref<Identifiable[]>([]);
 
@@ -114,7 +114,7 @@
     const excludedProperties = useExcludeProperties({ ...props.group }, [
         'id',
         'contentsAmount',
-        'dateCreated',
+        'date_created',
     ]) as CreateGroupSchema;
 
     if (props.group) {
