@@ -94,14 +94,14 @@
             sortable: false,
             align: 'center',
         },
-        {
-            title: 'Category',
-            key: 'category.name',
-        },
-        {
-            title: 'Contents amount',
-            key: 'contentsAmount',
-        },
+        // {
+        //     title: 'Category',
+        //     key: 'category.name',
+        // },
+        // {
+        //     title: 'Contents amount',
+        //     key: 'contentsAmount',
+        // },
         {
             title: 'Date',
             key: 'date_created',

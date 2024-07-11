@@ -6,6 +6,7 @@ import { defineStore } from 'pinia';
 
 import { authLogin } from '@/api/auth/auth-login.api.ts';
 import { authLogout } from '@/api/auth/auth-logout.api.ts';
+import { getProfile } from '@/api/auth/get-profile.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
 import type { AdminUser } from '@/ts/users';
 import type { SignInInput } from '@/validations/types/auth';
@@ -19,13 +20,7 @@ export const useAuthStore = defineStore(
         const isAuthenticated = ref(!!Cookies.get('ora_admin'));
         const isSuperAdmin = ref(true);
 
-        const profile = ref<AdminUser | null>({
-            first_name: 'Joe',
-            last_name: 'Doe',
-            email: 'admin1@example.com',
-            company_name: 'Tech Solutions',
-            role: 'super admin',
-        });
+        const profile = ref<AdminUser>();
 
         const profileName = computed(
             () => `${profile.value?.first_name} ${profile.value?.last_name}`
@@ -34,6 +29,20 @@ export const useAuthStore = defineStore(
         const clearAuth = () => {
             Cookies.remove('ora_admin');
             isAuthenticated.value = false;
+        };
+
+        const getProfileInfo = async () => {
+            try {
+                const res = await getProfile();
+
+                if (res) {
+                    profile.value = res;
+                }
+
+                return profile.value;
+            } catch (e) {
+                void logout();
+            }
         };
 
         // Logout functionality
@@ -81,6 +90,7 @@ export const useAuthStore = defineStore(
             profile,
             profileName,
             clearAuth,
+            getProfileInfo,
             login,
             logout,
         };

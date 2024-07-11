@@ -1,15 +1,20 @@
-import type { RegisterInput } from '@/validations/types/auth';
-
-export interface UserProfile
-    extends Omit<
-        RegisterInput,
-        'agree_with_terms' | 'password' | 'confirm_password' | 'recaptcha_token'
-    > {}
+export interface UserProfile {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    company_name: string;
+    activity: string;
+    job_title?: string;
+    company_website?: string;
+    phone_number?: string;
+}
 
 export interface AdminUser {
     first_name: string;
     last_name: string;
     email: string;
-    company_name: string;
-    role: string;
+    role: 'super-admin' | 'admin';
 }
+
+export type Role = 'super-admin' | 'admin';

@@ -12,20 +12,27 @@
             <v-divider></v-divider>
 
             <v-list nav>
-                <div class="flex items-center gap-1">
+                <div v-if="profile" class="mb-1 flex items-center gap-1">
                     <div
-                        class="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-50"
+                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-50"
                     >
                         <v-icon icon="mdi-account"></v-icon>
                     </div>
 
                     <v-list-item
-                        subtitle="test@gmail.com"
-                        :title="profileName"
+                        :subtitle="profile.email"
+                        :title="`${profile.first_name} ${profile.last_name}`"
                         value="profile"
                         :to="{ name: 'profile' }"
                     ></v-list-item>
                 </div>
+
+                <v-skeleton-loader
+                    v-else
+                    color="primary"
+                    class="mb-2 w-full"
+                    type="list-item-avatar"
+                />
 
                 <v-divider></v-divider>
 
@@ -117,6 +124,7 @@
 
     import MainLogo from '@/components/base/MainLogo.vue';
 
+    import { storeToRefs } from 'pinia';
     import { useAuthStore } from '@/stores/auth.store.ts';
 
     interface Props {
@@ -131,7 +139,8 @@
     const emits = defineEmits<Emits>();
 
     const router = useRouter();
-    const { clearAuth, profileName, isSuperAdmin } = useAuthStore();
+    const authStore = useAuthStore();
+    const { profile, isSuperAdmin } = storeToRefs(authStore);
 
     const isExpand = computed({
         get() {
@@ -151,13 +160,20 @@
 
         try {
             // await logout();
-            clearAuth();
+            authStore.clearAuth();
 
             void router.push({ name: 'auth' });
         } finally {
             isLoading.value = false;
         }
     };
+
+    if (
+        !profile.value &&
+        router.currentRoute.value.name !== 'profileInfoView'
+    ) {
+        void authStore.getProfileInfo();
+    }
 
     const sidebarElement = ref<HTMLElement>();
 </script>

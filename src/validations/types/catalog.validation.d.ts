@@ -30,7 +30,7 @@ export interface CreateGroupSchema
  * Types for creating theme
  */
 export interface TopicInput extends Pick<Topic, 'name' | 'requires_auth'> {
-    group: number;
+    group_id: number;
     image: File;
 }
 

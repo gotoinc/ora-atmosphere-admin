@@ -31,6 +31,12 @@
             <div v-else>No image</div>
         </template>
 
+        <template #[`item.date_created`]="{ item }">
+            <p class="whitespace-nowrap">
+                {{ useFormatDate(item.date_created) }}
+            </p>
+        </template>
+
         <template #[`item.requires_auth`]="{ item }">
             <v-icon
                 v-if="!item.requires_auth"
@@ -54,6 +60,7 @@
 <script setup lang="ts">
     import TableActionButtons from '@/components/tables/TableActionButtons.vue';
 
+    import { useFormatDate } from '@/hooks/useFormatDate.ts';
     import type { CatalogItem } from '@/ts/catalog';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 

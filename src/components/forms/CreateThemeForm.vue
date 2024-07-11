@@ -181,14 +181,14 @@
             if (props.topic) {
                 await updateTopic(props.topic.id, {
                     ...editedValues,
-                    group: group.value.id,
+                    group_id: group.value.id,
                 });
 
                 toast.success('Topic successfully updated');
             } else {
                 await postTopic({
                     ...values,
-                    group: group.value.id,
+                    group_id: group.value.id,
                     image: image.value as File,
                 });
 

@@ -39,14 +39,16 @@
             </div>
 
             <div>
-                <p class="mb-3">Please enter a company name</p>
+                <p class="mb-3">Please enter password</p>
 
                 <v-text-field
-                    v-model="company"
-                    :error-messages="errors.company_name"
-                    name="company"
-                    label="Company"
+                    v-model="password"
+                    name="password"
                     variant="outlined"
+                    type="password"
+                    label="Password"
+                    placeholder="Set your password"
+                    :error-messages="errors.password"
                 />
             </div>
 
@@ -65,6 +67,7 @@
             </div>
 
             <v-btn
+                :loading="isLoading"
                 :disabled="isButtonDisabled"
                 type="submit"
                 class="text-none w-fit"
@@ -77,16 +80,23 @@
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
-    import userRoles from '@/constants/user-roles.ts';
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
-    import type { AdminUser } from '@/ts/users';
-    import { createUserSchema } from '@/validations/schemas/user.schema.ts';
+    import type { CreateFormEmits } from '@/components/forms/types';
 
-    const props = defineProps<{ admin?: AdminUser }>();
-    defineEmits<{ (e: 'close'): void }>();
+    import { postAdmin } from '@/api/users/post-admin.api.ts';
+    import { userRoles } from '@/constants/user-roles.ts';
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
+    import type { AdminUser, UserProfile } from '@/ts/users';
+    import { createUserSchema } from '@/validations/schemas/user.schema.ts';
+    import type { CreateAdminSchema } from '@/validations/types/user.validation';
+
+    const props = defineProps<{ admin?: AdminUser | UserProfile }>();
+    const emits = defineEmits<CreateFormEmits>();
+
+    const toast = useToast();
 
     const isButtonDisabled = computed(
         () =>
@@ -103,26 +113,40 @@
         resetForm,
         setValues,
         controlledValues,
-    } = useForm<AdminUser>({
+    } = useForm<CreateAdminSchema>({
         validationSchema: createUserSchema,
         initialValues: {
             email: '',
-            company_name: '',
         },
     });
 
     const [email] = defineField('email');
-    const [company] = defineField('company_name');
     const [role] = defineField('role');
+    const [password] = defineField('password');
     const [firstName] = defineField('first_name');
     const [lastName] = defineField('last_name');
+
+    const isLoading = ref(false);
 
     if (props.admin) {
         setValues({ ...props.admin });
     }
 
-    const onSubmit = handleSubmit(() => {
-        resetForm();
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
+        try {
+            await postAdmin(values);
+
+            toast.success('Admin has been successfully created');
+            resetForm();
+
+            emits('update');
+            emits('close');
+        } catch (e) {
+            toast.error('Admin is not created');
+        } finally {
+            isLoading.value = false;
+        }
     });
 </script>
 

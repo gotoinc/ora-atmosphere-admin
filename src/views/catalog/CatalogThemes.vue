@@ -94,13 +94,14 @@
             sortable: false,
             align: 'center',
         },
-        {
-            title: 'Group',
-            key: 'group.name',
-        },
+        // {
+        //     title: 'Group',
+        //     key: 'group.name',
+        // },
         {
             title: 'Contents amount',
-            key: 'contentsAmount',
+            key: 'contents_amount',
+            align: 'center',
         },
         {
             title: 'Date',

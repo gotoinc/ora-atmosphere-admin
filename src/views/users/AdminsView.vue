@@ -1,5 +1,5 @@
 <template>
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
+    <v-data-table class="!rounded-lg" :headers="headers" :items="users">
         <template #[`item.role`]="{ item }">
             <span class="capitalize">
                 {{ item.role }}
@@ -21,8 +21,9 @@
     <teleport to="body">
         <full-screen-dialog v-model="isEditOpen" :title="`Edit - ${userName}`">
             <create-user-form
-                :admin="selectedUser as AdminUser"
+                :admin="selectedUser as UserProfile"
                 @close="isEditOpen = false"
+                @update="loadUsers"
             />
         </full-screen-dialog>
 
@@ -41,12 +42,14 @@
     import CreateUserForm from '@/components/forms/CreateUserForm.vue';
     import ActionButtons from '@/components/tables/TableActionButtons.vue';
 
-    import type { AdminUser } from '@/ts/users';
+    import { getAdminUsers } from '@/api/users/get-admin-users.api.ts';
+    import type { UserProfile } from '@/ts/users';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
-    const selectedUser = ref<AdminUser | null>(null);
+    const isLoading = ref(false);
+    const selectedUser = ref<UserProfile | null>(null);
 
     const userName = computed(
         () =>
@@ -85,55 +88,31 @@
         },
     ]);
 
-    const items = [
-        {
-            first_name: 'Joe',
-            last_name: 'Doe',
-            email: 'admin1@example.com',
-            company_name: 'Tech Solutions',
-            role: 'admin',
-        },
-        {
-            first_name: 'Joe',
-            last_name: 'Doe',
-            email: 'superadmin1@example.com',
-            company_name: 'Innovatech',
-            role: 'super admin',
-        },
-        {
-            first_name: 'Joe',
-            last_name: 'Doe',
-            email: 'admin2@example.com',
-            company_name: 'Creative Works',
-            role: 'admin',
-        },
-        {
-            first_name: 'Joe',
-            last_name: 'Doe',
-            email: 'superadmin2@example.com',
-            company_name: 'Business Corp',
-            role: 'super admin',
-        },
-        {
-            first_name: 'Joe',
-            last_name: 'Doe',
-            email: 'admin3@example.com',
-            company_name: 'Future Innovations',
-            role: 'admin',
-        },
-    ];
+    const users = ref<UserProfile[]>([]);
 
-    const handleEdit = (user: AdminUser) => {
+    const handleEdit = (user: UserProfile) => {
         selectedUser.value = user;
 
         isEditOpen.value = true;
     };
 
-    const handleDelete = (user: AdminUser) => {
+    const handleDelete = (user: UserProfile) => {
         selectedUser.value = user;
 
         isDeleteOpen.value = true;
     };
+
+    const loadUsers = async () => {
+        isLoading.value = true;
+
+        try {
+            users.value = (await getAdminUsers()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    void loadUsers();
 </script>
 
 <style scoped></style>

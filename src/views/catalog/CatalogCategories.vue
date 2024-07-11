@@ -92,10 +92,10 @@
             sortable: false,
             align: 'center',
         },
-        {
-            title: 'Contents amount',
-            key: 'contentsAmount',
-        },
+        // {
+        //     title: 'Contents amount',
+        //     key: 'contentsAmount',
+        // },
         {
             title: 'Date',
             key: 'date_created',

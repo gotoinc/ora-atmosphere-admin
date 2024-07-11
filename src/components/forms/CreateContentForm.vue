@@ -449,7 +449,7 @@
     };
 
     const onVideoCapture = async () => {
-        if (videoElement.value) {
+        if (videoElement.value instanceof HTMLVideoElement) {
             try {
                 const src = useCaptureImage(videoElement.value);
 

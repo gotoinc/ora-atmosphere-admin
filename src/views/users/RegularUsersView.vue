@@ -1,5 +1,10 @@
 <template>
-    <v-data-table class="!rounded-lg" :headers="headers" :items="items">
+    <v-data-table
+        :loading="isLoading"
+        class="!rounded-lg"
+        :headers="headers"
+        :items="users"
+    >
         <template #[`item.actions`]="{ item }">
             <action-buttons
                 @delete="handleDelete(item)"
@@ -27,6 +32,7 @@
     import EditUserForm from '@/components/forms/EditUserForm.vue';
     import ActionButtons from '@/components/tables/TableActionButtons.vue';
 
+    import { getRegularUsers } from '@/api/users/get-regular-users.api.ts';
     import type { UserProfile } from '@/ts/users';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
@@ -38,6 +44,7 @@
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
     const selectedUser = ref<UserProfile | null>(null);
+    const isLoading = ref(false);
 
     const headers = ref<ReadonlyHeaders>([
         {
@@ -70,58 +77,7 @@
         },
     ]);
 
-    const items = [
-        {
-            first_name: 'John',
-            last_name: 'Doe',
-            company_name: 'Tech Solutions',
-            email: 'john.doe@example.com',
-            activity: 'Active',
-            job_title: 'Software Engineer',
-            company_website: 'https://www.techsolutions.com',
-            phone_number: '1234567890',
-        },
-        {
-            first_name: 'Jane',
-            last_name: 'Smith',
-            company_name: 'Innovatech',
-            email: 'jane.smith@example.com',
-            activity: 'Inactive',
-            job_title: 'Product Manager',
-            company_website: '',
-            phone_number: '0987654321',
-        },
-        {
-            first_name: 'Alice',
-            last_name: 'Johnson',
-            company_name: 'Creative Works',
-            email: 'alice.johnson@example.com',
-            activity: 'Active',
-            job_title: 'Graphic Designer',
-            company_website: '',
-            phone_number: '',
-        },
-        {
-            first_name: 'Bob',
-            last_name: 'Brown',
-            company_name: 'Business Corp',
-            email: 'bob.brown@example.com',
-            activity: 'Active',
-            job_title: '',
-            company_website: 'https://www.businesscorp.com',
-            phone_number: '5559876543',
-        },
-        {
-            first_name: 'Carol',
-            last_name: 'Davis',
-            company_name: 'Future Innovations',
-            email: 'carol.davis@example.com',
-            activity: 'Inactive',
-            job_title: 'Chief Technology Officer',
-            company_website: 'https://www.futureinnovations.com',
-            phone_number: '1235557890',
-        },
-    ];
+    const users = ref<UserProfile[]>([]);
 
     const handleEdit = (user: UserProfile) => {
         selectedUser.value = user;
@@ -134,6 +90,18 @@
 
         isDeleteOpen.value = true;
     };
+
+    const loadUsers = async () => {
+        isLoading.value = true;
+
+        try {
+            users.value = (await getRegularUsers()) ?? [];
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    void loadUsers();
 </script>
 
 <style scoped></style>

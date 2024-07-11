@@ -24,16 +24,6 @@
 
         <div>
             <v-text-field
-                v-model="company"
-                :error-messages="errors.company_name"
-                name="company_name"
-                label="Company name"
-                variant="outlined"
-            />
-        </div>
-
-        <div>
-            <v-text-field
                 v-model="email"
                 :error-messages="errors.email"
                 name="email"
@@ -66,13 +56,13 @@
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { computed, onMounted } from 'vue';
     import { useForm } from 'vee-validate';
 
     import { useAuthStore } from '@/stores/auth.store.ts';
 
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
-    import type { AdminUser } from '@/ts/users';
+    import type { AdminUser, Role } from '@/ts/users';
     import { createUserSchema } from '@/validations/schemas/user.schema.ts';
 
     const { defineField, handleSubmit, errors, setValues, controlledValues } =
@@ -80,7 +70,6 @@
             validationSchema: createUserSchema,
             initialValues: {
                 email: '',
-                company_name: '',
             },
         });
 
@@ -89,7 +78,6 @@
     );
 
     const [email] = defineField('email');
-    const [company] = defineField('company_name');
     const [role] = defineField('role');
     const [firstName] = defineField('first_name');
     const [lastName] = defineField('last_name');
@@ -97,16 +85,20 @@
     const toCapitalize = (value: string) =>
         value[0].toUpperCase() + value.slice(1);
 
-    const { profile } = useAuthStore();
-
-    if (profile) {
-        setValues({
-            ...profile,
-            role: toCapitalize(profile.role),
-        });
-    }
+    const { profile, getProfileInfo } = useAuthStore();
 
     const onSubmit = handleSubmit(() => {});
+
+    onMounted(async () => {
+        if (!profile) {
+            await getProfileInfo();
+        } else {
+            setValues({
+                ...profile,
+                role: toCapitalize(profile.role) as Role,
+            });
+        }
+    });
 </script>
 
 <style scoped></style>
