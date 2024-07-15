@@ -1,11 +1,5 @@
 <template>
     <v-data-table class="!rounded-lg" :headers="headers" :items="users">
-        <template #[`item.role`]="{ item }">
-            <span class="capitalize">
-                {{ item.role }}
-            </span>
-        </template>
-
         <template #[`item.actions`]="{ item }">
             <action-buttons
                 @delete="handleDelete(item)"
@@ -29,7 +23,7 @@
 
         <delete-dialog
             v-model="isDeleteOpen"
-            :title="selectedUser?.company_name"
+            :title="selectedUser?.first_name"
         />
     </teleport>
 </template>

@@ -557,6 +557,10 @@
             audioUploadables.value.delete(audioToRemove.value);
 
         audioFiles.value.delete(file);
+
+        audios.value = audios.value?.filter(
+            (file) => isFile(file) && file !== audioToRemove.value?.file
+        );
     };
 
     /*
@@ -575,11 +579,6 @@
                 });
             }
         } finally {
-            topics.value.push({
-                name: 'Title',
-                id: 1,
-            });
-
             isTopicsLoading.value = false;
         }
     };
