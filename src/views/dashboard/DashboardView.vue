@@ -2,11 +2,15 @@
     <section>
         <div class="mb-16">
             <div class="mb-16">
-                <h1 v-if="profile" class="mb-1 text-2xl font-bold">
-                    Hello {{ `${profile.first_name} ${profile.last_name}` }}
-                </h1>
+                <template v-if="profile">
+                    <h1 class="mb-1 text-2xl font-bold">
+                        Hello {{ `${profile.first_name} ${profile.last_name}` }}
+                    </h1>
 
-                <p class="text-grey-100">Welcome back!</p>
+                    <p class="text-grey-100">Welcome back!</p>
+                </template>
+
+                <v-skeleton-loader v-else class="h-12 w-36" />
             </div>
 
             <v-card class="overflow-visible">
@@ -120,6 +124,7 @@
     import CatalogGraph from '@/components/graph/CatalogGraph.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
+    import { storeToRefs } from 'pinia';
     import { useAuthStore } from '@/stores/auth.store.ts';
 
     import { getDashboardStats } from '@/api/stats/dashboard-stats.api.ts';
@@ -128,7 +133,7 @@
 
     const toast = useToast();
 
-    const { profile } = useAuthStore();
+    const { profile } = storeToRefs(useAuthStore());
 
     const isLoading = ref(true);
 

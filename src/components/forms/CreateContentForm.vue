@@ -43,112 +43,125 @@
                     </div>
 
                     <div class="flex flex-col">
-                        <!-- Video info -->
-                        <div v-if="isVideoLoaded">
-                            <div v-if="content" class="mb-5">
-                                <span class="block text-sm">Video link:</span>
-
-                                <a
-                                    target="_blank"
-                                    :href="content.file"
-                                    class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
-                                >
-                                    {{ content.file }}
-                                </a>
-                            </div>
-
-                            <div v-else-if="uploadedVideoFile" class="mb-2">
-                                <span class="text-sm">File name:</span>
-
-                                <p class="block truncate font-semibold">
-                                    {{ uploadedVideoFile.name }}
-                                </p>
-                            </div>
-
-                            <div class="mb-2">
-                                <span class="text-sm">File size:</span>
-
-                                <p class="font-semibold">
-                                    {{ useFormatFileSize(videoSize) }}
-                                </p>
-                            </div>
-
-                            <div class="mb-5">
-                                <span class="text-sm">Duration:</span>
-
-                                <p class="font-semibold">
-                                    {{ useFormatVideoDuration(duration) }}
-                                </p>
-                            </div>
-                        </div>
-
                         <v-skeleton-loader
-                            v-else-if="!content"
+                            v-if="!isVideoLoaded"
                             type="paragraph"
+                            class="mb-3"
                         ></v-skeleton-loader>
 
-                        <div class="mb-4">
-                            <v-btn
-                                type="submit"
-                                color="red"
-                                class="text-none w-fit"
-                                @click="changeVideo"
-                            >
-                                Change video
-                            </v-btn>
-                        </div>
+                        <!-- Video info -->
+                        <template v-else>
+                            <div>
+                                <div v-if="content" class="mb-5">
+                                    <span class="block text-sm"
+                                        >Video link:</span
+                                    >
 
-                        <div class="mb-4">
-                            <h3 class="text-xl">Settings</h3>
+                                    <a
+                                        target="_blank"
+                                        :href="content.file"
+                                        class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
+                                    >
+                                        {{ content.file }}
+                                    </a>
+                                </div>
 
-                            <v-divider class="my-3"></v-divider>
+                                <div v-else-if="uploadedVideoFile" class="mb-2">
+                                    <span class="text-sm">File name:</span>
 
-                            <div class="flex flex-wrap gap-x-10 gap-y-2">
-                                <v-checkbox
-                                    v-model="requiresAuth"
-                                    hide-details
-                                    color="primary"
-                                    density="comfortable"
-                                    label="Disable for unregistered users"
-                                ></v-checkbox>
+                                    <p class="block truncate font-semibold">
+                                        {{ uploadedVideoFile.name }}
+                                    </p>
+                                </div>
 
-                                <v-checkbox
-                                    v-model="withAudio"
-                                    hide-details
-                                    color="primary"
-                                    density="comfortable"
-                                    label="Sound enabled"
-                                ></v-checkbox>
+                                <div class="mb-2">
+                                    <span class="text-sm">File size:</span>
 
-                                <v-checkbox
-                                    v-model="withNarration"
-                                    hide-details
-                                    color="primary"
-                                    density="comfortable"
-                                    label="Narration enabled"
-                                ></v-checkbox>
+                                    <p class="font-semibold">
+                                        {{ useFormatFileSize(videoSize) }}
+                                    </p>
+                                </div>
 
-                                <v-checkbox
-                                    v-model="isShowContentOnBanner"
-                                    hide-details
-                                    color="primary"
-                                    density="comfortable"
-                                    label="Show video on main banner by default"
-                                ></v-checkbox>
+                                <div class="mb-5">
+                                    <span class="text-sm">Duration:</span>
+
+                                    <p class="font-semibold">
+                                        {{ useFormatVideoDuration(duration) }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-4">
-                            <catalog-image-upload
-                                :background="imageSrc"
-                                :name="title"
-                                :show-card="isShowCard"
-                                class="z-10"
-                                label="Select a file of background (optional)"
-                                @upload="selectPreviewImage"
-                                @remove="removeImage"
-                            />
-                        </div>
+                            <div class="mb-4">
+                                <h3 class="text-xl">Settings</h3>
+
+                                <v-divider class="my-3"></v-divider>
+
+                                <div
+                                    class="mb-4 flex flex-wrap gap-x-10 gap-y-2"
+                                >
+                                    <v-checkbox
+                                        v-model="requiresAuth"
+                                        hide-details
+                                        color="primary"
+                                        density="comfortable"
+                                        label="Disable for unregistered users"
+                                    ></v-checkbox>
+
+                                    <v-checkbox
+                                        v-model="withAudio"
+                                        hide-details
+                                        color="primary"
+                                        density="comfortable"
+                                        label="Sound enabled"
+                                    ></v-checkbox>
+
+                                    <v-checkbox
+                                        v-model="withNarration"
+                                        hide-details
+                                        color="primary"
+                                        density="comfortable"
+                                        label="Narration enabled"
+                                    ></v-checkbox>
+                                </div>
+
+                                <div class="mb-4 flex gap-3">
+                                    <v-btn
+                                        type="submit"
+                                        color="red"
+                                        class="text-none w-fit"
+                                        @click="changeVideo"
+                                    >
+                                        Change video
+                                    </v-btn>
+
+                                    <v-btn
+                                        v-if="
+                                            content &&
+                                            defaultContent?.id !== content.id
+                                        "
+                                        type="submit"
+                                        color="primary"
+                                        class="text-none w-fit"
+                                        @click="isDialogOpen = true"
+                                    >
+                                        Set as default
+                                    </v-btn>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <catalog-image-upload
+                                    :background="imageSrc"
+                                    :name="title"
+                                    :error="errors.preview_image"
+                                    :show-card="isShowCard"
+                                    class="z-10"
+                                    label="Select a file of background"
+                                    @upload="selectPreviewImage"
+                                    @remove="removeImage"
+                                />
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -316,6 +329,35 @@
                 {{ content ? 'Save changes' : 'Save' }}
             </v-btn>
         </form>
+
+        <!-- Dialog for confirm -->
+        <v-dialog v-model="isDialogOpen" max-width="400">
+            <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
+                <h3 class="mb-5 text-xl font-semibold">
+                    Are you sure you want to set current video as default?
+                </h3>
+
+                <div class="mx-auto flex max-w-80 flex-wrap gap-4">
+                    <v-btn
+                        color="primary"
+                        variant="outlined"
+                        class="text-none flex-grow"
+                        @click="isDialogOpen = false"
+                    >
+                        Cancel
+                    </v-btn>
+
+                    <v-btn
+                        :loading="isConfirmLoading"
+                        class="text-none flex-grow"
+                        color="primary"
+                        @click="setVideoAsDefault"
+                    >
+                        Yes
+                    </v-btn>
+                </div>
+            </div>
+        </v-dialog>
     </div>
 </template>
 
@@ -329,9 +371,11 @@
     import type { CreateFormEmits } from '@/components/forms/types';
 
     import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
+    import { getDefaultContent } from '@/api/contens/get-default-content.api.ts';
     import { getBlobFile } from '@/api/contens/get-file.api.ts';
     import { getLanguages } from '@/api/contens/get-languages.api.ts';
     import { postVideo } from '@/api/contens/post-video.api.ts';
+    import { setDefaultContent } from '@/api/contens/set-default-content.api.ts';
     import { updateVideo } from '@/api/contens/update-video.api.ts';
     import { useCaptureImage } from '@/hooks/useCaptureImage.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
@@ -353,6 +397,10 @@
     const isContentSelected = ref(!!props.content);
     const isVideoLoaded = ref(!props.content);
     const isLoading = ref(false);
+
+    const defaultContent = ref<VideoContent>();
+    const isConfirmLoading = ref(false);
+    const isDialogOpen = ref(false);
 
     const isShowCard = ref(false);
 
@@ -379,8 +427,6 @@
     const [requiresAuth] = defineField('requires_auth');
     const [withAudio] = defineField('audio_enabled');
     const [withNarration] = defineField('narration_enabled');
-
-    const isShowContentOnBanner = ref(false);
 
     /**
      * Data for content sources
@@ -448,6 +494,12 @@
         }
     };
 
+    const loadDefaultContent = async () => {
+        if (props.content) {
+            defaultContent.value = await getDefaultContent();
+        }
+    };
+
     const onVideoCapture = async () => {
         if (videoElement.value instanceof HTMLVideoElement) {
             try {
@@ -491,6 +543,23 @@
                 }
             } finally {
                 isVideoLoaded.value = true;
+            }
+        }
+    };
+
+    const setVideoAsDefault = async () => {
+        if (props.content) {
+            isConfirmLoading.value = true;
+
+            try {
+                await setDefaultContent(props.content.id);
+
+                toast.error('Content is default now');
+            } catch (e) {
+                toast.error('Content is not default');
+            } finally {
+                isConfirmLoading.value = false;
+                isDialogOpen.value = false;
             }
         }
     };
@@ -644,6 +713,7 @@
     void loadVideoFile();
     void loadTopics();
     void loadLanguages();
+    void loadDefaultContent();
 </script>
 
 <style scoped></style>
