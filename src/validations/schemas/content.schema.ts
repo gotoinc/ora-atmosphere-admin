@@ -2,7 +2,7 @@ import type { ObjectSchema } from 'yup';
 import { boolean } from 'yup';
 import { array, object, string } from 'yup';
 
-import { fileSchema, identifiableSchema } from '@/validations';
+import { audioSchema, fileSchema, identifiableSchema } from '@/validations';
 import type { CreateContentSchema } from '@/validations/types/content.validation';
 
 /**
@@ -13,7 +13,7 @@ export const createContentSchema: ObjectSchema<CreateContentSchema> = object({
     file: fileSchema.required('Please select file'),
     preview_image: fileSchema,
     description: string().nullable(),
-    audios: array().of(fileSchema.required('Please select file')),
+    audios: array().of(audioSchema.required()),
     languages: identifiableSchema.required('Please select language'),
     tags: array().of(string().required()),
     topic: identifiableSchema.required('Please select a theme'),

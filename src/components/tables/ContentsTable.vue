@@ -90,7 +90,7 @@
 
         <template #[`item.duration`]="{ item }">
             <p class="whitespace-nowrap">
-                {{ useFormatVideoDuration(item.duration) }}
+                {{ useFormatDuration(item.duration) }}
             </p>
         </template>
 
@@ -151,7 +151,7 @@
     import TableActionButtons from '@/components/tables/TableActionButtons.vue';
 
     import { useFormatDate } from '@/hooks/useFormatDate.ts';
-    import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
+    import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
     import type { VideoContent } from '@/ts/contents';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 

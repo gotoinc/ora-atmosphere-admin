@@ -18,12 +18,12 @@ export interface ContentInput extends EditableValues, Partial<BooleanValues> {
     file: File;
     preview_image: File;
     languages: number[];
-    audios?: File[];
+    audios?: AudioInput[];
     topic: number;
 }
 
 export interface AudioInput extends Omit<Audio, 'id' | 'file'> {
-    file: File | string;
+    file: File;
 }
 
 export interface CreateContentSchema
@@ -33,9 +33,11 @@ export interface CreateContentSchema
     file: File | string;
     preview_image?: File | string;
     description?: string | null;
-    audios?: Array<File | string>;
+    audios?: CreateAudio[];
     languages: Identifiable;
     tags?: string[];
 }
 
-export interface CreateAudio extends Omit<Audio, 'id' | 'video'> {}
+export interface CreateAudio extends Omit<Audio, 'id' | 'video' | 'file'> {
+    file: File | string;
+}

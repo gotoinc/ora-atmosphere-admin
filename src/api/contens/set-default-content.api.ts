@@ -7,7 +7,7 @@ import type { VideoContent } from '@/ts/contents';
 export const setDefaultContent = async (id: number) => {
     try {
         const res = await axios.post<AxiosResponse<VideoContent>>(
-            `/admin/set-default-video/`,
+            `/admin/videos/set_default_video/`,
             {
                 video_id: id,
             }

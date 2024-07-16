@@ -1,6 +1,8 @@
+import type { ObjectSchema } from 'yup';
 import { boolean, mixed, number, object, string } from 'yup';
 
 import { isFile } from '@/ts/guards/file.guard.ts';
+import type { CreateAudio } from '@/validations/types/content.validation';
 
 /**
  * Define common validations
@@ -54,7 +56,7 @@ export const fileSchema = mixed<File | string>()
     });
 
 // Audio schema
-export const audioSchema = object({
+export const audioSchema: ObjectSchema<CreateAudio> = object({
     name: string().required('Please enter the name'),
     file: fileSchema.required('Please upload a file'),
     duration: number().required('Please enter the duration'),

@@ -53,14 +53,14 @@
                         <template v-else>
                             <div>
                                 <div v-if="content" class="mb-5">
-                                    <span class="block text-sm"
-                                        >Video link:</span
-                                    >
+                                    <span class="block text-sm">
+                                        Video link:
+                                    </span>
 
                                     <a
                                         target="_blank"
                                         :href="content.file"
-                                        class="block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100"
+                                        class="link"
                                     >
                                         {{ content.file }}
                                     </a>
@@ -86,7 +86,7 @@
                                     <span class="text-sm">Duration:</span>
 
                                     <p class="font-semibold">
-                                        {{ useFormatVideoDuration(duration) }}
+                                        {{ useFormatDuration(duration) }}
                                     </p>
                                 </div>
                             </div>
@@ -173,7 +173,6 @@
                     :accept="['audio/mpeg']"
                     multiple
                     class="mb-5"
-                    :file-to-remove="audioToRemove"
                     @upload="selectAudioFiles"
                 >
                     <template #icon>
@@ -181,15 +180,15 @@
                     </template>
                 </drag-and-drop>
 
-                <div v-if="audioFiles.size > 0" class="grid gap-2">
+                <div v-if="audios?.length" class="grid gap-2">
                     <h4 class="mb-3 font-semibold">
                         Uploaded files
-                        {{ `(${audioFiles.size})` }}
+                        {{ `(${audios.length})` }}
                     </h4>
 
                     <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
                         <div
-                            v-for="(audio, i) in audioFiles"
+                            v-for="(audio, i) in audios"
                             :key="i"
                             class="rounded bg-slate-600 p-4"
                         >
@@ -210,27 +209,32 @@
                                 preload="metadata"
                                 class="mb-2 w-full"
                                 controls
-                                :src="getSource(audio)"
+                                :src="getSource(audio.file)"
                             ></audio>
 
                             <div class="space-y-4">
-                                <h5 class="mb-2">
-                                    File name:
+                                <p class="mb-2">
+                                    File name
                                     <span class="line-camp-1">
-                                        {{ isFile(audio) ? audio.name : audio }}
+                                        {{ audio.name }}
                                     </span>
-                                </h5>
+                                </p>
 
-                                <p v-if="isFile(audio)">
+                                <p>
                                     File size:
                                     {{ useFormatFileSize(audio.size) }}
+                                </p>
+
+                                <p>
+                                    File duration:
+                                    {{ useFormatDuration(audio.duration) }}
                                 </p>
 
                                 <v-btn
                                     type="submit"
                                     color="red"
                                     class="text-none w-fit"
-                                    @click="removeAudioFile(audio)"
+                                    @click="removeAudioFile(audio.name)"
                                 >
                                     Remove
                                 </v-btn>
@@ -362,7 +366,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, onUnmounted, ref, watch } from 'vue';
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
@@ -380,14 +384,17 @@
     import { useCaptureImage } from '@/hooks/useCaptureImage.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
+    import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
-    import { useFormatVideoDuration } from '@/hooks/useFormatVideoDuration.ts';
     import { useThrowError } from '@/hooks/useThrowError.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
-    import type { CreateContentSchema } from '@/validations/types/content.validation';
+    import type {
+        AudioInput,
+        CreateContentSchema,
+    } from '@/validations/types/content.validation';
 
     const props = defineProps<{ content?: VideoContent | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -403,16 +410,20 @@
     const isDialogOpen = ref(false);
 
     const isShowCard = ref(false);
+    const isChangesDetected = ref(false);
 
     /**
      * Define schema
      */
-    const { defineField, handleSubmit, errors, resetForm, setValues } =
+    const { defineField, values, handleSubmit, errors, resetForm, setValues } =
         useForm<CreateContentSchema>({
             validationSchema: createContentSchema,
             initialValues: {
                 audios: [],
                 description: '',
+                audio_enabled: false,
+                narration_enabled: false,
+                requires_auth: false,
             },
         });
 
@@ -435,10 +446,6 @@
     const imageSrc = ref('');
     const initialImageSrc = ref('');
 
-    const audioFiles = ref<Set<File | string>>(new Set());
-    const audioUploadables = ref<Set<UploadableFile>>(new Set());
-    const audioToRemove = ref<UploadableFile>();
-
     const videoElement = ref<HTMLVideoElement | null>(null);
     const videoSrc = ref('');
     const videoSize = ref(0);
@@ -459,9 +466,12 @@
      */
     if (props.content) {
         if (props.content.audios) {
-            audioFiles.value = new Set(
-                props.content.audios.map((item) => item.file)
-            );
+            audios.value = props.content.audios;
+        }
+
+        if (props.content.preview_image) {
+            isShowCard.value = true;
+            imageSrc.value = props.content.preview_image;
         }
 
         if (props.content.tags) {
@@ -580,15 +590,20 @@
 
     const selectAudioFiles = (files: UploadableFile[]) => {
         files.forEach((item) => {
-            if (!audioUploadables.value.has(item)) {
-                audioUploadables.value.add(item);
+            const isFileExist = audios.value?.some(
+                (file) => item.name === file.name
+            );
 
-                audioFiles.value.add(item.file);
-
+            if (!isFileExist) {
                 const audio = new Audio(getSource(item.file));
 
                 audio.addEventListener('loadedmetadata', () => {
-                    audios.value?.push(item.file);
+                    audios.value?.push({
+                        name: item.file.name,
+                        size: item.file.size,
+                        duration: audio.duration,
+                        file: item.file,
+                    });
                 });
             }
         });
@@ -615,21 +630,8 @@
         isShowCard.value = false;
     };
 
-    const removeAudioFile = (file: File | string) => {
-        for (const item of audioUploadables.value) {
-            if (item.file === file) {
-                audioToRemove.value = item;
-            }
-        }
-
-        if (audioToRemove.value)
-            audioUploadables.value.delete(audioToRemove.value);
-
-        audioFiles.value.delete(file);
-
-        audios.value = audios.value?.filter(
-            (file) => isFile(file) && file !== audioToRemove.value?.file
-        );
+    const removeAudioFile = (fileName: string) => {
+        audios.value = audios.value?.filter((file) => file.name !== fileName);
     };
 
     /*
@@ -660,6 +662,19 @@
         }
     };
 
+    watch(values, (value) => {
+        if (
+            value.audios?.length ||
+            value.description ||
+            value.file ||
+            value.title ||
+            value.languages.id ||
+            value.topic.id
+        ) {
+            isChangesDetected.value = true;
+        }
+    });
+
     /*
      * Submit create/update operation for the content
      */
@@ -678,7 +693,8 @@
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,
-            audios: audios.value as File[],
+            // TODO: transform audios to file
+            audios: audios.value as AudioInput[],
         };
 
         try {
@@ -714,6 +730,24 @@
     void loadTopics();
     void loadLanguages();
     void loadDefaultContent();
+
+    const preventReload = (event: Event) => {
+        if (isChangesDetected.value) {
+            event.preventDefault();
+        }
+    };
+
+    onMounted(() => {
+        window.addEventListener('beforeunload', preventReload);
+    });
+
+    onUnmounted(() => {
+        window.removeEventListener('beforeunload', preventReload);
+    });
 </script>
 
-<style scoped></style>
+<style scoped lang="postcss">
+    .link {
+        @apply block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100;
+    }
+</style>
