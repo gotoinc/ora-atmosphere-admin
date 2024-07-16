@@ -6,7 +6,7 @@ export const postVideo = async (body: ContentInput) => {
     try {
         const formData = new FormData();
         formData.append('title', body.title);
-        formData.append('description', 'This is a sample description.');
+        formData.append('description', body.description ?? '');
         formData.append('languages', String(body.languages)); // Language ID
         formData.append('tags', body.tags ?? '');
         formData.append('requires_auth', String(body.requires_auth));
@@ -15,7 +15,12 @@ export const postVideo = async (body: ContentInput) => {
         formData.append('topic', String(body.topic)); // Topic ID
         formData.append('duration', String(body.duration));
         formData.append('preview_image', body.preview_image); // File object
+        formData.append('image', body.preview_image); // File object
         formData.append('file', body.file); // File object
+        formData.append('show_on_main_banner', String(true)); // File object
+        formData.append('visible_for_unregistered', String(true));
+        formData.append('is_featured ', String(true));
+        formData.append('date_created', new Date().toISOString());
 
         if (body.audios) {
             body.audios.forEach((audioFile) => {
