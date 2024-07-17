@@ -5,13 +5,13 @@ export interface VideoContent {
     title: string;
     description?: string | null;
     file: string;
-    languages: Identifiable;
+    languages: Identifiable[];
     requires_auth: boolean;
     preview_image: string;
     audio_enabled: boolean;
     narration_enabled: boolean;
     duration: number;
-    date_created: string;
+    date_created?: string;
     topic: Identifiable;
     audios?: Audio[];
     tags?: string;

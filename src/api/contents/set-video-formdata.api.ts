@@ -15,7 +15,10 @@ export const setVideoFormdata = (body: ContentInput) => {
     formData.append('preview_image', body.preview_image); // File object
     formData.append('image', body.image); // File object
     formData.append('file', body.file); // File object
-    formData.append('date_created', body.date_created);
+
+    if (body.date_created) {
+        formData.append('date_created', body.date_created);
+    }
 
     // Test data
     formData.append('show_on_main_banner', String(true));

@@ -5,7 +5,7 @@
             'bg-primary-100': files.length > 0 && !multiple,
         }"
         class="drop-area group w-full rounded bg-grey-200 p-3 text-center transition-colors"
-        @files-dropped="checkFileType"
+        @files-dropped="checkFile"
     >
         <div
             :class="{
@@ -129,7 +129,7 @@
         }
     };
 
-    const checkFileType = (newFiles: FileList | File[]) => {
+    const checkFile = (newFiles: FileList | File[]) => {
         if (!props.multiple && newFiles.length > 1) {
             toast.error('Only 1 attachment is allowed');
             return;
@@ -182,7 +182,7 @@
         const input = e.target as HTMLInputElement;
 
         if (input.files) {
-            checkFileType(input.files);
+            checkFile(input.files);
         }
 
         input.value = ''; // reset so that selecting the same file again will still cause it to fire this change

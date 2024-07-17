@@ -7,7 +7,7 @@
                 <drag-and-drop
                     v-if="!videoSrc && !isContentSelected"
                     :error="!!errors.file"
-                    :accept="['video/mp4', 'video/webm']"
+                    :accept="acceptedVideos"
                     @upload="selectVideoFile"
                     @remove="removeVideoFile"
                 >
@@ -417,6 +417,7 @@
     import { setDefaultContent } from '@/api/contents/set-default-content.api.ts';
     import { updateVideo } from '@/api/contents/update-video.api.ts';
     import { getFile } from '@/api/files/get-file.api.ts';
+    import acceptedVideos from '@/constants/accepted-videos.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
@@ -458,6 +459,7 @@
             initialValues: {
                 audios: [],
                 description: '',
+                title: '',
                 audio_enabled: false,
                 narration_enabled: false,
                 requires_auth: false,
@@ -537,11 +539,11 @@
             useExcludeProperties({ ...props.content }, [
                 'id',
                 'date_created',
-                'languages',
                 'tags',
                 'audios',
                 'preview_image',
                 'file',
+                'languages',
             ])
         );
 
@@ -556,6 +558,10 @@
             audios.value = props.content.audios;
 
             await loadAudioFiles();
+        }
+
+        if (props.content?.languages) {
+            language.value = props.content.languages[0];
         }
 
         if (props.content?.tags) {
@@ -688,17 +694,23 @@
     /*
      * Loading data for selection
      */
+    const formatSelectionList = <T extends Identifiable>(
+        items: T[]
+    ): Identifiable[] => {
+        return items.map((item) => {
+            return {
+                name: item.name,
+                id: item.id,
+            };
+        });
+    };
+
     const loadTopics = async () => {
         try {
             const items = (await getTopics()) ?? [];
 
             if (items.length > 0) {
-                topics.value = items.map((item) => {
-                    return {
-                        name: item.name,
-                        id: item.id,
-                    };
-                });
+                topics.value = formatSelectionList(items);
             }
         } finally {
             isTopicsLoading.value = false;
@@ -707,7 +719,11 @@
 
     const loadLanguages = async () => {
         try {
-            languagesList.value = (await getLanguages()) ?? [];
+            const items = (await getLanguages()) ?? [];
+
+            if (items.length > 0) {
+                languagesList.value = formatSelectionList(items);
+            }
         } finally {
             isLanguagesLoading.value = false;
         }
@@ -719,10 +735,8 @@
             value.description ||
             value.file ||
             value.title ||
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            value.languages?.id ||
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            value.topic?.id
+            value.languages.id ||
+            value.topic.id
         ) {
             isChangesDetected.value = true;
         }
@@ -742,8 +756,6 @@
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,
-            date_created: new Date().toISOString(),
-            // TODO: transform audios to file
             audios: audios.value,
             image: props.content?.preview_image ?? '',
         };

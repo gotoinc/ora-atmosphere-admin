@@ -84,7 +84,11 @@
 
         <template #[`item.date_created`]="{ item }">
             <p class="whitespace-nowrap">
-                {{ useFormatDate(item.date_created) }}
+                {{
+                    item.date_created
+                        ? useFormatDate(item.date_created)
+                        : 'Date is not set'
+                }}
             </p>
         </template>
 
@@ -96,15 +100,19 @@
 
         <template #[`item.languages`]="{ item }">
             <div
-                v-if="item.languages.name"
+                v-if="item.languages"
                 class="flex flex-wrap items-center gap-2 py-2"
             >
-                <span class="tag tag--lang tag--fill pointer-events-none">
-                    {{ item.languages.name }}
+                <span
+                    v-for="lang in item.languages.slice(0, 2)"
+                    :key="lang.id"
+                    class="tag tag--lang tag--fill pointer-events-none capitalize"
+                >
+                    {{ lang.name }}
                 </span>
 
-                <span v-if="item.tags" class="text-xs">
-                    + {{ item.tags.length - 2 }} more
+                <span v-if="item.languages.length > 2" class="text-xs">
+                    + {{ item.languages.length - 2 }} more
                 </span>
             </div>
 
@@ -117,7 +125,7 @@
                 class="flex min-w-40 flex-wrap items-center gap-2 py-2"
             >
                 <span
-                    v-for="tag in splitTags(item.tags).slice(0, 2)"
+                    v-for="tag in splitTags(item.tags)"
                     :key="tag"
                     class="tag tag--fill pointer-events-none"
                 >
@@ -233,8 +241,4 @@
     const splitTags = (tags: string) => tags.split(', ');
 </script>
 
-<style>
-    /* .v-table > .v-table__wrapper > table {
-        min-width: 1240px;
-    }*/
-</style>
+<style></style>
