@@ -49,7 +49,7 @@ export const fileSchema = mixed<File | string>()
     })
     .test('fileSize', 'File size is too large', (value) => {
         if (value && isFile(value)) {
-            return value.size <= 5000000; // not bigger that 5mb
+            return value.size < 50 * 1024 * 1024; // not bigger that 50mb
         } else {
             return true;
         }
