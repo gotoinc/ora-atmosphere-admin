@@ -18,12 +18,9 @@ export interface ContentInput extends EditableValues, Partial<BooleanValues> {
     file: File;
     preview_image: File;
     languages: number[];
-    audios?: AudioInput[];
+    audios?: CreateAudio[];
     topic: number;
-}
-
-export interface AudioInput extends Omit<Audio, 'id' | 'file'> {
-    file: File;
+    image: string;
 }
 
 export interface CreateContentSchema

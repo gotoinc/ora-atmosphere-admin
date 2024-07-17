@@ -40,3 +40,8 @@ export default function createUploader(url: string) {
         },
     };
 }
+
+export const getFileName = (url: string) => {
+    const parts = url.split('/');
+    return parts[parts.length - 1];
+};

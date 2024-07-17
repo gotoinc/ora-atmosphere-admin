@@ -83,6 +83,7 @@
         multiple?: boolean;
         accept?: string[];
         fileToRemove?: UploadableFile;
+        sizeLimit?: number; // size in MB
     }
 
     interface Emits {
@@ -91,7 +92,9 @@
     }
 
     const emits = defineEmits<Emits>();
-    const props = defineProps<Props>();
+    const props = withDefaults(defineProps<Props>(), {
+        sizeLimit: 50,
+    });
 
     const toast = useToast();
 
@@ -109,6 +112,20 @@
         } else {
             toast.error(`File ${file.name} is not supported`);
             return false;
+        }
+    };
+
+    const checkFileSize = (file: File) => {
+        if (props.sizeLimit) {
+            const limit = props.sizeLimit * 1024 * 1024;
+
+            if (file.size > limit) {
+                toast.error(`File ${file.name} is too large`);
+
+                return false;
+            }
+
+            return true;
         }
     };
 
@@ -132,13 +149,13 @@
 
             if (Array.isArray(newFiles)) {
                 newFiles.forEach((file) => {
-                    if (checkFileAccept(file)) {
+                    if (checkFileAccept(file) && checkFileSize(file)) {
                         accepted.push(file);
                     }
                 });
             } else {
                 for (const file of newFiles) {
-                    if (checkFileAccept(file)) {
+                    if (checkFileAccept(file) && checkFileSize(file)) {
                         accepted.push(file);
                     }
                 }
@@ -154,12 +171,10 @@
         }
 
         // Check file type
-        if (props.accept.includes(newFiles[0].type)) {
+        if (checkFileAccept(newFiles[0]) && checkFileSize(newFiles[0])) {
             addFiles(newFiles);
 
             emits('upload', files.value);
-        } else {
-            toast.error('This file type is not supported');
         }
     };
 

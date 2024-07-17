@@ -119,8 +119,8 @@
     import CreateContentForm from '@/components/forms/CreateContentForm.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
-    import { deleteContent } from '@/api/contens/delete-content.api.ts';
-    import { getContents } from '@/api/contens/get-contents.api.ts';
+    import { deleteContent } from '@/api/contents/delete-content.api.ts';
+    import { getContents } from '@/api/contents/get-contents.api.ts';
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';

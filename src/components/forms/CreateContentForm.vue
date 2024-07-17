@@ -23,7 +23,7 @@
                 >
                     <div class="mb-4 h-80 max-tab:h-[45vw]">
                         <video
-                            v-if="isVideoLoaded"
+                            v-if="isVideoLoaded && uploadedVideoFile"
                             ref="videoElement"
                             class="h-full w-full rounded-lg object-cover"
                             controls
@@ -31,7 +31,7 @@
                             @loadedmetadata="loadVideoInfo"
                         >
                             <source
-                                :type="videoType"
+                                :type="uploadedVideoFile.type"
                                 :src="videoSrc ?? content?.file"
                             />
                         </video>
@@ -66,29 +66,35 @@
                                     </a>
                                 </div>
 
-                                <div v-else-if="uploadedVideoFile" class="mb-2">
-                                    <span class="text-sm">File name:</span>
+                                <template v-else-if="uploadedVideoFile">
+                                    <div class="mb-2">
+                                        <span class="text-sm">File name:</span>
 
-                                    <p class="block truncate font-semibold">
-                                        {{ uploadedVideoFile.name }}
-                                    </p>
-                                </div>
+                                        <p class="block truncate font-semibold">
+                                            {{ uploadedVideoFile.name }}
+                                        </p>
+                                    </div>
 
-                                <div class="mb-2">
-                                    <span class="text-sm">File size:</span>
+                                    <div class="mb-2">
+                                        <span class="text-sm">File size:</span>
 
-                                    <p class="font-semibold">
-                                        {{ useFormatFileSize(videoSize) }}
-                                    </p>
-                                </div>
+                                        <p class="font-semibold">
+                                            {{
+                                                useFormatFileSize(
+                                                    uploadedVideoFile.size
+                                                )
+                                            }}
+                                        </p>
+                                    </div>
 
-                                <div class="mb-5">
-                                    <span class="text-sm">Duration:</span>
+                                    <div class="mb-5">
+                                        <span class="text-sm">Duration:</span>
 
-                                    <p class="font-semibold">
-                                        {{ useFormatDuration(duration) }}
-                                    </p>
-                                </div>
+                                        <p class="font-semibold">
+                                            {{ useFormatDuration(duration) }}
+                                        </p>
+                                    </div>
+                                </template>
                             </div>
 
                             <div class="mb-4">
@@ -192,19 +198,6 @@
                             :key="i"
                             class="rounded bg-slate-600 p-4"
                         >
-                            <span
-                                v-if="!isFile(audio)"
-                                class="mb-4 inline-flex items-center rounded-full bg-grey-300 px-3 py-1 text-sm"
-                            >
-                                Active
-                                <v-icon
-                                    class="ml-1"
-                                    size="20"
-                                    icon="mdi-check-circle-outline"
-                                    color="green"
-                                />
-                            </span>
-
                             <audio
                                 preload="metadata"
                                 class="mb-2 w-full"
@@ -214,7 +207,7 @@
 
                             <div class="space-y-4">
                                 <p class="mb-2">
-                                    File name
+                                    File name:
                                     <span class="line-camp-1">
                                         {{ audio.name }}
                                     </span>
@@ -375,26 +368,21 @@
     import type { CreateFormEmits } from '@/components/forms/types';
 
     import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
-    import { getDefaultContent } from '@/api/contens/get-default-content.api.ts';
-    import { getBlobFile } from '@/api/contens/get-file.api.ts';
-    import { getLanguages } from '@/api/contens/get-languages.api.ts';
-    import { postVideo } from '@/api/contens/post-video.api.ts';
-    import { setDefaultContent } from '@/api/contens/set-default-content.api.ts';
-    import { updateVideo } from '@/api/contens/update-video.api.ts';
-    import { useCaptureImage } from '@/hooks/useCaptureImage.ts';
+    import { getDefaultContent } from '@/api/contents/get-default-content.api.ts';
+    import { getLanguages } from '@/api/contents/get-languages.api.ts';
+    import { postVideo } from '@/api/contents/post-video.api.ts';
+    import { setDefaultContent } from '@/api/contents/set-default-content.api.ts';
+    import { updateVideo } from '@/api/contents/update-video.api.ts';
+    import { getFile } from '@/api/files/get-file.api.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
     import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
-    import { useThrowError } from '@/hooks/useThrowError.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
-    import type {
-        AudioInput,
-        CreateContentSchema,
-    } from '@/validations/types/content.validation';
+    import type { CreateContentSchema } from '@/validations/types/content.validation';
 
     const props = defineProps<{ content?: VideoContent | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -444,12 +432,9 @@
      */
     const uploadedVideoFile = ref<File | null>(null);
     const imageSrc = ref('');
-    const initialImageSrc = ref('');
 
     const videoElement = ref<HTMLVideoElement | null>(null);
     const videoSrc = ref('');
-    const videoSize = ref(0);
-    const videoType = ref('');
     const duration = ref(0);
 
     /**
@@ -462,22 +447,30 @@
     const isLanguagesLoading = ref(true);
 
     /*
+     * Functions to manage audio
+     */
+    const loadAudioFiles = async () => {
+        if (props.content?.audios && audios.value) {
+            audios.value = await Promise.all(
+                audios.value.map(async (audio) => {
+                    if (!isFile(audio.file)) {
+                        const file = await getFile(audio.file);
+
+                        if (file) {
+                            audio.file = file;
+                        }
+                    }
+
+                    return audio;
+                })
+            );
+        }
+    };
+
+    /*
      * Fill existing data for content
      */
-    if (props.content) {
-        if (props.content.audios) {
-            audios.value = props.content.audios;
-        }
-
-        if (props.content.preview_image) {
-            isShowCard.value = true;
-            imageSrc.value = props.content.preview_image;
-        }
-
-        if (props.content.tags) {
-            tags.value = props.content.tags.split(', ');
-        }
-
+    const setExistingContent = async () => {
         // Set existing values to form
         setValues(
             useExcludeProperties({ ...props.content }, [
@@ -486,8 +479,33 @@
                 'languages',
                 'tags',
                 'audios',
+                'preview_image',
+                'file',
             ])
         );
+
+        if (props.content?.preview_image) {
+            isShowCard.value = true;
+            imageSrc.value = props.content.preview_image;
+
+            image.value = await getFile(props.content.preview_image);
+        }
+
+        if (props.content?.audios) {
+            audios.value = props.content.audios;
+
+            await loadAudioFiles();
+        }
+
+        if (props.content?.tags) {
+            tags.value = props.content.tags.split(', ');
+        }
+
+        await loadVideoFile();
+    };
+
+    if (props.content) {
+        void setExistingContent();
     }
 
     const getSource = (file: File | string) =>
@@ -510,32 +528,6 @@
         }
     };
 
-    const onVideoCapture = async () => {
-        if (videoElement.value instanceof HTMLVideoElement) {
-            try {
-                const src = useCaptureImage(videoElement.value);
-
-                if (src) {
-                    imageSrc.value = src;
-                    initialImageSrc.value = src;
-
-                    const blob = await getBlobFile(src);
-
-                    if (blob) {
-                        image.value = new File([blob], 'preview.jpg', {
-                            type: 'image/jpg',
-                            lastModified: new Date().getTime(),
-                        });
-                    }
-                }
-            } catch (e) {
-                useThrowError(e);
-            }
-
-            duration.value = videoElement.value.duration;
-        }
-    };
-
     const changeVideo = () => {
         videoSrc.value = '';
         isContentSelected.value = false;
@@ -544,12 +536,12 @@
     const loadVideoFile = async () => {
         if (props.content) {
             try {
-                const res = await getBlobFile(props.content.file);
+                const res = await getFile(props.content.file);
 
                 if (res) {
+                    videoFile.value = res;
+                    uploadedVideoFile.value = res;
                     videoSrc.value = URL.createObjectURL(res);
-                    videoType.value = res.type;
-                    videoSize.value = res.size;
                 }
             } finally {
                 isVideoLoaded.value = true;
@@ -578,12 +570,10 @@
      * Functions for file selection
      */
     const selectVideoFile = (files: UploadableFile[]) => {
-        const { file, name } = files[0];
+        const { file } = files[0];
 
         uploadedVideoFile.value = file;
-        videoFile.value = name;
-        videoType.value = file.type;
-        videoSize.value = file.size;
+        videoFile.value = file;
 
         videoSrc.value = getSource(file);
     };
@@ -668,7 +658,8 @@
             value.description ||
             value.file ||
             value.title ||
-            value.languages.id ||
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            value.languages?.id ||
             value.topic.id
         ) {
             isChangesDetected.value = true;
@@ -681,20 +672,18 @@
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
 
-        if (!image.value) {
-            await onVideoCapture();
-        }
-
         const body = {
             ...values,
-            file: uploadedVideoFile.value as File,
+            file: videoFile.value as File,
             duration: Math.round(duration.value),
             languages: [language.value.id],
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,
+            date_created: new Date().toISOString(),
             // TODO: transform audios to file
-            audios: audios.value as AudioInput[],
+            audios: audios.value,
+            image: props.content?.preview_image ?? '',
         };
 
         try {
@@ -726,7 +715,6 @@
         }
     });
 
-    void loadVideoFile();
     void loadTopics();
     void loadLanguages();
     void loadDefaultContent();
