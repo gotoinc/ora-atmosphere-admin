@@ -23,16 +23,16 @@ export const setVideoFormdata = (body: ContentInput) => {
 
     if (body.audios) {
         body.audios.forEach((audio) => {
-            const name = isFile(audio.file) ? audio.file.name : audio.name;
             const duration = isFile(audio.file)
                 ? audio.duration.toFixed()
                 : audio.duration;
+
             const size = isFile(audio.file)
                 ? audio.file.size.toFixed()
                 : audio.size;
 
             formData.append('audios', audio.file);
-            formData.append('audio_names', name);
+            formData.append('audio_names', audio.name);
             formData.append('audio_durations', String(duration));
             formData.append('audio_sizes', String(size));
         });

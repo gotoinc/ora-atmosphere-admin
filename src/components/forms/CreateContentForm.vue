@@ -172,6 +172,7 @@
                 </div>
             </div>
 
+            <!-- Audios block -->
             <div class="w-full rounded bg-grey-400 p-4">
                 <h3 class="mb-5 text-lg font-semibold">Upload audio</h3>
 
@@ -207,9 +208,51 @@
 
                             <div class="space-y-4">
                                 <p class="mb-2">
-                                    File name:
-                                    <span class="line-camp-1">
-                                        {{ audio.name }}
+                                    Audio name:
+                                    <span class="flex min-h-8 items-center">
+                                        <v-text-field
+                                            v-if="
+                                                audioToEdit?.name === audio.name
+                                            "
+                                            v-model="audioEditableName"
+                                            hide-details
+                                            density="compact"
+                                            variant="underlined"
+                                        />
+
+                                        <span v-else class="line-camp-1">
+                                            {{ audio.name }}
+                                        </span>
+
+                                        <span
+                                            v-ripple
+                                            class="edit-icon"
+                                            @click="handleRenameAudio(audio)"
+                                        >
+                                            <v-icon
+                                                size="18"
+                                                :icon="
+                                                    audioToEdit?.name ===
+                                                    audio.name
+                                                        ? 'mdi-cancel'
+                                                        : 'mdi-pencil'
+                                                "
+                                            />
+                                        </span>
+
+                                        <span
+                                            v-if="
+                                                audioToEdit?.name === audio.name
+                                            "
+                                            v-ripple
+                                            class="edit-icon"
+                                            @click="confirmAudioRename(audio)"
+                                        >
+                                            <v-icon
+                                                size="18"
+                                                :icon="'mdi-check'"
+                                            />
+                                        </span>
                                     </span>
                                 </p>
 
@@ -382,7 +425,10 @@
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
-    import type { CreateContentSchema } from '@/validations/types/content.validation';
+    import type {
+        CreateAudio,
+        CreateContentSchema,
+    } from '@/validations/types/content.validation';
 
     const props = defineProps<{ content?: VideoContent | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -396,6 +442,9 @@
     const defaultContent = ref<VideoContent>();
     const isConfirmLoading = ref(false);
     const isDialogOpen = ref(false);
+
+    const audioToEdit = ref<CreateAudio | null>(null);
+    const audioEditableName = ref('');
 
     const isShowCard = ref(false);
     const isChangesDetected = ref(false);
@@ -415,6 +464,9 @@
             },
         });
 
+    /**
+     * Define fields for form
+     */
     const [title] = defineField('title');
     const [description] = defineField('description');
     const [videoFile] = defineField('file');
@@ -437,9 +489,6 @@
     const videoSrc = ref('');
     const duration = ref(0);
 
-    /**
-     * Define fields for form
-     */
     const topics = ref<Identifiable[]>([]);
     const isTopicsLoading = ref(true);
 
@@ -465,6 +514,18 @@
                 })
             );
         }
+    };
+
+    const confirmAudioRename = (audio: CreateAudio) => {
+        audio.name = audioEditableName.value;
+        audioToEdit.value = null;
+    };
+
+    const handleRenameAudio = (audio: CreateAudio) => {
+        audioToEdit.value =
+            audioToEdit.value?.name === audio.name ? null : { ...audio };
+
+        audioEditableName.value = audio.name;
     };
 
     /*
@@ -660,7 +721,8 @@
             value.title ||
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             value.languages?.id ||
-            value.topic.id
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            value.topic?.id
         ) {
             isChangesDetected.value = true;
         }
@@ -737,5 +799,9 @@
 <style scoped lang="postcss">
     .link {
         @apply block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100;
+    }
+
+    .edit-icon {
+        @apply ml-2 flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-grey-200;
     }
 </style>
