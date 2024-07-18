@@ -91,6 +91,8 @@
                         family: 'Mulish',
                     },
 
+                    precision: 0,
+
                     color: '#f4effe',
                 },
             },

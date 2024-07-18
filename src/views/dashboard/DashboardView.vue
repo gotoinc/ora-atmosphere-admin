@@ -13,9 +13,9 @@
                 <v-skeleton-loader v-else class="h-12 w-36" />
             </div>
 
-            <v-card class="overflow-visible">
+            <v-card v-if="false" class="overflow-visible">
                 <div>
-                    <catalog-graph />
+                    <!--                    <catalog-graph /> -->
                 </div>
             </v-card>
         </div>
@@ -121,7 +121,6 @@
     import { useToast } from 'vue-toastification';
 
     import InfoCard from '@/components/base/InfoCard.vue';
-    import CatalogGraph from '@/components/graph/CatalogGraph.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
     import { storeToRefs } from 'pinia';

@@ -1,9 +1,13 @@
 <template>
-    <div class="v-sheet--offset mx-auto w-full rounded bg-grey-200 p-5">
+    <div
+        :class="{ loading: isLoading }"
+        class="v-sheet--offset mx-auto w-full rounded bg-grey-200 p-5"
+    >
         <div class="mb-10 flex flex-wrap items-start justify-between gap-5">
-            <h2 class="text-xl font-semibold">Catalog statistics</h2>
+            <h2 class="text-xl font-semibold">Contents statistics</h2>
 
             <v-btn-toggle
+                v-if="false"
                 v-model="selectedGraphOption"
                 class="max-xs:!h-auto max-xs:w-full max-xs:flex-col"
                 color="primary"
@@ -15,6 +19,8 @@
                 <v-btn class="tab"> Themes </v-btn>
             </v-btn-toggle>
         </div>
+
+        <v-loader v-if="isLoading" />
 
         <div class="min-h-[350px] overflow-x-auto pb-5">
             <main-graph
@@ -40,62 +46,46 @@
 
     import MainGraph from '@/components/graph/MainGraph.vue';
 
-    const selectedGraphOption = ref(0);
+    import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
+    import VLoader from '@/App.vue';
+
+    const selectedGraphOption = ref(3);
+    const isLoading = ref(true);
+
+    const chartInstance = {
+        labels: [],
+        datasets: [{ data: [] }],
+    };
 
     // Categories
-    const categoriesData = ref<ChartData<'bar'>>({
-        labels: [
-            `Brands & events id:1`,
-            'Science id:2',
-            'Culture id:3',
-            'Our World id:4',
-            'Entertainment id:5',
-            'Oceans & Skies id:6',
-        ],
-
-        datasets: [
-            {
-                data: [0, 1, 2, 2, 32, 4],
-            },
-        ],
-    });
+    const categoriesData = ref<ChartData<'bar'>>(chartInstance);
 
     // Groups
-    const groupsData = ref<ChartData<'bar'>>({
-        labels: [
-            'Brands id:1',
-            'Events id:2',
-            'Climate id:3',
-            'Biodiversity id:4',
-            'Space id:5',
-            'Geology id:6',
-            'The Future id:7',
-        ],
-
-        datasets: [
-            {
-                data: [4, 4, 6, 0, 9, 23, 5],
-            },
-        ],
-    });
+    const groupsData = ref<ChartData<'bar'>>(chartInstance);
 
     // Themes
-    const topicsData = ref<ChartData<'bar'>>({
-        labels: [
-            'Theme 1 id:1',
-            'Theme 2 id:2',
-            'Theme 3 id:3',
-            'Theme 4 id:4',
-            'Theme 5 id:5',
-            'Theme 6 id:6',
-        ],
+    const topicsData = ref<ChartData<'bar'>>(chartInstance);
 
-        datasets: [
-            {
-                data: [20, 5, 6, 0, 12, 1],
-            },
-        ],
-    });
+    const loadTopicsData = async () => {
+        isLoading.value = true;
+
+        try {
+            const topics = (await getTopics()) ?? [];
+
+            if (topics.length > 0) {
+                topics.slice(0, 8).forEach((item) => {
+                    topicsData.value.labels?.push(item.name);
+                    topicsData.value.datasets[0].data.push(
+                        item.contents_amount
+                    );
+                });
+            }
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    void loadTopicsData();
 </script>
 
 <style scoped>
@@ -103,6 +93,26 @@
         top: -24px;
         position: relative;
         max-width: calc(100% - 32px);
+
+        &:before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background: rgb(41 41 45 / 0.8);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        &.loading {
+            &:before {
+                opacity: 1;
+            }
+        }
     }
 
     .v-sheet--offset {

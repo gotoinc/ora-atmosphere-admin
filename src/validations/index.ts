@@ -76,7 +76,7 @@ export const commonCatalogSchema = object({
     date_created: string()
         .required('Date Created is required')
         .typeError('Date Created must be a string'),
-    contentsAmount: number()
+    contents_amount: number()
         .required('Contents Amount is required')
         .typeError('Contents Amount must be a number'),
 });

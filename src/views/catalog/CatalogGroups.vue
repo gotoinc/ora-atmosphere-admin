@@ -100,7 +100,7 @@
         // },
         // {
         //     title: 'Contents amount',
-        //     key: 'contentsAmount',
+        //     key: 'contents_amount',
         // },
         {
             title: 'Date',

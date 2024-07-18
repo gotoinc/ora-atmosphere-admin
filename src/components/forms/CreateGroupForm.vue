@@ -113,7 +113,7 @@
      */
     const excludedProperties = useExcludeProperties({ ...props.group }, [
         'id',
-        'contentsAmount',
+        'contents_amount',
         'date_created',
     ]) as CreateGroupSchema;
 

@@ -8,16 +8,15 @@ export const useUpdateQueryParams = <T extends Record<string, FilterValue>>(
 ) => {
     const query = { ...router.currentRoute.value.query } as Record<
         string,
-        string
+        number | string
     >;
 
     for (const key in filters) {
         const keyValue = filters[key];
         if (keyValue) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             query[key] =
-                typeof keyValue === 'object' && 'name' in keyValue
-                    ? keyValue['name']
+                typeof keyValue === 'object' && 'id' in keyValue
+                    ? keyValue['id']
                     : keyValue;
         } else {
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete

@@ -6,7 +6,7 @@ import type { ContentInput } from '@/validations/types/content.validation';
 export const updateVideo = async (id: string | number, body: ContentInput) => {
     try {
         const res = await axios.put<ContentInput>(
-            `/admin/videos/${id}/`,
+            `/admin/videos/${id}/update_video/`,
             setVideoFormdata(body)
         );
 

@@ -28,7 +28,9 @@
             ></v-text-field>
 
             <v-select
+                v-if="filters.category"
                 v-model="filters.category"
+                :loading="isTopicsLoading"
                 label="Category"
                 density="compact"
                 variant="outlined"
@@ -40,6 +42,7 @@
             />
 
             <v-select
+                v-if="filters.group"
                 v-model="filters.group"
                 label="Group"
                 density="compact"
@@ -75,7 +78,8 @@
 
     <contents-table
         :loading="isLoading"
-        :items="items"
+        :items="contents"
+        :search="filters.search"
         editable
         @delete="handleDelete"
         @edit="handleEdit"
@@ -85,6 +89,7 @@
     <teleport to="body">
         <full-screen-dialog v-model="isDialogOpen" title="Add new content">
             <create-content-form
+                :topics="topics"
                 @close="isDialogOpen = false"
                 @update="loadContents"
             />
@@ -96,6 +101,7 @@
         >
             <create-content-form
                 v-model:content="selectedContent"
+                :topics="topics"
                 @close="isEditOpen = false"
                 @update="loadContents"
             />
@@ -111,7 +117,8 @@
 
 <script setup lang="ts">
     import { computed, onMounted, reactive, ref, watch } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
+    import type { RouteLocationNormalizedGeneric } from 'vue-router';
+    import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
     import { useToast } from 'vue-toastification';
 
     import DeleteDialog from '@/components/dialogs/DeleteDialog.vue';
@@ -119,6 +126,7 @@
     import CreateContentForm from '@/components/forms/CreateContentForm.vue';
     import ContentsTable from '@/components/tables/ContentsTable.vue';
 
+    import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
     import { deleteContent } from '@/api/contents/delete-content.api.ts';
     import { getContents } from '@/api/contents/get-contents.api.ts';
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
@@ -141,11 +149,13 @@
 
     const isLoading = ref(false);
     const isDeleteLoading = ref(false);
+    const isTopicsLoading = ref(false);
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
 
-    const items = ref<VideoContent[]>([]);
+    const contents = ref<VideoContent[]>([]);
+    const initialContents = ref<VideoContent[]>([]);
 
     const isResetShow = computed(() =>
         [filters.search, filters.topic, filters.group, filters.category].some(
@@ -163,16 +173,7 @@
         topic: null,
     });
 
-    const topics = ref<Identifiable[]>([
-        {
-            id: 100,
-            name: 'Theme 1',
-        },
-        {
-            id: 101,
-            name: 'Theme 2',
-        },
-    ]);
+    const topics = ref<Identifiable[]>([]);
 
     const handleEdit = (content: VideoContent) => {
         selectedContent.value = content;
@@ -198,9 +199,31 @@
         isLoading.value = true;
 
         try {
-            items.value = (await getContents()) ?? [];
+            const items = (await getContents()) ?? [];
+
+            initialContents.value = items;
+            contents.value = items;
         } finally {
             isLoading.value = false;
+        }
+    };
+
+    const loadTopics = async () => {
+        isTopicsLoading.value = true;
+
+        try {
+            const items = (await getTopics()) ?? [];
+
+            if (items.length > 0) {
+                topics.value = items.map((item) => {
+                    return {
+                        name: item.name,
+                        id: item.id,
+                    };
+                });
+            }
+        } finally {
+            isTopicsLoading.value = false;
         }
     };
 
@@ -225,26 +248,48 @@
         }
     };
 
-    onMounted(() => {
+    const handleSearch = (route: RouteLocationNormalizedGeneric) => {
+        const { topic } = route.query;
+
+        if (topic) {
+            contents.value = initialContents.value.filter(
+                (content) => content.topic.id === Number(topic)
+            );
+        } else {
+            contents.value = initialContents.value;
+        }
+    };
+
+    onBeforeRouteUpdate((to) => {
+        handleSearch(to);
+    });
+
+    onMounted(async () => {
+        // Get topics
+        await loadTopics();
+
         // Filters
-        const { search, category, group, topic } = route.query;
+        const { search, topic } = route.query;
 
         if (search) filters.search = search as string;
 
-        if (category)
-            filters.category =
-                topics.value.find((item) => item.name === category) ?? null;
+        // if (category)
+        //     filters.category =
+        //         topics.value.find((item) => item.name === category) ?? null;
+        //
+        // if (group)
+        //     filters.group =
+        //         topics.value.find((item) => item.name === group) ?? null;
 
-        if (group)
-            filters.group =
-                topics.value.find((item) => item.name === group) ?? null;
-
-        if (topic)
+        if (topic) {
             filters.topic =
-                topics.value.find((item) => item.name === topic) ?? null;
+                topics.value.find((item) => item.id === Number(topic)) ?? null;
+        }
 
         // Get contents
-        void loadContents();
+        await loadContents();
+
+        handleSearch(route);
     });
 
     watch(filters, useUpdateQueryParams, { deep: true });

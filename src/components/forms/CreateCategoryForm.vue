@@ -97,7 +97,7 @@
      */
     const excludedProperties = useExcludeProperties({ ...props.category }, [
         'id',
-        'contentsAmount',
+        'contents_amount',
         'date_created',
     ]) as CreateCategorySchema;
 

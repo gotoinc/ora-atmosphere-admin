@@ -318,7 +318,6 @@
                     label="Theme"
                     variant="outlined"
                     clearable
-                    :loading="isTopicsLoading"
                     :items="topics"
                     :error-messages="errors.topic"
                     item-title="name"
@@ -410,7 +409,6 @@
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
     import type { CreateFormEmits } from '@/components/forms/types';
 
-    import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
     import { getDefaultContent } from '@/api/contents/get-default-content.api.ts';
     import { getLanguages } from '@/api/contents/get-languages.api.ts';
     import { postVideo } from '@/api/contents/post-video.api.ts';
@@ -431,7 +429,14 @@
         CreateContentSchema,
     } from '@/validations/types/content.validation';
 
-    const props = defineProps<{ content?: VideoContent | null }>();
+    interface Props {
+        topics: Identifiable[];
+        content?: VideoContent | null;
+    }
+
+    const props = withDefaults(defineProps<Props>(), {
+        topics: () => [],
+    });
     const emits = defineEmits<CreateFormEmits>();
 
     const toast = useToast();
@@ -490,9 +495,6 @@
     const videoElement = ref<HTMLVideoElement | null>(null);
     const videoSrc = ref('');
     const duration = ref(0);
-
-    const topics = ref<Identifiable[]>([]);
-    const isTopicsLoading = ref(true);
 
     const languagesList = ref<Identifiable[]>([]);
     const isLanguagesLoading = ref(true);
@@ -694,35 +696,17 @@
     /*
      * Loading data for selection
      */
-    const formatSelectionList = <T extends Identifiable>(
-        items: T[]
-    ): Identifiable[] => {
-        return items.map((item) => {
-            return {
-                name: item.name,
-                id: item.id,
-            };
-        });
-    };
-
-    const loadTopics = async () => {
-        try {
-            const items = (await getTopics()) ?? [];
-
-            if (items.length > 0) {
-                topics.value = formatSelectionList(items);
-            }
-        } finally {
-            isTopicsLoading.value = false;
-        }
-    };
-
     const loadLanguages = async () => {
         try {
             const items = (await getLanguages()) ?? [];
 
             if (items.length > 0) {
-                languagesList.value = formatSelectionList(items);
+                languagesList.value = items.map((item) => {
+                    return {
+                        name: item.name,
+                        id: item.id,
+                    };
+                });
             }
         } finally {
             isLanguagesLoading.value = false;
@@ -789,7 +773,6 @@
         }
     });
 
-    void loadTopics();
     void loadLanguages();
     void loadDefaultContent();
 

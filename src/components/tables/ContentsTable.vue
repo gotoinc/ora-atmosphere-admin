@@ -6,6 +6,7 @@
                 order: 'desc',
             },
         ]"
+        :search="search"
         :loading="loading"
         class="!rounded-lg"
         :headers="headers"
@@ -167,6 +168,7 @@
         loading?: boolean;
         items: VideoContent[];
         editable?: boolean;
+        search?: string;
     }
 
     interface Emits {

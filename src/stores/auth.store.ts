@@ -8,6 +8,7 @@ import { authLogin } from '@/api/auth/auth-login.api.ts';
 import { authLogout } from '@/api/auth/auth-logout.api.ts';
 import { getProfile } from '@/api/auth/get-profile.api.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
+import router from '@/router';
 import type { AdminUser } from '@/ts/users';
 import type { SignInInput } from '@/validations/types/auth';
 
@@ -41,7 +42,9 @@ export const useAuthStore = defineStore(
 
                 return profile.value;
             } catch (e) {
+                clearAuth();
                 void logout();
+                void router.replace({ name: 'auth' });
             }
         };
 

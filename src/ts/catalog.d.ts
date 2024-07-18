@@ -6,7 +6,7 @@ export interface CommonCatalogTypes {
     image: string | null;
     requires_auth?: boolean;
     date_created: string;
-    contentsAmount: number;
+    contents_amount: number;
 }
 
 export interface Category extends CommonCatalogTypes {}

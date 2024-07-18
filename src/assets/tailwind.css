@@ -79,3 +79,10 @@
         }
     }
 }
+
+.v-overlay__scrim {
+    background: rgb(41 41 45 / 0.4) !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 1 !important;
+}

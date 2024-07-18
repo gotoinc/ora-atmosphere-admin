@@ -13,7 +13,7 @@
         </template>
 
         <template #no-data>
-            <v-btn color="primary"> Reset </v-btn>
+            <p class="text-lg">No users found</p>
         </template>
     </v-data-table>
 
