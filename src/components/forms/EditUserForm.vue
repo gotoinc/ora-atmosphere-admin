@@ -49,18 +49,6 @@
         </div>
 
         <div>
-            <p class="mb-3">Please enter company name</p>
-
-            <v-text-field
-                v-model="companyName"
-                name="company_name"
-                label="Company name"
-                :error-messages="errors.company_name"
-                variant="outlined"
-            />
-        </div>
-
-        <div>
             <p class="mb-3">Please select activity</p>
 
             <v-select
@@ -109,36 +97,35 @@
             />
         </div>
 
-        <v-btn
-            :disabled="isButtonDisabled"
-            type="submit"
-            class="text-none w-fit"
-            color="primary"
-        >
+        <v-btn type="submit" class="text-none w-fit" color="primary">
             Save changes
         </v-btn>
     </form>
 </template>
 
 <script setup lang="ts">
-    import { computed } from 'vue';
+    import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
+    import type { CreateFormEmits } from '@/components/forms/types';
+
+    import { updateUser } from '@/api/users/update-user.api.ts';
     import activitiesList from '@/constants/activities-list.ts';
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import type { UserProfile } from '@/ts/users';
     import { editUserSchema } from '@/validations/schemas/user.schema.ts';
 
     const props = defineProps<{ user: UserProfile }>();
+    const emits = defineEmits<CreateFormEmits>();
 
-    const { defineField, handleSubmit, errors, setValues, controlledValues } =
+    const toast = useToast();
+
+    const isLoading = ref(false);
+
+    const { defineField, handleSubmit, errors, setValues } =
         useForm<UserProfile>({
             validationSchema: editUserSchema,
         });
-
-    const isButtonDisabled = computed(
-        () => !!useCompareObjects(controlledValues.value, props.user)
-    );
 
     const [firstName] = defineField('first_name');
     const [lastName] = defineField('last_name');
@@ -151,8 +138,21 @@
 
     setValues({ ...props.user });
 
-    const onSubmit = handleSubmit((values) => {
-        console.log(values);
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
+
+        try {
+            await updateUser(props.user.id, values);
+
+            toast.success('User has been successfully updated');
+
+            emits('update');
+            emits('close');
+        } catch (e) {
+            toast.error('User is not updated');
+        } finally {
+            isLoading.value = false;
+        }
     });
 </script>
 

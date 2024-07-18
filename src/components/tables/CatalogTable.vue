@@ -4,6 +4,7 @@
         :loading="loading"
         :headers="headers"
         :items="items"
+        :search="search"
     >
         <template #[`item.actions`]="{ item }">
             <table-action-buttons
@@ -70,6 +71,7 @@
         items: any[];
         editable?: boolean;
         loading?: boolean;
+        search?: string;
     }
 
     interface Emits {

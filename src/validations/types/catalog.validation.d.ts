@@ -1,4 +1,5 @@
 import type { Category, Group, Topic } from '@/ts/catalog';
+import type { Identifiable } from '@/ts/common';
 
 /**
  * Types for creating category
@@ -22,8 +23,9 @@ export interface GroupInput extends Pick<Category, 'name' | 'requires_auth'> {
 }
 
 export interface CreateGroupSchema
-    extends Pick<Group, 'name' | 'requires_auth' | 'category'> {
+    extends Pick<Group, 'name' | 'requires_auth'> {
     image: File | string;
+    category: Identifiable;
 }
 
 /**
@@ -35,6 +37,7 @@ export interface TopicInput extends Pick<Topic, 'name' | 'requires_auth'> {
 }
 
 export interface CreateTopicSchema
-    extends Pick<Topic, 'name' | 'requires_auth' | 'group'> {
+    extends Pick<Topic, 'name' | 'requires_auth'> {
     image: File | string;
+    group: Identifiable;
 }

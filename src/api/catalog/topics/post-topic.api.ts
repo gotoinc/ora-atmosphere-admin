@@ -8,7 +8,7 @@ import type { TopicInput } from '@/validations/types/catalog.validation';
 export const postTopic = async (body: TopicInput) => {
     try {
         const res = await axios.postForm<TopicInput, AxiosResponse<Topic>>(
-            `/admin/topics/`,
+            `/admin/topics/create_topic/`,
             body
         );
 

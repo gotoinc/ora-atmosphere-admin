@@ -11,8 +11,6 @@
         </div>
 
         <div>
-            <p class="mb-3">Last name</p>
-
             <v-text-field
                 v-model="lastName"
                 :error-messages="errors.last_name"
@@ -59,6 +57,7 @@
     import { computed, onMounted } from 'vue';
     import { useForm } from 'vee-validate';
 
+    import { storeToRefs } from 'pinia';
     import { useAuthStore } from '@/stores/auth.store.ts';
 
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
@@ -74,7 +73,9 @@
         });
 
     const isButtonDisabled = computed(
-        () => !!profile && !!useCompareObjects(controlledValues.value, profile)
+        () =>
+            !!profile.value &&
+            !!useCompareObjects(controlledValues.value, profile.value)
     );
 
     const [email] = defineField('email');
@@ -85,17 +86,20 @@
     const toCapitalize = (value: string) =>
         value[0].toUpperCase() + value.slice(1);
 
-    const { profile, getProfileInfo } = useAuthStore();
+    const authStore = useAuthStore();
+    const { profile } = storeToRefs(authStore);
 
     const onSubmit = handleSubmit(() => {});
 
     onMounted(async () => {
-        if (!profile) {
-            await getProfileInfo();
-        } else {
+        if (!profile.value) {
+            await authStore.getProfileInfo();
+        }
+
+        if (profile.value) {
             setValues({
-                ...profile,
-                role: toCapitalize(profile.role) as Role,
+                ...profile.value,
+                role: toCapitalize(profile.value.role) as Role,
             });
         }
     });

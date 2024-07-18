@@ -112,6 +112,7 @@
      */
     const excludedProperties = useExcludeProperties({ ...props.topic }, [
         'id',
+        'group',
     ]) as CreateTopicSchema;
 
     if (props.topic) {
@@ -152,11 +153,13 @@
                     };
                 });
 
-                const selected = items.find(
-                    (item) => item.id === props.topic?.group.id
-                );
+                if (props.topic) {
+                    const selected = items.find(
+                        (item) => item.id === props.topic?.group
+                    );
 
-                if (selected) group.value = selected;
+                    if (selected) group.value = selected;
+                }
             }
         } finally {
             isGroupsLoading.value = false;
@@ -167,7 +170,13 @@
      * Submit form
      */
     const onSubmit = handleSubmit(async (values) => {
-        const editedValues = useCompareObjects(excludedProperties, values);
+        const editedValues = useCompareObjects(
+            {
+                ...excludedProperties,
+                group: group.value,
+            },
+            values
+        );
 
         if (props.topic && !editedValues) {
             toast.error('No changes were captured');
@@ -187,7 +196,8 @@
                 toast.success('Topic successfully updated');
             } else {
                 await postTopic({
-                    ...values,
+                    name: values.name,
+                    requires_auth: values.requires_auth,
                     group_id: group.value.id,
                     image: image.value as File,
                 });

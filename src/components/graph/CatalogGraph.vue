@@ -12,6 +12,7 @@
                 class="max-xs:!h-auto max-xs:w-full max-xs:flex-col"
                 color="primary"
             >
+                <!-- TODO: show graph -->
                 <v-btn class="tab"> Categories </v-btn>
 
                 <v-btn class="tab"> Groups </v-btn>

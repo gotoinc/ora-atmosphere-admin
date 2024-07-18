@@ -1,6 +1,7 @@
 <template>
     <div class="mb-5 flex items-center gap-4 max-sm:flex-col">
         <v-text-field
+            v-model.trim="search"
             append-inner-icon="mdi-magnify"
             density="compact"
             label="Search..."
@@ -23,6 +24,7 @@
     <catalog-table
         :headers="headers"
         :items="items"
+        :search="search"
         :loading="isLoading"
         @edit="handleEdit"
         @delete="handleDelete"
@@ -79,6 +81,8 @@
 
     const isLoading = ref(true);
     const isDeleteLoading = ref(false);
+
+    const search = ref('');
 
     const selectedTopic = ref<Topic | null>(null);
 

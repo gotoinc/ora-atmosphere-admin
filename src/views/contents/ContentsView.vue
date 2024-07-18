@@ -14,45 +14,48 @@
 
     <div class="relative">
         <form
-            class="mb-10 grid grid-cols-4 items-center gap-4 max-tab:grid-cols-3 max-mob-lg:grid-cols-1"
+            class="mb-10 flex flex-wrap items-center gap-4 max-mob-md:flex-col"
         >
             <v-text-field
-                v-model="filters.search"
+                v-model.trim="filters.search"
                 append-inner-icon="mdi-magnify"
                 density="compact"
                 label="Search..."
                 variant="outlined"
                 hide-details
                 single-line
-                class="max-w-96 max-tab:col-span-full max-tab:max-w-full"
+                class="w-full max-w-96 max-mob-md:max-w-full"
             ></v-text-field>
 
-            <v-select
-                v-if="filters.category"
-                v-model="filters.category"
-                :loading="isTopicsLoading"
-                label="Category"
-                density="compact"
-                variant="outlined"
-                clearable
-                hide-details
-                :items="topics"
-                item-title="name"
-                return-object
-            />
+            <template v-if="false">
+                <!-- TODO: filters for group ann category  -->
+                <v-select
+                    v-if="filters.category"
+                    v-model="filters.category"
+                    :loading="isTopicsLoading"
+                    label="Category"
+                    density="compact"
+                    variant="outlined"
+                    clearable
+                    hide-details
+                    :items="topics"
+                    item-title="name"
+                    return-object
+                />
 
-            <v-select
-                v-if="filters.group"
-                v-model="filters.group"
-                label="Group"
-                density="compact"
-                variant="outlined"
-                clearable
-                hide-details
-                :items="topics"
-                item-title="name"
-                return-object
-            />
+                <v-select
+                    v-if="filters.group"
+                    v-model="filters.group"
+                    label="Group"
+                    density="compact"
+                    variant="outlined"
+                    clearable
+                    hide-details
+                    :items="topics"
+                    item-title="name"
+                    return-object
+                />
+            </template>
 
             <v-select
                 v-model="filters.topic"
@@ -64,6 +67,7 @@
                 :items="topics"
                 item-title="name"
                 return-object
+                class="w-full max-w-96 max-mob-md:max-w-full"
             />
         </form>
 

@@ -10,7 +10,7 @@ export const postCategories = async (body: CategoryInput) => {
         const res = await axios.postForm<
             CategoryInput,
             AxiosResponse<Category>
-        >(`/admin/categories/`, body);
+        >(`/admin/categories/create_category/`, body);
 
         return res.data;
     } catch (err) {

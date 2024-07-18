@@ -5,7 +5,7 @@
 
             <v-text-field
                 v-model="password"
-                :error-messages="errors.password"
+                :error-messages="errors.new_password1"
                 name="password"
                 label="Password"
                 type="password"
@@ -18,7 +18,7 @@
 
             <v-text-field
                 v-model="confirmPassword"
-                :error-messages="errors.confirmPassword"
+                :error-messages="errors.new_password2"
                 name="confirmPassword"
                 type="password"
                 label="Password"
@@ -26,15 +26,23 @@
             />
         </div>
 
-        <v-btn class="text-none w-fit" color="primary" type="submit">
+        <v-btn
+            :loading="isLoading"
+            class="text-none w-fit"
+            color="primary"
+            type="submit"
+        >
             Save changes
         </v-btn>
     </form>
 </template>
 
 <script setup lang="ts">
+    import { ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
+    import { changePassword } from '@/api/auth/change-password.api.ts';
     import { setNewPasswordSchema } from '@/validations/schemas/auth.schema.ts';
     import type { SetNewPasswordType } from '@/validations/types/auth';
 
@@ -42,11 +50,25 @@
         validationSchema: setNewPasswordSchema,
     });
 
-    const [password] = defineField('password');
-    const [confirmPassword] = defineField('confirmPassword');
+    const toast = useToast();
 
-    const onSubmit = handleSubmit((values) => {
-        console.log(values);
+    const [password] = defineField('new_password1');
+    const [confirmPassword] = defineField('new_password2');
+
+    const isLoading = ref(false);
+
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
+
+        try {
+            await changePassword(values);
+
+            toast.success('New password has been saved');
+        } catch (e) {
+            toast.error('Password was not changed');
+        } finally {
+            isLoading.value = false;
+        }
     });
 </script>
 

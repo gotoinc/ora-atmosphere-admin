@@ -26,6 +26,7 @@ export const passwordValidation = string()
 
 // Phone number
 export const phoneValidation = string()
+    .nullable()
     .test(
         'is-valid-phone',
         'Must be only digits',

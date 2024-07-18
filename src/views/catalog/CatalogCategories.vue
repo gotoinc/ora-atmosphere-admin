@@ -1,6 +1,7 @@
 <template>
     <div class="mb-5 flex items-center gap-4 max-sm:flex-col">
         <v-text-field
+            v-model.trim="search"
             append-inner-icon="mdi-magnify"
             density="compact"
             label="Search..."
@@ -24,6 +25,7 @@
         :loading="isLoading"
         :headers="headers"
         :items="items"
+        :search="search"
         @edit="handleEdit"
         @delete="handleDelete"
     />
@@ -79,6 +81,8 @@
     const isLoading = ref(false);
     const isDeleteLoading = ref(false);
     const selectedCategory = ref<Category | null>(null);
+
+    const search = ref('');
 
     const headers = ref<ReadonlyHeaders>([
         {

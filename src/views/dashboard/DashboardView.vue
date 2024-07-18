@@ -4,7 +4,8 @@
             <div class="mb-16">
                 <template v-if="profile">
                     <h1 class="mb-1 text-2xl font-bold">
-                        Hello {{ `${profile.first_name} ${profile.last_name}` }}
+                        Hello,
+                        {{ `${profile.first_name} ${profile.last_name}` }}!
                     </h1>
 
                     <p class="text-grey-100">Welcome back!</p>
@@ -14,6 +15,7 @@
             </div>
 
             <v-card v-if="false" class="overflow-visible">
+                <!-- TODO: show graph -->
                 <div>
                     <!--                    <catalog-graph /> -->
                 </div>

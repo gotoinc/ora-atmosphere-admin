@@ -115,6 +115,7 @@
         'id',
         'contents_amount',
         'date_created',
+        'category',
     ]) as CreateGroupSchema;
 
     if (props.group) {
@@ -201,6 +202,14 @@
                         id: item.id,
                     };
                 });
+
+                if (props.group) {
+                    const selected = categories.value.find(
+                        (category) => category.id === props.group?.category
+                    );
+
+                    if (selected) category.value = selected;
+                }
             }
         } finally {
             isCategoriesLoading.value = false;

@@ -1,6 +1,7 @@
 <template>
     <div class="mb-5 flex items-center gap-4 max-sm:flex-col">
         <v-text-field
+            v-model.trim="search"
             append-inner-icon="mdi-magnify"
             density="compact"
             label="Search..."
@@ -24,6 +25,7 @@
         :loading="isLoading"
         :headers="headers"
         :items="items"
+        :search="search"
         @edit="handleEdit"
         @delete="handleDelete"
     />
@@ -76,6 +78,8 @@
     const isDialogOpen = ref(false);
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
+
+    const search = ref('');
 
     const isLoading = ref(true);
     const isDeleteLoading = ref(false);

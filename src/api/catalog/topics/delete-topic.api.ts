@@ -7,7 +7,7 @@ import type { Topic } from '@/ts/catalog';
 export const deleteTopic = async (id: string | number) => {
     try {
         const res = await axios.delete<undefined, AxiosResponse<Topic>>(
-            `/admin/topics/${id}/`
+            `/admin/topics/${id}/delete_topic/`
         );
 
         return res.data;

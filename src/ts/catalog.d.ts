@@ -1,5 +1,3 @@
-import type { Identifiable } from '@/ts/common';
-
 export interface CommonCatalogTypes {
     id: number;
     name: string;
@@ -12,11 +10,11 @@ export interface CommonCatalogTypes {
 export interface Category extends CommonCatalogTypes {}
 
 export interface Group extends CommonCatalogTypes {
-    category: Identifiable;
+    category: number;
 }
 
 export interface Topic extends CommonCatalogTypes {
-    group: Identifiable;
+    group: number;
 }
 
 export type CatalogItem = Category | Group | Topic;

@@ -4,8 +4,8 @@ export interface SignInInput {
 }
 
 export interface SetNewPasswordType {
-    password: string;
-    confirmPassword: string;
+    new_password1: string;
+    new_password2: string;
 }
 
 export interface EmailType {

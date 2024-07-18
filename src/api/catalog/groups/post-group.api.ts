@@ -8,7 +8,7 @@ import type { GroupInput } from '@/validations/types/catalog.validation';
 export const postGroup = async (body: GroupInput) => {
     try {
         const res = await axios.postForm<GroupInput, AxiosResponse<Group>>(
-            `/admin/groups/`,
+            `/admin/groups/create_group/`,
             body
         );
 

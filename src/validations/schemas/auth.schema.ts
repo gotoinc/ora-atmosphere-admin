@@ -27,8 +27,8 @@ export const forgotPasswordSchema: ObjectSchema<EmailType> = object({
  * Define schema for choose new password
  */
 export const setNewPasswordSchema: ObjectSchema<SetNewPasswordType> = object({
-    password: passwordValidation,
-    confirmPassword: string()
+    new_password1: passwordValidation,
+    new_password2: string()
         .required('Please confirm password')
-        .oneOf([ref('password'), ''], 'Passwords must match'),
+        .oneOf([ref('new_password1'), ''], 'Passwords must match'),
 });
