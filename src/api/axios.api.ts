@@ -18,6 +18,6 @@ axios.interceptors.request.use(function (config) {
     return config;
 });
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
+axios.defaults.baseURL = 'https://api-staging.atmosphere.space';
 
 export default axios;
