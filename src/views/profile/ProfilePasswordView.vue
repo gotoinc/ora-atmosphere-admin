@@ -8,9 +8,11 @@
                 :error-messages="errors.new_password1"
                 name="password"
                 label="Password"
-                type="password"
                 variant="outlined"
-            />
+                :append-inner-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="show1 ? 'text' : 'password'"
+                @click:append-inner="show1 = !show1"
+            ></v-text-field>
         </div>
 
         <div>
@@ -20,10 +22,12 @@
                 v-model="confirmPassword"
                 :error-messages="errors.new_password2"
                 name="confirmPassword"
-                type="password"
                 label="Password"
                 variant="outlined"
-            />
+                :append-inner-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+                :type="show2 ? 'text' : 'password'"
+                @click:append-inner="show2 = !show2"
+            ></v-text-field>
         </div>
 
         <v-btn
@@ -56,6 +60,9 @@
     const [confirmPassword] = defineField('new_password2');
 
     const isLoading = ref(false);
+
+    const show1 = ref(false);
+    const show2 = ref(false);
 
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;

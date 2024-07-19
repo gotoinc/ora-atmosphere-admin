@@ -18,11 +18,15 @@
                     v-model="password"
                     name="password"
                     variant="outlined"
-                    type="password"
                     label="Password"
                     placeholder="Set your password"
                     :error-messages="errors.password"
-                />
+                    :append-inner-icon="
+                        showPassword ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    :type="showPassword ? 'text' : 'password'"
+                    @click:append-inner="showPassword = !showPassword"
+                ></v-text-field>
             </div>
 
             <div class="my-2 flex flex-wrap items-center justify-between gap-4">
@@ -79,6 +83,8 @@
 
     const [email] = defineField('email');
     const [password] = defineField('password');
+
+    const showPassword = ref(false);
 
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
