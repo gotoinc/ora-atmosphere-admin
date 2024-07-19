@@ -543,18 +543,19 @@
                 'date_created',
                 'tags',
                 'audios',
-                'preview_image',
+                // 'preview_image',
                 'file',
                 'languages',
             ])
         );
 
-        if (props.content?.preview_image) {
-            isShowCard.value = true;
-            imageSrc.value = props.content.preview_image;
-
-            image.value = await getFile(props.content.preview_image);
-        }
+        // TODO: fix image issue
+        // if (props.content?.preview_image) {
+        //     isShowCard.value = true;
+        //     imageSrc.value = props.content.preview_image;
+        //
+        //     image.value = await getFile(props.content.preview_image);
+        // }
 
         if (props.content?.audios) {
             audios.value = props.content.audios;
@@ -612,6 +613,8 @@
                     uploadedVideoFile.value = res;
                     videoSrc.value = URL.createObjectURL(res);
                 }
+            } catch (e) {
+                videoSrc.value = props.content.file;
             } finally {
                 isVideoLoaded.value = true;
             }
