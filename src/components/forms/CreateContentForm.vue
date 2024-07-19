@@ -66,7 +66,7 @@
                                     </a>
                                 </div>
 
-                                <template v-else-if="uploadedVideoFile">
+                                <template v-if="uploadedVideoFile">
                                     <div class="mb-2">
                                         <span class="text-sm">File name:</span>
 

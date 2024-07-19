@@ -97,7 +97,12 @@
             />
         </div>
 
-        <v-btn type="submit" class="text-none w-fit" color="primary">
+        <v-btn
+            :loading="isLoading"
+            type="submit"
+            class="text-none w-fit"
+            color="primary"
+        >
             Save changes
         </v-btn>
     </form>
@@ -110,10 +115,11 @@
 
     import type { CreateFormEmits } from '@/components/forms/types';
 
-    import { updateUser } from '@/api/users/update-user.api.ts';
+    import { updateProfile } from '@/api/auth/update-profile.api.ts';
     import activitiesList from '@/constants/activities-list.ts';
     import type { UserProfile } from '@/ts/users';
     import { editUserSchema } from '@/validations/schemas/user.schema.ts';
+    import type { UserInput } from '@/validations/types/user.validation';
 
     const props = defineProps<{ user: UserProfile }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -122,10 +128,11 @@
 
     const isLoading = ref(false);
 
-    const { defineField, handleSubmit, errors, setValues } =
-        useForm<UserProfile>({
+    const { defineField, handleSubmit, errors, setValues } = useForm<UserInput>(
+        {
             validationSchema: editUserSchema,
-        });
+        }
+    );
 
     const [firstName] = defineField('first_name');
     const [lastName] = defineField('last_name');
@@ -135,21 +142,25 @@
     const [jobTitle] = defineField('job_title');
     const [companyWebsite] = defineField('company_website');
     const [phone] = defineField('phone_number');
+    const [role] = defineField('role');
 
     setValues({ ...props.user });
+
+    // TODO: add role for all users
+    role.value = 'admin';
 
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;
 
         try {
-            await updateUser(props.user.id, values);
+            await updateProfile(props.user.id, values);
 
             toast.success('User has been successfully updated');
 
             emits('update');
             emits('close');
         } catch (e) {
-            toast.error('User is not updated');
+            toast.error('User was not updated');
         } finally {
             isLoading.value = false;
         }

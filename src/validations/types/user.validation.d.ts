@@ -1,7 +1,9 @@
-import type { AdminUser, UserProfile } from '@/ts/users';
+import type { AdminUser, Role, UserProfile } from '@/ts/users';
 
-export interface CreateAdminSchema extends AdminUser {
+export interface CreateAdminSchema extends Omit<AdminUser, 'id'> {
     password: string;
 }
 
-export interface UserInput extends Omit<UserProfile, 'id'> {}
+export interface UserInput extends Omit<UserProfile, 'id'> {
+    role: Role;
+}

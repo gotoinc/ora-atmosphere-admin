@@ -73,6 +73,7 @@
 
     import DropZone from '@/components/drag-and-drop/DropZone.vue';
 
+    import { fileSizeLimit } from '@/constants/fileSizeLimit.ts';
     // File Management
     import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFiles } from '@/hooks/useFileList.ts';
@@ -93,7 +94,7 @@
 
     const emits = defineEmits<Emits>();
     const props = withDefaults(defineProps<Props>(), {
-        sizeLimit: 50,
+        sizeLimit: fileSizeLimit,
     });
 
     const toast = useToast();

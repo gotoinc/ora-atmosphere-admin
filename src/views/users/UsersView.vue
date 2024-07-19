@@ -16,7 +16,7 @@
             </template>
         </div>
 
-        <template v-if="false">
+        <template v-if="true">
             <!-- TODO: split regular users and admins -->
             <v-tabs v-model="tab" class="mb-5 border-b border-white">
                 <v-tab
@@ -26,7 +26,7 @@
                     color="white"
                     :value="1"
                 >
-                    Regular users
+                    All users
                 </v-tab>
 
                 <v-tab

@@ -1,6 +1,7 @@
 import type { ObjectSchema } from 'yup';
 import { boolean, mixed, number, object, string } from 'yup';
 
+import { fileSizeLimit } from '@/constants/fileSizeLimit.ts';
 import { isFile } from '@/ts/guards/file.guard.ts';
 import type { CreateAudio } from '@/validations/types/content.validation';
 
@@ -50,7 +51,7 @@ export const fileSchema = mixed<File | string>()
     })
     .test('fileSize', 'File size is too large', (value) => {
         if (value && isFile(value)) {
-            return value.size < 50 * 1024 * 1024; // not bigger that 50mb
+            return value.size < fileSizeLimit * 1024 * 1024; // not bigger that 50mb
         } else {
             return true;
         }

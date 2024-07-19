@@ -18,7 +18,6 @@ axios.interceptors.request.use(function (config) {
     return config;
 });
 
-axios.defaults.baseURL =
-    'http://atmosphere-api.eba-menjd7cv.eu-west-3.elasticbeanstalk.com';
+axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
 export default axios;

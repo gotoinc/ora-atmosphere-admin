@@ -62,7 +62,7 @@
             <img
                 v-else
                 src="@img/volume-off.svg"
-                class="h-10 w-10 object-contain opacity-60"
+                class="h-10 w-10 object-contain opacity-30"
                 alt=""
             />
         </template>
@@ -78,7 +78,7 @@
             <img
                 v-else
                 src="@img/narration-off.svg"
-                class="h-10 w-10 object-contain opacity-60"
+                class="h-10 w-10 object-contain opacity-30"
                 alt=""
             />
         </template>
@@ -126,7 +126,7 @@
                 class="flex min-w-40 flex-wrap items-center gap-2 py-2"
             >
                 <span
-                    v-for="tag in splitTags(item.tags)"
+                    v-for="tag in splitTags(item.tags).slice(0, 2)"
                     :key="tag"
                     class="tag tag--fill pointer-events-none"
                 >

@@ -4,7 +4,7 @@ import type { UserProfile } from '@/ts/users';
 
 export const getRegularUsers = async () => {
     try {
-        const res = await axios.get<UserProfile[]>(`/admin/users/`);
+        const res = await axios.get<UserProfile[]>(`/users/`);
 
         return res.data;
     } catch (err) {

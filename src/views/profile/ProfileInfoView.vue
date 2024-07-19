@@ -43,7 +43,7 @@
         </div>
 
         <v-btn
-            :disabled="isButtonDisabled"
+            :loading="isLoading"
             class="text-none w-fit"
             color="primary"
             type="submit"
@@ -54,28 +54,28 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, onMounted } from 'vue';
+    import { onMounted, ref } from 'vue';
+    import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
     import { storeToRefs } from 'pinia';
     import { useAuthStore } from '@/stores/auth.store.ts';
 
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
+    import { updateProfile } from '@/api/auth/update-profile.api.ts';
     import type { AdminUser, Role } from '@/ts/users';
     import { createUserSchema } from '@/validations/schemas/user.schema.ts';
 
-    const { defineField, handleSubmit, errors, setValues, controlledValues } =
-        useForm<AdminUser>({
-            validationSchema: createUserSchema,
+    const toast = useToast();
+
+    const isLoading = ref(false);
+
+    const { defineField, handleSubmit, errors, setValues } = useForm<AdminUser>(
+        {
+            validationSchema: createUserSchema.omit(['password', 'role']),
             initialValues: {
                 email: '',
             },
-        });
-
-    const isButtonDisabled = computed(
-        () =>
-            !!profile.value &&
-            !!useCompareObjects(controlledValues.value, profile.value)
+        }
     );
 
     const [email] = defineField('email');
@@ -89,7 +89,32 @@
     const authStore = useAuthStore();
     const { profile } = storeToRefs(authStore);
 
-    const onSubmit = handleSubmit(() => {});
+    const onSubmit = handleSubmit(async (values) => {
+        isLoading.value = true;
+
+        if (profile.value) {
+            try {
+                const res = await updateProfile(profile.value.id, {
+                    first_name: values.first_name,
+                    last_name: values.last_name,
+                    email: values.email,
+                    role: values.role,
+                });
+
+                if (res) {
+                    profile.value.first_name = res.first_name;
+                    profile.value.last_name = res.last_name;
+                    profile.value.email = res.email;
+                }
+
+                toast.success('Profile has been updated');
+            } catch (e) {
+                toast.error('Profile was not updated');
+            } finally {
+                isLoading.value = false;
+            }
+        }
+    });
 
     onMounted(async () => {
         if (!profile.value) {

@@ -68,19 +68,18 @@
 
             <v-btn
                 :loading="isLoading"
-                :disabled="isButtonDisabled"
                 type="submit"
                 class="text-none w-fit"
                 color="primary"
             >
-                {{ admin ? 'Save changes' : 'Add admin' }}
+                Add admin
             </v-btn>
         </form>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { computed, ref } from 'vue';
+    import { ref } from 'vue';
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
@@ -88,37 +87,20 @@
 
     import { postAdmin } from '@/api/users/post-admin.api.ts';
     import { userRoles } from '@/constants/user-roles.ts';
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
-    import type { AdminUser, UserProfile } from '@/ts/users';
     import { createUserSchema } from '@/validations/schemas/user.schema.ts';
     import type { CreateAdminSchema } from '@/validations/types/user.validation';
 
-    const props = defineProps<{ admin?: AdminUser | UserProfile }>();
     const emits = defineEmits<CreateFormEmits>();
 
     const toast = useToast();
 
-    const isButtonDisabled = computed(
-        () =>
-            !!(
-                props.admin &&
-                useCompareObjects(controlledValues.value, props.admin)
-            )
-    );
-
-    const {
-        defineField,
-        handleSubmit,
-        errors,
-        resetForm,
-        setValues,
-        controlledValues,
-    } = useForm<CreateAdminSchema>({
-        validationSchema: createUserSchema,
-        initialValues: {
-            email: '',
-        },
-    });
+    const { defineField, handleSubmit, errors, resetForm } =
+        useForm<CreateAdminSchema>({
+            validationSchema: createUserSchema,
+            initialValues: {
+                email: '',
+            },
+        });
 
     const [email] = defineField('email');
     const [role] = defineField('role');
@@ -127,10 +109,6 @@
     const [lastName] = defineField('last_name');
 
     const isLoading = ref(false);
-
-    if (props.admin) {
-        setValues({ ...props.admin });
-    }
 
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;

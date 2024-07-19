@@ -40,4 +40,10 @@ export const editUserSchema: ObjectSchema<UserInput> = object({
     job_title: string().nullable(),
     company_website: string().nullable().url('Please enter a valid URL'),
     phone_number: phoneValidation,
+    role: mixed<Role>()
+        .oneOf(
+            ['super-admin', 'admin'],
+            'Role must be either "super-admin" or "admin"'
+        )
+        .required('Please select role'),
 });

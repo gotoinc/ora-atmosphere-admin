@@ -13,9 +13,7 @@
     </div>
 
     <div class="relative">
-        <form
-            class="mb-10 flex flex-wrap items-center gap-4 max-mob-md:flex-col"
-        >
+        <form class="mb-10 flex items-center gap-4 max-mob-md:flex-col">
             <v-text-field
                 v-model.trim="filters.search"
                 append-inner-icon="mdi-magnify"

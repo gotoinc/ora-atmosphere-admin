@@ -19,6 +19,7 @@
     >
         <template #[`item.actions`]="{ item }">
             <action-buttons
+                v-if="item.id !== profile?.id"
                 @delete="handleDelete(item)"
                 @edit="handleEdit(item)"
             />
@@ -54,12 +55,18 @@
     import EditUserForm from '@/components/forms/EditUserForm.vue';
     import ActionButtons from '@/components/tables/TableActionButtons.vue';
 
+    import { storeToRefs } from 'pinia';
+    import { useAuthStore } from '@/stores/auth.store.ts';
+
     import { deleteUser } from '@/api/users/delete-user.api.ts';
     import { getRegularUsers } from '@/api/users/get-regular-users.api.ts';
     import type { UserProfile } from '@/ts/users';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
     const toast = useToast();
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { profile } = storeToRefs(useAuthStore());
 
     const userName = computed(
         () =>
@@ -84,19 +91,19 @@
             title: 'Last name',
             key: 'last_name',
         },
-        {
-            title: 'Company name',
-            key: 'company_name',
-        },
+        // {
+        //     title: 'Company name',
+        //     key: 'company_name',
+        // },
         {
             title: 'Email',
             key: 'email',
             sortable: false,
         },
-        {
-            title: 'Activity',
-            key: 'activity',
-        },
+        // {
+        //     title: 'Activity',
+        //     key: 'activity',
+        // },
         {
             title: 'Actions',
             key: 'actions',
