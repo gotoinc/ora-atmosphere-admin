@@ -12,7 +12,6 @@ export const updateVideo = async (id: string | number, body: ContentInput) => {
 
         return res.data;
     } catch (err) {
-        console.log(err);
         useThrowError(err);
     }
 };

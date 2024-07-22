@@ -13,8 +13,11 @@ export const setVideoFormdata = (body: ContentInput) => {
     formData.append('topic', String(body.topic)); // Topic ID
     formData.append('duration', String(body.duration));
     formData.append('preview_image', body.preview_image); // File object
-    formData.append('image', body.image); // File object
     formData.append('file', body.file); // File object
+
+    if (body.image) {
+        formData.append('image', body.image);
+    }
 
     if (body.date_created) {
         formData.append('date_created', body.date_created);

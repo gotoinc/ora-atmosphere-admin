@@ -20,7 +20,7 @@ export interface ContentInput extends EditableValues, Partial<BooleanValues> {
     languages: number[];
     audios?: CreateAudio[];
     topic: number;
-    image: string;
+    image?: string;
 }
 
 export interface CreateContentSchema
