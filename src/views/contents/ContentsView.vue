@@ -275,14 +275,6 @@
 
         if (search) filters.search = search as string;
 
-        // if (category)
-        //     filters.category =
-        //         topics.value.find((item) => item.name === category) ?? null;
-        //
-        // if (group)
-        //     filters.group =
-        //         topics.value.find((item) => item.name === group) ?? null;
-
         if (topic) {
             filters.topic =
                 topics.value.find((item) => item.id === Number(topic)) ?? null;

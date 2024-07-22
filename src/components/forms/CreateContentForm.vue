@@ -30,10 +30,7 @@
                             crossorigin="anonymous"
                             @loadedmetadata="loadVideoInfo"
                         >
-                            <source
-                                :type="uploadedVideoFile.type"
-                                :src="videoSrc ?? content?.file"
-                            />
+                            <source :src="videoSrc ?? content?.file" />
                         </video>
 
                         <v-skeleton-loader
@@ -71,7 +68,11 @@
                                         <span class="text-sm">File name:</span>
 
                                         <p class="block truncate font-semibold">
-                                            {{ uploadedVideoFile.name }}
+                                            {{
+                                                getFileName(
+                                                    uploadedVideoFile.name
+                                                )
+                                            }}
                                         </p>
                                     </div>
 
@@ -148,7 +149,7 @@
                                         type="submit"
                                         color="primary"
                                         class="text-none w-fit"
-                                        @click="isDialogOpen = true"
+                                        @click="isDefaultContentDialog = true"
                                     >
                                         Set as default
                                     </v-btn>
@@ -179,6 +180,7 @@
                 <drag-and-drop
                     :accept="['audio/mpeg']"
                     multiple
+                    :file-to-remove="audioToRemove"
                     class="mb-5"
                     @upload="selectAudioFiles"
                 >
@@ -370,7 +372,7 @@
         </form>
 
         <!-- Dialog for confirm -->
-        <v-dialog v-model="isDialogOpen" max-width="400">
+        <v-dialog v-model="isDefaultContentDialog" max-width="400">
             <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
                 <h3 class="mb-5 text-xl font-semibold">
                     Are you sure you want to set current video as default?
@@ -381,7 +383,7 @@
                         color="primary"
                         variant="outlined"
                         class="text-none flex-grow"
-                        @click="isDialogOpen = false"
+                        @click="isDefaultContentDialog = false"
                     >
                         Cancel
                     </v-btn>
@@ -397,6 +399,45 @@
                 </div>
             </div>
         </v-dialog>
+
+        <!-- Dialog for feedback -->
+        <v-dialog v-model="isFeedbackOpen" persistent max-width="400">
+            <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
+                <template v-if="isLoading">
+                    <div class="relative mb-5 h-20">
+                        <v-loader />
+                    </div>
+
+                    <h3 class="text-xl font-semibold">
+                        Content is {{ content ? `updating` : 'uploading' }}...
+                    </h3>
+                </template>
+
+                <template v-else>
+                    <v-icon
+                        icon="mdi-check-circle-outline"
+                        size="60"
+                        color="green"
+                        class="mx-auto mb-4"
+                    />
+
+                    <h3 class="mb-5 text-xl font-semibold">
+                        Content has been successfully
+                        {{ content ? `updated` : 'uploaded' }}
+                    </h3>
+
+                    <div class="mx-auto flex max-w-80 flex-wrap gap-4">
+                        <v-btn
+                            color="primary"
+                            class="text-none flex-grow"
+                            @click="exit"
+                        >
+                            Close
+                        </v-btn>
+                    </div>
+                </template>
+            </div>
+        </v-dialog>
     </div>
 </template>
 
@@ -405,6 +446,7 @@
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
+    import VLoader from '@/components/base/VLoader.vue';
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
     import type { CreateFormEmits } from '@/components/forms/types';
@@ -442,15 +484,18 @@
     const toast = useToast();
 
     const isContentSelected = ref(!!props.content);
-    const isVideoLoaded = ref(!props.content);
+    const isVideoLoaded = ref(false);
     const isLoading = ref(false);
 
     const defaultContent = ref<VideoContent>();
     const isConfirmLoading = ref(false);
-    const isDialogOpen = ref(false);
+    const isDefaultContentDialog = ref(false);
+    const isFeedbackOpen = ref(false);
 
     const audioToEdit = ref<CreateAudio | null>(null);
     const audioEditableName = ref('');
+    const audioUploadables = ref<UploadableFile[]>([]);
+    const audioToRemove = ref<UploadableFile>();
 
     const isShowCard = ref(false);
     const isChangesDetected = ref(false);
@@ -532,6 +577,14 @@
         audioEditableName.value = audio.name;
     };
 
+    const getCleanURL = (url: string) => {
+        const newURL = new URL(url);
+
+        return `${newURL.origin}${newURL.pathname}`;
+    };
+
+    const getFileName = (name: string) => name.split('?')[0];
+
     /*
      * Fill existing data for content
      */
@@ -543,19 +596,21 @@
                 'date_created',
                 'tags',
                 'audios',
-                // 'preview_image',
+                'preview_image',
                 'file',
                 'languages',
             ])
         );
 
         // TODO: fix image issue
-        // if (props.content?.preview_image) {
-        //     isShowCard.value = true;
-        //     imageSrc.value = props.content.preview_image;
-        //
-        //     image.value = await getFile(props.content.preview_image);
-        // }
+        if (props.content?.preview_image) {
+            isShowCard.value = true;
+            imageSrc.value = props.content.preview_image;
+
+            image.value = await getFile(
+                getCleanURL(props.content.preview_image)
+            );
+        }
 
         if (props.content?.audios) {
             audios.value = props.content.audios;
@@ -633,7 +688,7 @@
                 toast.error('Content is not default');
             } finally {
                 isConfirmLoading.value = false;
-                isDialogOpen.value = false;
+                isDefaultContentDialog.value = false;
             }
         }
     };
@@ -648,6 +703,8 @@
         videoFile.value = file;
 
         videoSrc.value = getSource(file);
+
+        isVideoLoaded.value = true;
     };
 
     const selectAudioFiles = (files: UploadableFile[]) => {
@@ -657,6 +714,8 @@
             );
 
             if (!isFileExist) {
+                audioUploadables.value.push(item);
+
                 const audio = new Audio(getSource(item.file));
 
                 audio.addEventListener('loadedmetadata', () => {
@@ -667,6 +726,8 @@
                         file: item.file,
                     });
                 });
+            } else {
+                toast.error('File is already exists');
             }
         });
     };
@@ -693,6 +754,16 @@
     };
 
     const removeAudioFile = (fileName: string) => {
+        isWatching = false;
+
+        const file = audioUploadables.value.find(
+            (item) => item.name === fileName
+        );
+
+        if (file) {
+            audioToRemove.value = file;
+        }
+
         audios.value = audios.value?.filter((file) => file.name !== fileName);
     };
 
@@ -716,23 +787,35 @@
         }
     };
 
+    /*
+     * Detect changes
+     */
+    let isWatching = true;
+
     watch(values, (value) => {
         if (
-            value.audios?.length ||
-            value.description ||
-            value.file ||
-            value.title ||
-            value.languages.id ||
-            value.topic.id
+            isWatching &&
+            (value.audios?.length ||
+                value.description ||
+                value.file ||
+                value.title ||
+                value.languages.id ||
+                value.topic.id)
         ) {
             isChangesDetected.value = true;
         }
     });
 
+    const exit = () => {
+        emits('close');
+        emits('update');
+    };
+
     /*
      * Submit create/update operation for the content
      */
     const onSubmit = handleSubmit(async (values) => {
+        isFeedbackOpen.value = true;
         isLoading.value = true;
 
         const body = {
@@ -744,32 +827,28 @@
             topic: topic.value.id,
             preview_image: image.value as File,
             audios: audios.value,
-            image: props.content?.preview_image ?? '',
         };
 
         try {
             if (props.content) {
                 await updateVideo(props.content.id, body);
-
-                toast.success('Content has been successfully updated');
             } else {
                 await postVideo({
                     ...body,
                     date_created: new Date().toISOString(),
                 });
 
-                toast.success('Content has been successfully uploaded');
+                resetForm();
             }
 
-            emits('update');
-            emits('close');
-
-            resetForm();
+            isWatching = false;
         } catch (e) {
+            isFeedbackOpen.value = false;
+
             if (props.content) {
-                toast.error('Content is not updated');
+                toast.error('Content was not updated');
             } else {
-                toast.error('Content is not uploaded');
+                toast.error('Content was not uploaded');
             }
         } finally {
             isLoading.value = false;
