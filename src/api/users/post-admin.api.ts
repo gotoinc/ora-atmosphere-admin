@@ -4,7 +4,7 @@ import type { CreateAdminSchema } from '@/validations/types/user.validation';
 
 export const postAdmin = async (body: CreateAdminSchema) => {
     try {
-        const res = await axios.postForm<CreateAdminSchema>(
+        const res = await axios.post<CreateAdminSchema>(
             `/admin/users/create_admin/`,
             body
         );

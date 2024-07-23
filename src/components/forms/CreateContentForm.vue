@@ -27,6 +27,7 @@
                             ref="videoElement"
                             class="h-full w-full rounded-lg object-cover"
                             controls
+                            playsinline
                             crossorigin="anonymous"
                             @loadedmetadata="loadVideoInfo"
                         >
@@ -178,7 +179,7 @@
                 <h3 class="mb-5 text-lg font-semibold">Upload audio</h3>
 
                 <drag-and-drop
-                    :accept="['audio/mpeg']"
+                    :accept="[...acceptedAudios, ...acceptedVideos]"
                     multiple
                     :file-to-remove="audioToRemove"
                     class="mb-5"
@@ -457,6 +458,7 @@
     import { setDefaultContent } from '@/api/contents/set-default-content.api.ts';
     import { updateVideo } from '@/api/contents/update-video.api.ts';
     import { getFile } from '@/api/files/get-file.api.ts';
+    import acceptedAudios from '@/constants/accepted-audios.ts';
     import acceptedVideos from '@/constants/accepted-videos.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import type { UploadableFile } from '@/hooks/useFileList.ts';
@@ -805,6 +807,20 @@
         }
     });
 
+    // watch(videoElement, (element) => {
+    //     if (element) {
+    //         new Plyr(element, {
+    //             controls: [
+    //                 'play-large',
+    //                 'play',
+    //                 'progress',
+    //                 'current-time',
+    //                 'fullscreen',
+    //             ],
+    //         });
+    //     }
+    // });
+
     const exit = () => {
         emits('close');
         emits('update');
@@ -879,5 +895,11 @@
 
     .edit-icon {
         @apply ml-2 flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-grey-200;
+    }
+</style>
+
+<style lang="postcss">
+    .plyr {
+        @apply mb-4 h-80 max-tab:h-[45vw];
     }
 </style>

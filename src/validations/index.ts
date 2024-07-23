@@ -64,7 +64,7 @@ export const audioSchema: ObjectSchema<CreateAudio> = object({
     duration: number().required('Please enter the duration'),
     size: number()
         .required('Please enter the size')
-        .max(50000000, 'Size must be at most 50MB'),
+        .max(fileSizeLimit * 1024 * 1024, 'Size must be at most 50MB'),
 });
 
 // Common schema for catalog
