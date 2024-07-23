@@ -31,7 +31,7 @@ export interface CreateContentSchema
     preview_image?: File | string;
     description?: string | null;
     audios?: CreateAudio[];
-    languages: Identifiable;
+    languages: Identifiable[];
     tags?: string[];
 }
 

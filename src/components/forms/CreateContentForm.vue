@@ -332,7 +332,8 @@
                 <p class="mb-5">Please select language of the content</p>
 
                 <v-select
-                    v-model="language"
+                    v-model="languages"
+                    multiple
                     label="Languages"
                     variant="outlined"
                     clearable
@@ -526,7 +527,7 @@
     const [videoFile] = defineField('file');
     const [image] = defineField('preview_image');
     const [topic] = defineField('topic');
-    const [language] = defineField('languages');
+    const [languages] = defineField('languages');
     const [tags] = defineField('tags');
     const [audios] = defineField('audios');
     const [requiresAuth] = defineField('requires_auth');
@@ -604,6 +605,14 @@
             ])
         );
 
+        if (props.content?.languages) {
+            languages.value = props.content.languages;
+        }
+
+        if (props.content?.tags) {
+            tags.value = props.content.tags.split(', ');
+        }
+
         // TODO: fix image issue
         if (props.content?.preview_image) {
             isShowCard.value = true;
@@ -620,20 +629,8 @@
             await loadAudioFiles();
         }
 
-        if (props.content?.languages) {
-            language.value = props.content.languages[0];
-        }
-
-        if (props.content?.tags) {
-            tags.value = props.content.tags.split(', ');
-        }
-
         await loadVideoFile();
     };
-
-    if (props.content) {
-        void setExistingContent();
-    }
 
     const getSource = (file: File | string) =>
         isFile(file) ? URL.createObjectURL(file) : file;
@@ -801,7 +798,7 @@
                 value.description ||
                 value.file ||
                 value.title ||
-                value.languages.id ||
+                value.languages.length > 0 ||
                 value.topic.id)
         ) {
             isChangesDetected.value = true;
@@ -838,7 +835,7 @@
             ...values,
             file: videoFile.value as File,
             duration: Math.round(duration.value),
-            languages: [language.value.id],
+            languages: languages.value.map((lang) => lang.id),
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,
@@ -871,17 +868,21 @@
         }
     });
 
-    void loadLanguages();
-    void loadDefaultContent();
-
     const preventReload = (event: Event) => {
         if (isChangesDetected.value) {
             event.preventDefault();
         }
     };
 
-    onMounted(() => {
+    onMounted(async () => {
         window.addEventListener('beforeunload', preventReload);
+
+        await loadLanguages();
+        await loadDefaultContent();
+
+        if (props.content) {
+            await setExistingContent();
+        }
     });
 
     onUnmounted(() => {

@@ -6,6 +6,7 @@
             <div class="grid gap-4">
                 <v-text-field
                     v-model="email"
+                    autocomplete="email"
                     name="email"
                     label="Email"
                     type="email"
@@ -18,6 +19,7 @@
                     v-model="password"
                     name="password"
                     variant="outlined"
+                    autocomplete="current-password"
                     label="Password"
                     placeholder="Set your password"
                     :error-messages="errors.password"

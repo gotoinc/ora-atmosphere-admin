@@ -5,9 +5,9 @@ export const setVideoFormdata = (body: ContentInput) => {
     const formData = new FormData();
     formData.append('title', body.title);
     formData.append('description', body.description ?? '');
-    formData.append('languages', body.languages.toString()); // Language ID
     formData.append('tags', body.tags ?? '');
     formData.append('requires_auth', String(body.requires_auth));
+    formData.append('visible_for_unregistered', String(!body.requires_auth));
     formData.append('audio_enabled', String(body.audio_enabled));
     formData.append('narration_enabled', String(body.narration_enabled));
     formData.append('topic', String(body.topic)); // Topic ID
@@ -25,7 +25,12 @@ export const setVideoFormdata = (body: ContentInput) => {
 
     // Test data
     formData.append('show_on_main_banner', String(true));
-    formData.append('visible_for_unregistered', String(true));
+
+    if (body.languages.length > 0) {
+        body.languages.forEach((id) => {
+            formData.append('languages', id.toString());
+        });
+    }
 
     if (body.audios) {
         body.audios.forEach((audio) => {

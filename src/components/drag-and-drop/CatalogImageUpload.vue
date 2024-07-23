@@ -20,6 +20,7 @@
                 <category-card class="w-full" :img="background" :name="name" />
 
                 <button
+                    type="button"
                     class="action-icon absolute right-2 top-2 bg-red-500 hover:bg-red-600"
                 >
                     <v-icon
