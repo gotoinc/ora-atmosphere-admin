@@ -1,1 +1,1 @@
-export const fileSizeLimit = 200;
+export const fileSizeLimit = 500;
