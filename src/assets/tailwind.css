@@ -63,6 +63,20 @@
         @apply flex h-8 w-8 items-center justify-center rounded;
     }
 
+    .prose-sm {
+        ul {
+            list-style: disc;
+        }
+
+        ol {
+            list-style: decimal;
+        }
+
+        a {
+            @apply text-primary-50 underline;
+        }
+    }
+
     .fade-b {
         animation: fade-b 0.3s ease;
     }

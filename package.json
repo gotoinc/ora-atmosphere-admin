@@ -12,9 +12,13 @@
         "prepare": "husky"
     },
     "dependencies": {
-        "body-scroll-lock": "4.0.0-beta.0",
+        "@tiptap/extension-link": "^2.5.6",
+        "@tiptap/pm": "^2.5.6",
+        "@tiptap/starter-kit": "^2.5.6",
+        "@tiptap/vue-3": "^2.5.6",
         "@vee-validate/yup": "^4.12.6",
         "axios": "^1.6.8",
+        "body-scroll-lock": "4.0.0-beta.0",
         "browserlist": "^1.0.1",
         "chart.js": "^3.6.1",
         "js-cookie": "^3.0.5",
@@ -25,14 +29,15 @@
         "vue-chart-3": "^3.1.1",
         "vue-i18n": "^9.11.0",
         "vue-router": "^4.3.0",
+        "vue-toastification": "2.0.0-rc.5",
         "vuetify": "^3.6.3",
-        "yup": "^1.4.0",
-        "vue-toastification": "2.0.0-rc.5"
+        "yup": "^1.4.0"
     },
     "devDependencies": {
         "@mdi/font": "^7.4.47",
-        "@types/js-cookie": "^3.0.6",
+        "@tailwindcss/typography": "^0.5.13",
         "@types/body-scroll-lock": "^3.1.2",
+        "@types/js-cookie": "^3.0.6",
         "@typescript-eslint/eslint-plugin": "^7.5.0",
         "@typescript-eslint/parser": "^7.5.0",
         "@vitejs/plugin-vue": "^5.0.4",
