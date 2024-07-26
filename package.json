@@ -8,7 +8,7 @@
         "build": "vue-tsc && vite build",
         "preview": "vite preview",
         "lint": "eslint --ext .js,.vue,.ts --fix src --max-warnings=0",
-        "vue-tsc": "vue-tsc",
+        "tsc": "vue-tsc",
         "prepare": "husky"
     },
     "dependencies": {
@@ -21,6 +21,7 @@
         "body-scroll-lock": "4.0.0-beta.0",
         "browserlist": "^1.0.1",
         "chart.js": "^3.6.1",
+        "dompurify": "^3.1.6",
         "js-cookie": "^3.0.5",
         "pinia": "^2.1.7",
         "pinia-plugin-persistedstate": "^3.2.1",
@@ -35,9 +36,10 @@
     },
     "devDependencies": {
         "@mdi/font": "^7.4.47",
-        "@tailwindcss/typography": "^0.5.13",
         "@nabla/vite-plugin-eslint": "^2.0.4",
+        "@tailwindcss/typography": "^0.5.13",
         "@types/body-scroll-lock": "^3.1.2",
+        "@types/dompurify": "^3.0.5",
         "@types/js-cookie": "^3.0.6",
         "@typescript-eslint/eslint-plugin": "^7.5.0",
         "@typescript-eslint/parser": "^7.5.0",

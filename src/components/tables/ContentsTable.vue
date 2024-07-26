@@ -36,9 +36,11 @@
         </template>
 
         <template #[`item.description`]="{ item }">
-            <p v-if="item.description" class="line-camp-2">
-                {{ item.description }}
-            </p>
+            <div
+                v-if="item.description"
+                class="line-camp-2 description-rows"
+                v-html="sanitize(item.description.slice(0, 100))"
+            ></div>
 
             <div v-else>No description</div>
         </template>
@@ -156,6 +158,7 @@
 
 <script setup lang="ts">
     import { ref } from 'vue';
+    import DOMPurify from 'dompurify';
 
     import TableActionButtons from '@/components/tables/TableActionButtons.vue';
 
@@ -241,6 +244,8 @@
     }
 
     const splitTags = (tags: string) => tags.split(', ');
+
+    const sanitize = (str: string) => DOMPurify.sanitize(str);
 </script>
 
 <style></style>

@@ -87,6 +87,7 @@
                 size="small"
                 icon="mdi-link-off"
                 variant="text"
+                :disabled="!editor.isActive('link')"
                 @click="removeLink"
             >
             </v-btn>
