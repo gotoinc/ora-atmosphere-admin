@@ -303,17 +303,6 @@
             </div>
 
             <div>
-                <p class="mb-5">Please enter a description (optional)</p>
-
-                <v-textarea
-                    v-model="description"
-                    :error-messages="errors.description"
-                    label="Description"
-                    variant="outlined"
-                ></v-textarea>
-            </div>
-
-            <div>
                 <p class="mb-5">Please select theme of the content</p>
 
                 <v-select
@@ -361,6 +350,13 @@
                         </span>
                     </template>
                 </v-combobox>
+            </div>
+
+            <!-- HTML Editor -->
+            <div class="mb-10">
+                <p class="mb-5">Please enter a description (optional)</p>
+
+                <content-editor v-model="description" />
             </div>
 
             <v-btn
@@ -451,6 +447,7 @@
     import VLoader from '@/components/base/VLoader.vue';
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
+    import ContentEditor from '@/components/editor/ContentEditor.vue';
     import type { CreateFormEmits } from '@/components/forms/types';
 
     import { getDefaultContent } from '@/api/contents/get-default-content.api.ts';
