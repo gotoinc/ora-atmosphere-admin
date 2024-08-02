@@ -1,5 +1,5 @@
-import { getBlobFile } from '@/api/contents/get-file.api.ts';
-import { getFileName } from '@/hooks/file-uploader.ts';
+import { getBlobFile } from '@/api/contents/get-blob-file.api.ts';
+import { getFileName } from '@/hooks/useFormatFile.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
 
 export const getFile = async (src: string) => {

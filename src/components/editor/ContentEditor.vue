@@ -1,6 +1,6 @@
 <template>
     <div v-if="editor" class="rounded border !border-grey-100 p-4">
-        <div class="mb-10 flex flex-wrap items-center gap-3">
+        <div class="mb-5 flex flex-wrap items-center gap-3">
             <v-menu>
                 <template #activator="{ props: activatorProps }">
                     <v-btn
@@ -134,7 +134,7 @@
             </div>
         </div>
 
-        <editor-content :editor="editor" />
+        <editor-content class="rounded bg-grey-300 p-3" :editor="editor" />
 
         <!-- Dialog for enter url -->
         <v-dialog v-model="isURLOpen" persistent max-width="400">

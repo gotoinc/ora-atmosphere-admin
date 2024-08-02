@@ -68,27 +68,25 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, watch } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import { useToast } from 'vue-toastification';
 
     import DropZone from '@/components/drag-and-drop/DropZone.vue';
 
     import { fileSizeLimit } from '@/constants/fileSizeLimit.ts';
-    // File Management
-    import type { UploadableFile } from '@/hooks/useFileList.ts';
-    import { useFiles } from '@/hooks/useFileList.ts';
     import { useGeneratedID } from '@/hooks/useGeneratedID.ts';
 
     interface Props {
+        filesList?: File[];
         error?: boolean;
         multiple?: boolean;
         accept?: string[];
-        fileToRemove?: UploadableFile;
+        fileToRemove?: File;
         sizeLimit?: number; // size in MB
     }
 
     interface Emits {
-        (e: 'upload', value: UploadableFile[]): void;
+        (e: 'upload', value: File[] | File): void;
         (e: 'remove'): void;
     }
 
@@ -97,6 +95,8 @@
         sizeLimit: fileSizeLimit,
     });
 
+    const files = ref<File[]>(props.filesList ?? []);
+
     const toast = useToast();
 
     const acceptFileTypes = computed(() =>
@@ -104,8 +104,6 @@
     );
 
     const inputID = `file-input-${useGeneratedID()}`;
-
-    const { files, addFiles, removeFile } = useFiles();
 
     const checkFileAccept = (file: File) => {
         if (props.accept?.includes(file.type)) {
@@ -118,7 +116,7 @@
 
     const checkFileSize = (file: File) => {
         if (props.sizeLimit) {
-            const limit = props.sizeLimit * 1024 * 1024;
+            const limit = props.sizeLimit;
 
             if (file.size > limit) {
                 toast.error(`File ${file.name} is too large`);
@@ -130,16 +128,12 @@
         }
     };
 
-    const checkFile = (newFiles: FileList | File[]) => {
+    const fileExists = (file: File) =>
+        files.value.some((item) => item.name === file.name);
+
+    const checkFile = (newFiles: FileList) => {
         if (!props.multiple && newFiles.length > 1) {
             toast.error('Only 1 attachment is allowed');
-            return;
-        }
-
-        if (!props.accept) {
-            addFiles(newFiles);
-
-            emits('upload', files.value);
 
             return;
         }
@@ -148,34 +142,31 @@
         if (props.multiple) {
             const accepted: File[] = [];
 
-            if (Array.isArray(newFiles)) {
-                newFiles.forEach((file) => {
-                    if (checkFileAccept(file) && checkFileSize(file)) {
-                        accepted.push(file);
-                    }
-                });
-            } else {
-                for (const file of newFiles) {
-                    if (checkFileAccept(file) && checkFileSize(file)) {
-                        accepted.push(file);
-                    }
+            for (const file of newFiles) {
+                if (fileExists(file)) {
+                    toast.error(`File ${file.name} is already exists`);
+                }
+
+                if (
+                    checkFileAccept(file) &&
+                    checkFileSize(file) &&
+                    !fileExists(file)
+                ) {
+                    accepted.push(file);
+                    files.value.push(file);
                 }
             }
 
             if (accepted.length > 0) {
-                addFiles(accepted);
-
-                emits('upload', files.value);
+                emits('upload', accepted);
             }
 
             return;
-        }
-
-        // Check file type
-        if (checkFileAccept(newFiles[0]) && checkFileSize(newFiles[0])) {
-            addFiles(newFiles);
-
-            emits('upload', files.value);
+        } else {
+            if (checkFileAccept(newFiles[0]) && checkFileSize(newFiles[0])) {
+                files.value.push(newFiles[0]);
+                emits('upload', newFiles[0]);
+            }
         }
     };
 
@@ -189,15 +180,32 @@
         input.value = ''; // reset so that selecting the same file again will still cause it to fire this change
     };
 
+    const removeFile = (file: File) => {
+        files.value = files.value.filter((item) => item.name !== file.name);
+    };
+
     const onRemoveFile = () => {
-        removeFile(files.value[0]);
         emits('remove');
     };
 
     watch(
         () => props.fileToRemove,
         (file) => {
-            if (file) removeFile(file);
+            if (file) {
+                removeFile(file);
+            }
+        }
+    );
+
+    watch(
+        () => props.filesList,
+        (list) => {
+            if (list) {
+                files.value = list;
+            }
+        },
+        {
+            once: true,
         }
     );
 </script>

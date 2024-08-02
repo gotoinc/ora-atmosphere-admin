@@ -55,12 +55,13 @@
 
     import { postCategories } from '@/api/catalog/categories/post-category.api.ts';
     import { updateCategory } from '@/api/catalog/categories/update-category.api.ts';
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
-    import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Category } from '@/ts/catalog';
     import { createCategorySchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateCategorySchema } from '@/validations/types/catalog.validation';
+    import type {
+        CategoryInput,
+        CreateCategorySchema,
+    } from '@/validations/types/catalog.validation';
 
     interface Props {
         category?: Category | null;
@@ -115,10 +116,11 @@
     /**
      * Manage image file
      */
-    const selectFile = (value: UploadableFile[] | UploadableFile) => {
-        if (Array.isArray(value)) {
-            image.value = value[0].file;
-            imageSrc.value = URL.createObjectURL(value[0].file);
+    const selectFile = (value: File[] | File) => {
+        if (!Array.isArray(value)) {
+            image.value = value;
+            imageSrc.value = URL.createObjectURL(value);
+            isFileSelected.value = true;
         }
     };
 
@@ -128,14 +130,32 @@
         image.value = '';
     };
 
+    const getEditedValues = (values: CreateCategorySchema) => {
+        const editedValues: Partial<CategoryInput> = {};
+
+        if (values.image !== excludedProperties.image) {
+            editedValues.image = values.image as File;
+        }
+
+        if (values.name !== excludedProperties.name) {
+            editedValues.name = values.name;
+        }
+
+        if (values.requires_auth !== excludedProperties.requires_auth) {
+            editedValues.requires_auth = values.requires_auth;
+        }
+
+        return editedValues;
+    };
+
     /**
      * Submit form
      */
     const onSubmit = handleSubmit(async (values) => {
         // Check if something was edited
-        const editedValues = useCompareObjects(excludedProperties, values);
+        const editedValues = getEditedValues(values);
 
-        if (props.category && !editedValues) {
+        if (props.category && Object.keys(editedValues).length === 0) {
             toast.error('No changes were captured');
 
             return;

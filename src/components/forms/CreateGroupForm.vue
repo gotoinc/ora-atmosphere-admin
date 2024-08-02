@@ -71,13 +71,14 @@
     import { getCategories } from '@/api/catalog/categories/get-categories.api.ts';
     import { postGroup } from '@/api/catalog/groups/post-group.api.ts';
     import { updateGroup } from '@/api/catalog/groups/update-group.api.ts';
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
-    import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Group } from '@/ts/catalog';
     import type { Identifiable } from '@/ts/common';
     import { createGroupSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateGroupSchema } from '@/validations/types/catalog.validation';
+    import type {
+        CreateGroupSchema,
+        GroupInput,
+    } from '@/validations/types/catalog.validation';
 
     const props = defineProps<{ group?: Group | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -129,10 +130,11 @@
     /**
      * Manage image file
      */
-    const selectFile = (value: UploadableFile[] | UploadableFile) => {
-        if (Array.isArray(value)) {
-            imageSrc.value = URL.createObjectURL(value[0].file);
-            image.value = value[0].file;
+    const selectFile = (value: File[] | File) => {
+        if (!Array.isArray(value)) {
+            image.value = value;
+            imageSrc.value = URL.createObjectURL(value);
+            isFileSelected.value = true;
         }
     };
 
@@ -142,14 +144,36 @@
         imageSrc.value = '';
     };
 
+    const getEditedValues = (values: CreateGroupSchema) => {
+        const editedValues: Partial<GroupInput> = {};
+
+        if (values.image !== excludedProperties.image) {
+            editedValues.image = values.image as File;
+        }
+
+        if (values.name !== excludedProperties.name) {
+            editedValues.name = values.name;
+        }
+
+        if (values.requires_auth !== excludedProperties.requires_auth) {
+            editedValues.requires_auth = values.requires_auth;
+        }
+
+        if (values.category.id !== props.group?.category) {
+            editedValues.category = values.category.id;
+        }
+
+        return editedValues;
+    };
+
     /**
      * Submit form
      */
     const onSubmit = handleSubmit(async (values) => {
         // Check if something was edited
-        const editedValues = useCompareObjects(excludedProperties, values);
+        const editedValues = getEditedValues(values);
 
-        if (props.group && !editedValues) {
+        if (props.group && Object.keys(editedValues).length === 0) {
             toast.error('No changes were captured');
 
             return;
@@ -161,7 +185,6 @@
             if (props.group) {
                 await updateGroup(props.group.id, {
                     ...editedValues,
-                    category: category.value.id,
                 });
 
                 toast.success('Group successfully updated');

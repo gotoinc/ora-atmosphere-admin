@@ -14,7 +14,7 @@
     import { onMounted, onUnmounted, ref } from 'vue';
 
     const emits = defineEmits<{
-        (e: 'files-dropped', value: FileList | File[]): void;
+        (e: 'files-dropped', value: FileList): void;
     }>();
 
     const active = ref(false);
@@ -39,7 +39,7 @@
         setInactive();
 
         if (e.dataTransfer) {
-            emits('files-dropped', [...e.dataTransfer.files]);
+            emits('files-dropped', e.dataTransfer.files);
         }
     }
 

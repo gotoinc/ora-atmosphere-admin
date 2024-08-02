@@ -7,7 +7,7 @@ export interface DetailResponse {
 export interface Identifiable extends Pick<CommonCatalogTypes, 'id' | 'name'> {}
 
 export interface Audio extends Identifiable {
-    file: File;
+    file: string;
     size: number;
     duration: number;
 }

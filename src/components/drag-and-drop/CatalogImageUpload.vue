@@ -45,7 +45,6 @@
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
 
     import acceptedImages from '@/constants/accepted-images.ts';
-    import type { UploadableFile } from '@/hooks/useFileList.ts';
 
     interface Props {
         showCard: boolean;
@@ -56,7 +55,7 @@
     }
 
     interface Emits {
-        (e: 'upload', value: UploadableFile[] | UploadableFile): void;
+        (e: 'upload', value: File | File[]): void;
         (e: 'remove'): void;
     }
 

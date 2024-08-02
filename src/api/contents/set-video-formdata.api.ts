@@ -1,53 +1,101 @@
 import { isFile } from '@/ts/guards/file.guard.ts';
 import type { ContentInput } from '@/validations/types/content.validation';
 
-export const setVideoFormdata = (body: ContentInput) => {
+export const setVideoFormdata = (
+    body: ContentInput | Partial<ContentInput>
+) => {
     const formData = new FormData();
-    formData.append('title', body.title);
-    formData.append('description', body.description ?? '');
-    formData.append('tags', body.tags ?? '');
-    formData.append('requires_auth', String(body.requires_auth));
-    formData.append('visible_for_unregistered', String(!body.requires_auth));
-    formData.append('audio_enabled', String(body.audio_enabled));
-    formData.append('narration_enabled', String(body.narration_enabled));
-    formData.append('topic', String(body.topic)); // Topic ID
-    formData.append('duration', String(body.duration));
-    formData.append('preview_image', body.preview_image); // File object
-    formData.append('file', body.file); // File object
 
-    if (body.image) {
-        formData.append('image', body.image);
+    const {
+        description,
+        title,
+        tags,
+        audios,
+        topic,
+        date_created: date,
+        preview_image: image,
+        file,
+        duration,
+        languages,
+        requires_auth: isRequiresAuth,
+        audio_enabled: isAudioEnabled,
+        narration_enabled: isNarrationEnabled,
+    } = body;
+
+    if (title) {
+        formData.append('title', title);
     }
 
-    if (body.date_created) {
-        formData.append('date_created', body.date_created);
+    if (image) {
+        formData.append('preview_image', image); // File object
     }
 
-    // Test data
-    formData.append('show_on_main_banner', String(true));
+    if (file) {
+        formData.append('file', file); // File object
+    }
 
-    if (body.languages.length > 0) {
-        body.languages.forEach((id) => {
+    if (date) {
+        formData.append('date_created', date);
+    }
+
+    if (duration) {
+        formData.append('duration', String(duration));
+    }
+
+    if (topic) {
+        formData.append('topic', String(topic));
+    }
+
+    if (languages?.length) {
+        languages.forEach((id) => {
             formData.append('languages', id.toString());
         });
     }
 
-    if (body.audios) {
-        body.audios.forEach((audio) => {
-            const duration = isFile(audio.file)
-                ? audio.duration.toFixed()
-                : audio.duration;
+    if (audios) {
+        if (audios.length > 0) {
+            audios.forEach((audio) => {
+                const duration = isFile(audio.file)
+                    ? audio.duration.toFixed()
+                    : audio.duration;
 
-            const size = isFile(audio.file)
-                ? audio.file.size.toFixed()
-                : audio.size;
+                const size = isFile(audio.file)
+                    ? audio.file.size.toFixed()
+                    : audio.size;
 
-            formData.append('audios', audio.file);
-            formData.append('audio_names', audio.name);
-            formData.append('audio_durations', String(duration));
-            formData.append('audio_sizes', String(size));
-        });
+                formData.append('audios', audio.file);
+                formData.append('audio_names', audio.name);
+                formData.append('audio_durations', String(duration));
+                formData.append('audio_sizes', String(size));
+            });
+        } else {
+            formData.append('clear_audios', String(true));
+        }
     }
+
+    if (description) {
+        formData.append('description', description);
+    }
+
+    if (tags) {
+        formData.append('tags', tags);
+    }
+
+    if (isRequiresAuth !== undefined) {
+        formData.append('requires_auth', String(isRequiresAuth));
+        formData.append('visible_for_unregistered', String(!isRequiresAuth));
+    }
+
+    if (isAudioEnabled !== undefined) {
+        formData.append('audio_enabled', String(isAudioEnabled));
+    }
+
+    if (isNarrationEnabled !== undefined) {
+        formData.append('narration_enabled', String(isNarrationEnabled));
+    }
+
+    // Test data
+    formData.append('show_on_main_banner', String(false));
 
     return formData;
 };

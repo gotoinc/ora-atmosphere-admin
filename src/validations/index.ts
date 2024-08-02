@@ -51,7 +51,7 @@ export const fileSchema = mixed<File | string>()
     })
     .test('fileSize', 'File size is too large', (value) => {
         if (value && isFile(value)) {
-            return value.size < fileSizeLimit * 1024 * 1024; // not bigger that 50mb
+            return value.size < fileSizeLimit; // not bigger that 50mb
         } else {
             return true;
         }
@@ -64,7 +64,7 @@ export const audioSchema: ObjectSchema<CreateAudio> = object({
     duration: number().required('Please enter the duration'),
     size: number()
         .required('Please enter the size')
-        .max(fileSizeLimit * 1024 * 1024, 'Size must be at most 50MB'),
+        .max(fileSizeLimit, 'Size must be at most 50MB'),
 });
 
 // Common schema for catalog

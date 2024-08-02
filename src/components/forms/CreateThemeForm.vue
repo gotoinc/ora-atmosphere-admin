@@ -70,13 +70,14 @@
     import { getGroups } from '@/api/catalog/groups/get-groups.api.ts';
     import { postTopic } from '@/api/catalog/topics/post-topic.api.ts';
     import { updateTopic } from '@/api/catalog/topics/update-topic.api.ts';
-    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
-    import type { UploadableFile } from '@/hooks/useFileList.ts';
     import type { Topic } from '@/ts/catalog';
     import type { Identifiable } from '@/ts/common';
     import { createThemeSchema } from '@/validations/schemas/catalog.schema.ts';
-    import type { CreateTopicSchema } from '@/validations/types/catalog.validation';
+    import type {
+        CreateTopicSchema,
+        TopicInput,
+    } from '@/validations/types/catalog.validation';
 
     const props = defineProps<{ topic?: Topic | null }>();
     const emits = defineEmits<CreateFormEmits>();
@@ -126,10 +127,11 @@
     /**
      * Manage image file
      */
-    const selectFile = (value: UploadableFile[] | UploadableFile) => {
-        if (Array.isArray(value)) {
-            imageSrc.value = URL.createObjectURL(value[0].file);
-            image.value = value[0].file;
+    const selectFile = (value: File[] | File) => {
+        if (!Array.isArray(value)) {
+            image.value = value;
+            imageSrc.value = URL.createObjectURL(value);
+            isFileSelected.value = true;
         }
     };
 
@@ -155,7 +157,7 @@
 
                 if (props.topic) {
                     const selected = items.find(
-                        (item) => item.id === props.topic?.group
+                        (item) => item.id === props.topic?.group.id
                     );
 
                     if (selected) group.value = selected;
@@ -166,19 +168,35 @@
         }
     };
 
+    const getEditedValues = (values: CreateTopicSchema) => {
+        const editedValues: Partial<TopicInput> = {};
+
+        if (values.image !== excludedProperties.image) {
+            editedValues.image = values.image as File;
+        }
+
+        if (values.name !== excludedProperties.name) {
+            editedValues.name = values.name;
+        }
+
+        if (values.requires_auth !== excludedProperties.requires_auth) {
+            editedValues.requires_auth = values.requires_auth;
+        }
+
+        if (values.group.id !== props.topic?.group.id) {
+            editedValues.group_id = values.group.id;
+        }
+
+        return editedValues;
+    };
+
     /**
      * Submit form
      */
     const onSubmit = handleSubmit(async (values) => {
-        const editedValues = useCompareObjects(
-            {
-                ...excludedProperties,
-                group: group.value,
-            },
-            values
-        );
+        const editedValues = getEditedValues(values);
 
-        if (props.topic && !editedValues) {
+        if (props.topic && Object.keys(editedValues).length === 0) {
             toast.error('No changes were captured');
 
             return;
@@ -190,7 +208,6 @@
             if (props.topic) {
                 await updateTopic(props.topic.id, {
                     ...editedValues,
-                    group_id: group.value.id,
                 });
 
                 toast.success('Topic successfully updated');

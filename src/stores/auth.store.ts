@@ -43,7 +43,7 @@ export const useAuthStore = defineStore(
                 return profile.value;
             } catch (e) {
                 clearAuth();
-                void logout();
+                // void logout();
                 void router.replace({ name: 'auth' });
             }
         };

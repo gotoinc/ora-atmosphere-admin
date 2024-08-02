@@ -5,7 +5,7 @@
                 <h3 class="mb-5 text-lg font-semibold">Upload video</h3>
 
                 <drag-and-drop
-                    v-if="!videoSrc && !isContentSelected"
+                    v-if="!isContentSelected"
                     :error="!!errors.file"
                     :accept="acceptedVideos"
                     @upload="selectVideoFile"
@@ -23,7 +23,7 @@
                 >
                     <div class="mb-4 h-80 max-tab:h-[45vw]">
                         <video
-                            v-if="isVideoLoaded && uploadedVideoFile"
+                            v-if="videoSrc"
                             ref="videoElement"
                             class="h-full w-full rounded-lg object-cover"
                             controls
@@ -31,7 +31,7 @@
                             crossorigin="anonymous"
                             @loadedmetadata="loadVideoInfo"
                         >
-                            <source :src="videoSrc ?? content?.file" />
+                            <source :src="videoSrc" />
                         </video>
 
                         <v-skeleton-loader
@@ -64,16 +64,12 @@
                                     </a>
                                 </div>
 
-                                <template v-if="uploadedVideoFile">
+                                <template v-if="isFile(videoFile)">
                                     <div class="mb-2">
                                         <span class="text-sm">File name:</span>
 
                                         <p class="block truncate font-semibold">
-                                            {{
-                                                getFileName(
-                                                    uploadedVideoFile.name
-                                                )
-                                            }}
+                                            {{ getFileName(videoFile.name) }}
                                         </p>
                                     </div>
 
@@ -83,7 +79,7 @@
                                         <p class="font-semibold">
                                             {{
                                                 useFormatFileSize(
-                                                    uploadedVideoFile.size
+                                                    videoFile.size
                                                 )
                                             }}
                                         </p>
@@ -182,6 +178,7 @@
                     :accept="[...acceptedAudios, ...acceptedVideos]"
                     multiple
                     :file-to-remove="audioToRemove"
+                    :files-list="audioFiles"
                     class="mb-5"
                     @upload="selectAudioFiles"
                 >
@@ -197,88 +194,104 @@
                     </h4>
 
                     <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
-                        <div
-                            v-for="(audio, i) in audios"
-                            :key="i"
-                            class="rounded bg-slate-600 p-4"
-                        >
-                            <audio
-                                preload="metadata"
-                                class="mb-2 w-full"
-                                controls
-                                :src="getSource(audio.file)"
-                            ></audio>
+                        <template v-if="!isAudiosLoading">
+                            <div
+                                v-for="(audio, i) in audios"
+                                :key="i"
+                                class="rounded bg-slate-600 p-4"
+                            >
+                                <audio
+                                    preload="metadata"
+                                    class="mb-2 w-full"
+                                    controls
+                                    :src="getSource(audio.file)"
+                                ></audio>
 
-                            <div class="space-y-4">
-                                <p class="mb-2">
-                                    Audio name:
-                                    <span class="flex min-h-8 items-center">
-                                        <v-text-field
-                                            v-if="
-                                                audioToEdit?.name === audio.name
-                                            "
-                                            v-model="audioEditableName"
-                                            hide-details
-                                            density="compact"
-                                            variant="underlined"
-                                        />
-
-                                        <span v-else class="line-camp-1">
-                                            {{ audio.name }}
-                                        </span>
-
-                                        <span
-                                            v-ripple
-                                            class="edit-icon"
-                                            @click="handleRenameAudio(audio)"
-                                        >
-                                            <v-icon
-                                                size="18"
-                                                :icon="
+                                <div class="space-y-4">
+                                    <p class="mb-2">
+                                        Audio name:
+                                        <span class="flex min-h-8 items-center">
+                                            <v-text-field
+                                                v-if="
                                                     audioToEdit?.name ===
                                                     audio.name
-                                                        ? 'mdi-cancel'
-                                                        : 'mdi-pencil'
                                                 "
+                                                v-model="audioEditableName"
+                                                hide-details
+                                                density="compact"
+                                                variant="underlined"
                                             />
+
+                                            <span v-else class="line-camp-1">
+                                                {{ audio.name }}
+                                            </span>
+
+                                            <span
+                                                v-ripple
+                                                class="edit-icon"
+                                                @click="
+                                                    handleRenameAudio(audio)
+                                                "
+                                            >
+                                                <v-icon
+                                                    size="18"
+                                                    :icon="
+                                                        audioToEdit?.name ===
+                                                        audio.name
+                                                            ? 'mdi-cancel'
+                                                            : 'mdi-pencil'
+                                                    "
+                                                />
+                                            </span>
+
+                                            <span
+                                                v-if="
+                                                    audioToEdit?.name ===
+                                                    audio.name
+                                                "
+                                                v-ripple
+                                                class="edit-icon"
+                                                @click="
+                                                    confirmAudioRename(audio)
+                                                "
+                                            >
+                                                <v-icon
+                                                    size="18"
+                                                    :icon="'mdi-check'"
+                                                />
+                                            </span>
                                         </span>
+                                    </p>
 
-                                        <span
-                                            v-if="
-                                                audioToEdit?.name === audio.name
-                                            "
-                                            v-ripple
-                                            class="edit-icon"
-                                            @click="confirmAudioRename(audio)"
-                                        >
-                                            <v-icon
-                                                size="18"
-                                                :icon="'mdi-check'"
-                                            />
-                                        </span>
-                                    </span>
-                                </p>
+                                    <p>
+                                        File size:
+                                        {{ useFormatFileSize(audio.size) }}
+                                    </p>
 
-                                <p>
-                                    File size:
-                                    {{ useFormatFileSize(audio.size) }}
-                                </p>
+                                    <p>
+                                        File duration:
+                                        {{ useFormatDuration(audio.duration) }}
+                                    </p>
 
-                                <p>
-                                    File duration:
-                                    {{ useFormatDuration(audio.duration) }}
-                                </p>
-
-                                <v-btn
-                                    type="submit"
-                                    color="red"
-                                    class="text-none w-fit"
-                                    @click="removeAudioFile(audio.name)"
-                                >
-                                    Remove
-                                </v-btn>
+                                    <v-btn
+                                        type="submit"
+                                        color="red"
+                                        class="text-none w-fit"
+                                        @click="removeAudioFile(audio)"
+                                    >
+                                        Remove
+                                    </v-btn>
+                                </div>
                             </div>
-                        </div>
+                        </template>
+
+                        <template v-else>
+                            <v-skeleton-loader
+                                v-for="i in audios.length"
+                                :key="i"
+                                class="h-64 w-full rounded"
+                            />
+                        </template>
                     </div>
                 </div>
             </div>
@@ -360,7 +373,7 @@
             </div>
 
             <v-btn
-                :loading="isLoading"
+                :loading="isLoading || isAudiosLoading"
                 type="submit"
                 color="primary"
                 class="text-none w-fit"
@@ -370,72 +383,22 @@
         </form>
 
         <!-- Dialog for confirm -->
-        <v-dialog v-model="isDefaultContentDialog" max-width="400">
-            <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
-                <h3 class="mb-5 text-xl font-semibold">
-                    Are you sure you want to set current video as default?
-                </h3>
-
-                <div class="mx-auto flex max-w-80 flex-wrap gap-4">
-                    <v-btn
-                        color="primary"
-                        variant="outlined"
-                        class="text-none flex-grow"
-                        @click="isDefaultContentDialog = false"
-                    >
-                        Cancel
-                    </v-btn>
-
-                    <v-btn
-                        :loading="isConfirmLoading"
-                        class="text-none flex-grow"
-                        color="primary"
-                        @click="setVideoAsDefault"
-                    >
-                        Yes
-                    </v-btn>
-                </div>
-            </div>
-        </v-dialog>
+        <confirm-dialog
+            v-model="isDefaultContentDialog"
+            :loading="isConfirmLoading"
+            title="Are you sure you want to set current video as default?"
+            @confirm="setVideoAsDefault"
+        />
 
         <!-- Dialog for feedback -->
-        <v-dialog v-model="isFeedbackOpen" persistent max-width="400">
-            <div class="rounded-lg bg-dark p-7 text-center shadow-2xl">
-                <template v-if="isLoading">
-                    <div class="relative mb-5 h-20">
-                        <v-loader />
-                    </div>
-
-                    <h3 class="text-xl font-semibold">
-                        Content is {{ content ? `updating` : 'uploading' }}...
-                    </h3>
-                </template>
-
-                <template v-else>
-                    <v-icon
-                        icon="mdi-check-circle-outline"
-                        size="60"
-                        color="green"
-                        class="mx-auto mb-4"
-                    />
-
-                    <h3 class="mb-5 text-xl font-semibold">
-                        Content has been successfully
-                        {{ content ? `updated` : 'uploaded' }}
-                    </h3>
-
-                    <div class="mx-auto flex max-w-80 flex-wrap gap-4">
-                        <v-btn
-                            color="primary"
-                            class="text-none flex-grow"
-                            @click="exit"
-                        >
-                            Close
-                        </v-btn>
-                    </div>
-                </template>
-            </div>
-        </v-dialog>
+        <feedback-dialog
+            v-model="isFeedbackOpen"
+            :success="isSuccess"
+            :loading="isLoading"
+            :loading-title="`Content is ${content ? `updating` : 'uploading'}...`"
+            :success-title="`Content has been successfully ${content ? `updated` : 'uploaded'}`"
+            @close="exit"
+        />
     </div>
 </template>
 
@@ -444,7 +407,8 @@
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
-    import VLoader from '@/components/base/VLoader.vue';
+    import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue';
+    import FeedbackDialog from '@/components/dialogs/FeedbackDialog.vue';
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
     import DragAndDrop from '@/components/drag-and-drop/DragAndDrop.vue';
     import ContentEditor from '@/components/editor/ContentEditor.vue';
@@ -458,15 +422,19 @@
     import { getFile } from '@/api/files/get-file.api.ts';
     import acceptedAudios from '@/constants/accepted-audios.ts';
     import acceptedVideos from '@/constants/accepted-videos.ts';
+    import {
+        useCompareArrays,
+        useCompareObjects,
+    } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
-    import type { UploadableFile } from '@/hooks/useFileList.ts';
     import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
-    import { useFormatFileSize } from '@/hooks/useFormatFileSize.ts';
-    import type { Identifiable } from '@/ts/common';
+    import { useFormatFileSize } from '@/hooks/useFormatFile.ts';
+    import type { Audio, Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
     import type {
+        ContentInput,
         CreateAudio,
         CreateContentSchema,
     } from '@/validations/types/content.validation';
@@ -479,6 +447,7 @@
     const props = withDefaults(defineProps<Props>(), {
         topics: () => [],
     });
+
     const emits = defineEmits<CreateFormEmits>();
 
     const toast = useToast();
@@ -491,14 +460,28 @@
     const isConfirmLoading = ref(false);
     const isDefaultContentDialog = ref(false);
     const isFeedbackOpen = ref(false);
+    const isSuccess = ref(false);
 
     const audioToEdit = ref<CreateAudio | null>(null);
     const audioEditableName = ref('');
-    const audioUploadables = ref<UploadableFile[]>([]);
-    const audioToRemove = ref<UploadableFile>();
+    const audioToRemove = ref<File>();
+    const audioFiles = ref<File[] | undefined>();
+    const isAudiosLoading = ref(false);
 
     const isShowCard = ref(false);
     const isChangesDetected = ref(false);
+
+    /**
+     * Data for content sources
+     */
+    const imageSrc = ref('');
+
+    const videoElement = ref<HTMLVideoElement | null>(null);
+    const videoSrc = ref('');
+    const duration = ref(0);
+
+    const languagesList = ref<Identifiable[]>([]);
+    const isLanguagesLoading = ref(true);
 
     /**
      * Define schema
@@ -531,24 +514,13 @@
     const [withAudio] = defineField('audio_enabled');
     const [withNarration] = defineField('narration_enabled');
 
-    /**
-     * Data for content sources
-     */
-    const uploadedVideoFile = ref<File | null>(null);
-    const imageSrc = ref('');
-
-    const videoElement = ref<HTMLVideoElement | null>(null);
-    const videoSrc = ref('');
-    const duration = ref(0);
-
-    const languagesList = ref<Identifiable[]>([]);
-    const isLanguagesLoading = ref(true);
-
     /*
      * Functions to manage audio
      */
     const loadAudioFiles = async () => {
         if (props.content?.audios && audios.value) {
+            isAudiosLoading.value = true;
+
             audios.value = await Promise.all(
                 audios.value.map(async (audio) => {
                     if (!isFile(audio.file)) {
@@ -562,6 +534,10 @@
                     return audio;
                 })
             );
+
+            audioFiles.value = audios.value.map((item) => item.file as File);
+
+            isAudiosLoading.value = false;
         }
     };
 
@@ -577,12 +553,6 @@
         audioEditableName.value = audio.name;
     };
 
-    const getCleanURL = (url: string) => {
-        const newURL = new URL(url);
-
-        return `${newURL.origin}${newURL.pathname}`;
-    };
-
     const getFileName = (name: string) => name.split('?')[0];
 
     /*
@@ -596,11 +566,17 @@
                 'date_created',
                 'tags',
                 'audios',
-                'preview_image',
-                'file',
                 'languages',
             ])
         );
+
+        if (props.content?.file) {
+            videoSrc.value = props.content.file;
+        }
+
+        if (props.content?.preview_image) {
+            imageSrc.value = props.content.preview_image;
+        }
 
         if (props.content?.languages) {
             languages.value = props.content.languages;
@@ -610,23 +586,11 @@
             tags.value = props.content.tags.split(', ');
         }
 
-        // TODO: fix image issue
-        if (props.content?.preview_image) {
-            isShowCard.value = true;
-            imageSrc.value = props.content.preview_image;
-
-            image.value = await getFile(
-                getCleanURL(props.content.preview_image)
-            );
-        }
-
         if (props.content?.audios) {
-            audios.value = props.content.audios;
+            audios.value = [...props.content.audios];
 
             await loadAudioFiles();
         }
-
-        await loadVideoFile();
     };
 
     const getSource = (file: File | string) =>
@@ -638,7 +602,6 @@
     const loadVideoInfo = () => {
         if (videoElement.value) {
             duration.value = videoElement.value.duration;
-
             isVideoLoaded.value = true;
         }
     };
@@ -652,24 +615,6 @@
     const changeVideo = () => {
         videoSrc.value = '';
         isContentSelected.value = false;
-    };
-
-    const loadVideoFile = async () => {
-        if (props.content) {
-            try {
-                const res = await getFile(props.content.file);
-
-                if (res) {
-                    videoFile.value = res;
-                    uploadedVideoFile.value = res;
-                    videoSrc.value = URL.createObjectURL(res);
-                }
-            } catch (e) {
-                videoSrc.value = props.content.file;
-            } finally {
-                isVideoLoaded.value = true;
-            }
-        }
     };
 
     const setVideoAsDefault = async () => {
@@ -692,46 +637,36 @@
     /*
      * Functions for file selection
      */
-    const selectVideoFile = (files: UploadableFile[]) => {
-        const { file } = files[0];
+    const selectVideoFile = (file: File[] | File) => {
+        if (!Array.isArray(file)) {
+            videoFile.value = file;
+            videoSrc.value = getSource(file);
 
-        uploadedVideoFile.value = file;
-        videoFile.value = file;
-
-        videoSrc.value = getSource(file);
-
-        isVideoLoaded.value = true;
+            isContentSelected.value = true;
+        }
     };
 
-    const selectAudioFiles = (files: UploadableFile[]) => {
-        files.forEach((item) => {
-            const isFileExist = audios.value?.some(
-                (file) => item.name === file.name
-            );
-
-            if (!isFileExist) {
-                audioUploadables.value.push(item);
-
-                const audio = new Audio(getSource(item.file));
+    const selectAudioFiles = (files: File[] | File) => {
+        if (Array.isArray(files)) {
+            files.forEach((item) => {
+                const audio = new Audio(getSource(item));
 
                 audio.addEventListener('loadedmetadata', () => {
                     audios.value?.push({
-                        name: item.file.name,
-                        size: item.file.size,
+                        name: item.name,
+                        size: item.size,
                         duration: audio.duration,
-                        file: item.file,
+                        file: item,
                     });
                 });
-            } else {
-                toast.error('File is already exists');
-            }
-        });
+            });
+        }
     };
 
-    const selectPreviewImage = (value: UploadableFile[] | UploadableFile) => {
-        if (Array.isArray(value)) {
-            image.value = value[0].file;
-            imageSrc.value = getSource(value[0].file);
+    const selectPreviewImage = (file: File[] | File) => {
+        if (!Array.isArray(file)) {
+            image.value = file;
+            imageSrc.value = getSource(file);
         }
     };
 
@@ -739,8 +674,8 @@
      * Remove operations
      */
     const removeVideoFile = () => {
-        uploadedVideoFile.value = null;
         videoFile.value = '';
+        isContentSelected.value = false;
     };
 
     const removeImage = () => {
@@ -749,18 +684,15 @@
         isShowCard.value = false;
     };
 
-    const removeAudioFile = (fileName: string) => {
+    const removeAudioFile = (audio: CreateAudio | Audio) => {
         isWatching = false;
 
-        const file = audioUploadables.value.find(
-            (item) => item.name === fileName
+        audioToRemove.value = audio.file as File;
+
+        audios.value = audios.value?.filter((item) => item.file !== audio.file);
+        audioFiles.value = audioFiles.value?.filter(
+            (item) => isFile(audio.file) && item.name !== audio.file.name
         );
-
-        if (file) {
-            audioToRemove.value = file;
-        }
-
-        audios.value = audios.value?.filter((file) => file.name !== fileName);
     };
 
     /*
@@ -788,51 +720,95 @@
      */
     let isWatching = true;
 
+    // TODO: finish prevent reload functionality
     watch(values, (value) => {
         if (
             isWatching &&
             (value.audios?.length ||
                 value.description ||
                 value.file ||
-                value.title ||
-                value.languages.length > 0 ||
-                value.topic.id)
+                value.title)
         ) {
             isChangesDetected.value = true;
         }
     });
-
-    // watch(videoElement, (element) => {
-    //     if (element) {
-    //         new Plyr(element, {
-    //             controls: [
-    //                 'play-large',
-    //                 'play',
-    //                 'progress',
-    //                 'current-time',
-    //                 'fullscreen',
-    //             ],
-    //         });
-    //     }
-    // });
 
     const exit = () => {
         emits('close');
         emits('update');
     };
 
+    const getIds = (array: Identifiable[]) => array.map((item) => item.id);
+
+    const getUpdatedContent = (body: ContentInput) => {
+        if (props.content) {
+            /**
+             * Check changes in form except of: audios, languages
+             */
+            const updateBody: ContentInput = useCompareObjects(
+                {
+                    ...props.content,
+                    topic: props.content.topic.id,
+                },
+                body
+            ) as ContentInput;
+
+            /**
+             * Check changes in audios
+             */
+            if (props.content.audios) {
+                const editedAudios = values.audios?.filter(
+                    (audio) => !audio.hasOwnProperty('id')
+                );
+
+                if (
+                    (values.audios &&
+                        values.audios.length !== props.content.audios.length) ||
+                    editedAudios?.length
+                ) {
+                    updateBody.audios = values.audios;
+                }
+            }
+
+            /**
+             * Check changes in languages
+             */
+            const isLanguagesChanged = useCompareArrays(
+                getIds(languages.value),
+                getIds(props.content.languages)
+            );
+
+            if (isLanguagesChanged) {
+                updateBody.languages = getIds(languages.value);
+            }
+
+            /**
+             * Check changes in video file
+             */
+            if (isFile(values.file)) {
+                updateBody.file = values.file;
+            }
+
+            /**
+             * Check changes in image file
+             */
+            if (isFile(values.preview_image)) {
+                updateBody.preview_image = values.preview_image;
+            }
+
+            return updateBody;
+        }
+    };
+
     /*
      * Submit create/update operation for the content
      */
     const onSubmit = handleSubmit(async (values) => {
-        isFeedbackOpen.value = true;
-        isLoading.value = true;
-
         const body = {
             ...values,
             file: videoFile.value as File,
             duration: Math.round(duration.value),
-            languages: languages.value.map((lang) => lang.id),
+            languages: getIds(languages.value),
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,
@@ -841,8 +817,20 @@
 
         try {
             if (props.content) {
-                await updateVideo(props.content.id, body);
+                const updatedBody = getUpdatedContent(body);
+
+                if (updatedBody && Object.keys(updatedBody).length > 0) {
+                    isFeedbackOpen.value = true;
+                    isLoading.value = true;
+
+                    await updateVideo(props.content.id, updatedBody);
+                } else {
+                    toast.error('No changes were captured');
+                }
             } else {
+                isFeedbackOpen.value = true;
+                isLoading.value = true;
+
                 await postVideo({
                     ...body,
                     date_created: new Date().toISOString(),
@@ -851,6 +839,7 @@
                 resetForm();
             }
 
+            isSuccess.value = true;
             isWatching = false;
         } catch (e) {
             isFeedbackOpen.value = false;
@@ -894,11 +883,5 @@
 
     .edit-icon {
         @apply ml-2 flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-grey-200;
-    }
-</style>
-
-<style lang="postcss">
-    .plyr {
-        @apply mb-4 h-80 max-tab:h-[45vw];
     }
 </style>

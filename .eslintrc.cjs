@@ -70,6 +70,7 @@ module.exports = {
         '@typescript-eslint/no-inferrable-types': 'error',
         '@typescript-eslint/method-signature-style': ['error', 'property'],
         '@typescript-eslint/no-unsafe-member-access': 'error',
+        // '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/naming-convention': [
             'warn',
             {
