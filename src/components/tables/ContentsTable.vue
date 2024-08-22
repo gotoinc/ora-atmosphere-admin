@@ -1,163 +1,169 @@
 <template>
-    <v-data-table
-        :sort-by="[
-            {
-                key: 'date_created',
-                order: 'desc',
-            },
-        ]"
-        :search="search"
-        :loading="loading"
-        class="!rounded-lg"
-        :headers="headers"
-        :items="items"
-    >
-        <template #[`item.title`]="{ item }">
-            <p class="min-w-28">
-                {{ item.title }}
-            </p>
-        </template>
+    <div class="flex gap-3">
+        <v-data-table
+            :sort-by="[
+                {
+                    key: 'date_created',
+                    order: 'desc',
+                },
+            ]"
+            :search="search"
+            :loading="loading"
+            class="!rounded-lg"
+            :headers="headers"
+            :items="items"
+        >
+            <template #[`item.title`]="{ item }">
+                <p class="min-w-28">
+                    {{ item.title }}
+                </p>
+            </template>
 
-        <template #[`item.preview_image`]="{ item }">
-            <v-card
-                v-if="item.preview_image"
-                class="my-2 h-20 w-20"
-                elevation="2"
-                rounded
-            >
-                <v-img
-                    :src="item.preview_image"
-                    class="h-full w-full"
-                    cover
-                ></v-img>
-            </v-card>
-
-            <div v-else>No preview</div>
-        </template>
-
-        <template #[`item.description`]="{ item }">
-            <div
-                v-if="item.description"
-                class="line-camp-2 description-rows"
-                v-html="sanitize(item.description.slice(0, 100))"
-            ></div>
-
-            <div v-else>No description</div>
-        </template>
-
-        <template #[`item.topic`]="{ item }">
-            <p v-if="item.topic" class="line-camp-2">
-                {{ item.topic.name }}
-            </p>
-
-            <div v-else>No theme</div>
-        </template>
-
-        <template #[`item.audio_enabled`]="{ item }">
-            <img
-                v-if="item.audio_enabled"
-                src="@img/volume-on.svg"
-                class="h-10 w-10 object-contain"
-                alt=""
-            />
-
-            <img
-                v-else
-                src="@img/volume-off.svg"
-                class="h-10 w-10 object-contain opacity-30"
-                alt=""
-            />
-        </template>
-
-        <template #[`item.narration_enabled`]="{ item }">
-            <img
-                v-if="item.narration_enabled"
-                src="@img/narration-on.svg"
-                class="h-10 w-10 object-contain"
-                alt=""
-            />
-
-            <img
-                v-else
-                src="@img/narration-off.svg"
-                class="h-10 w-10 object-contain opacity-30"
-                alt=""
-            />
-        </template>
-
-        <template #[`item.date_created`]="{ item }">
-            <p class="whitespace-nowrap">
-                {{
-                    item.date_created
-                        ? useFormatDate(item.date_created)
-                        : 'Date is not set'
-                }}
-            </p>
-        </template>
-
-        <template #[`item.duration`]="{ item }">
-            <p class="whitespace-nowrap">
-                {{ useFormatDuration(item.duration) }}
-            </p>
-        </template>
-
-        <template #[`item.languages`]="{ item }">
-            <div
-                v-if="item.languages"
-                class="flex flex-wrap items-center gap-2 py-2"
-            >
-                <span
-                    v-for="lang in item.languages.slice(0, 2)"
-                    :key="lang.id"
-                    class="tag tag--lang tag--fill pointer-events-none capitalize"
+            <template #[`item.preview_image`]="{ item }">
+                <v-card
+                    v-if="item.preview_image"
+                    class="my-2 h-20 w-20"
+                    elevation="2"
+                    rounded
                 >
-                    {{ lang.name }}
-                </span>
+                    <v-img
+                        :src="item.preview_image"
+                        class="h-full w-full"
+                        cover
+                    ></v-img>
+                </v-card>
 
-                <span v-if="item.languages.length > 2" class="text-xs">
-                    + {{ item.languages.length - 2 }} more
-                </span>
-            </div>
+                <div v-else>No preview</div>
+            </template>
 
-            <div v-else>No languages</div>
-        </template>
+            <template #[`item.description`]="{ item }">
+                <div
+                    v-if="item.description"
+                    class="line-camp-2 description-rows"
+                    v-html="sanitize(item.description.slice(0, 100))"
+                ></div>
 
-        <template #[`item.tags`]="{ item }">
-            <div
-                v-if="item.tags"
-                class="flex min-w-40 flex-wrap items-center gap-2 py-2"
-            >
-                <span
-                    v-for="tag in splitTags(item.tags).slice(0, 2)"
-                    :key="tag"
-                    class="tag tag--fill pointer-events-none"
+                <div v-else>No description</div>
+            </template>
+
+            <template #[`item.topic`]="{ item }">
+                <p v-if="item.topic" class="line-camp-2">
+                    {{ item.topic.name }}
+                </p>
+
+                <div v-else>No theme</div>
+            </template>
+
+            <template #[`item.audio_enabled`]="{ item }">
+                <img
+                    v-if="item.audio_enabled"
+                    src="@img/volume-on.svg"
+                    class="h-10 w-10 object-contain"
+                    alt=""
+                />
+
+                <img
+                    v-else
+                    src="@img/volume-off.svg"
+                    class="h-10 w-10 object-contain opacity-30"
+                    alt=""
+                />
+            </template>
+
+            <template #[`item.narration_enabled`]="{ item }">
+                <img
+                    v-if="item.narration_enabled"
+                    src="@img/narration-on.svg"
+                    class="h-10 w-10 object-contain"
+                    alt=""
+                />
+
+                <img
+                    v-else
+                    src="@img/narration-off.svg"
+                    class="h-10 w-10 object-contain opacity-30"
+                    alt=""
+                />
+            </template>
+
+            <template #[`item.date_created`]="{ item }">
+                <p class="whitespace-nowrap">
+                    {{
+                        item.date_created
+                            ? useFormatDate(item.date_created)
+                            : 'Date is not set'
+                    }}
+                </p>
+            </template>
+
+            <template #[`item.duration`]="{ item }">
+                <p class="whitespace-nowrap">
+                    {{ useFormatDuration(item.duration) }}
+                </p>
+            </template>
+
+            <template #[`item.languages`]="{ item }">
+                <div
+                    v-if="item.languages"
+                    class="flex flex-wrap items-center gap-2 py-2"
                 >
-                    {{ tag }}
-                </span>
+                    <span
+                        v-for="lang in item.languages.slice(0, 2)"
+                        :key="lang.id"
+                        class="tag tag--lang tag--fill pointer-events-none capitalize"
+                    >
+                        {{ lang.name }}
+                    </span>
 
-                <span v-if="splitTags(item.tags).length > 2" class="text-xs">
-                    + {{ splitTags(item.tags).length - 2 }} more
-                </span>
-            </div>
+                    <span v-if="item.languages.length > 2" class="text-xs">
+                        + {{ item.languages.length - 2 }} more
+                    </span>
+                </div>
 
-            <div v-else>No tags</div>
-        </template>
+                <div v-else>No languages</div>
+            </template>
 
-        <template v-if="editable" #[`item.actions`]="{ item }">
-            <table-action-buttons
-                @edit="emits('edit', item)"
-                @delete="emits('delete', item)"
-            />
-        </template>
+            <template #[`item.tags`]="{ item }">
+                <div
+                    v-if="item.tags"
+                    class="flex min-w-40 flex-wrap items-center gap-2 py-2"
+                >
+                    <span
+                        v-for="tag in splitTags(item.tags).slice(0, 2)"
+                        :key="tag"
+                        class="tag tag--fill pointer-events-none"
+                    >
+                        {{ tag }}
+                    </span>
 
-        <template #no-data>
-            <p class="text-lg">No contents found</p>
-        </template>
-    </v-data-table>
+                    <span
+                        v-if="splitTags(item.tags).length > 2"
+                        class="text-xs"
+                    >
+                        + {{ splitTags(item.tags).length - 2 }} more
+                    </span>
+                </div>
+
+                <div v-else>No tags</div>
+            </template>
+
+            <template v-if="editable" #[`item.actions`]="{ item }">
+                <table-action-buttons
+                    class="max-desktop-xl:flex-col"
+                    @edit="emits('edit', item)"
+                    @delete="emits('delete', item)"
+                />
+            </template>
+
+            <template #no-data>
+                <p class="text-lg">No contents found</p>
+            </template>
+        </v-data-table>
+    </div>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, onUnmounted, ref } from 'vue';
     import DOMPurify from 'dompurify';
 
     import TableActionButtons from '@/components/tables/TableActionButtons.vue';
@@ -182,7 +188,9 @@
     const props = defineProps<Props>();
     const emits = defineEmits<Emits>();
 
-    const headers = ref<ReadonlyHeaders>([
+    type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+    const headers = ref<Writeable<ReadonlyHeaders>>([
         {
             title: 'Title',
             align: 'start',
@@ -230,22 +238,54 @@
         },
     ]);
 
-    type Writeable<T> = { -readonly [P in keyof T]: T[P] };
-
-    if (props.editable) {
-        const tableHeaders = headers.value as Writeable<ReadonlyHeaders>;
-
-        tableHeaders?.push({
-            align: 'end',
-            title: 'Actions',
-            key: 'actions',
-            sortable: false,
-        });
-    }
-
     const splitTags = (tags: string) => tags.split(', ');
 
     const sanitize = (str: string) => DOMPurify.sanitize(str);
+
+    const moveActionsToStart = () => {
+        if (headers.value) {
+            const lastElement = headers.value[headers.value.length - 1];
+
+            if (window.innerWidth < 1576) {
+                if (lastElement.key === 'actions') {
+                    const actions = headers.value.pop();
+
+                    if (actions) headers.value.unshift(actions);
+                }
+            } else {
+                if (lastElement.key !== 'actions') {
+                    const actions = headers.value.shift();
+
+                    if (actions) headers.value.push(actions);
+                }
+            }
+        }
+    };
+
+    onMounted(() => {
+        if (props.editable && headers.value) {
+            const actions = {
+                align: 'start',
+                title: 'Actions',
+                key: 'actions',
+                sortable: false,
+            } as (typeof headers.value)[0];
+
+            if (window.innerWidth < 1576) {
+                headers.value.unshift(actions);
+            } else {
+                headers.value.push(actions);
+            }
+
+            window.addEventListener('resize', moveActionsToStart);
+        }
+    });
+
+    onUnmounted(() => {
+        if (props.editable) {
+            window.removeEventListener('resize', moveActionsToStart);
+        }
+    });
 </script>
 
 <style></style>

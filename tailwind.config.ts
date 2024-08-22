@@ -78,6 +78,7 @@ export default {
                 lg: '1025px',
                 '2lg': '1200px',
                 desktop: '1440px',
+                'desktop-xl': '1576px',
             },
 
             height: {

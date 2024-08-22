@@ -70,7 +70,7 @@ export const useAuthStore = defineStore(
 
                 if (res) {
                     Cookies.set('ora_admin', res.token, {
-                        expires: remember ? 14 : undefined,
+                        expires: remember ? 14 : 1 / 48,
                         sameSite: 'Strict',
                         secure: true,
                     });

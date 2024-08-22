@@ -103,9 +103,16 @@
                 </template>
 
                 <template #text>
-                    <div class="text-h6 font-weight-light">Total contents</div>
+                    <router-link
+                        class="flex items-end gap-3 transition-colors hover:text-primary-50"
+                        :to="{ name: 'contents' }"
+                    >
+                        <div class="text-h6 font-weight-light">
+                            Total contents
+                        </div>
 
-                    <span class="mdi mdi-play-circle text-xl"></span>
+                        <span class="mdi mdi-play-circle text-xl"></span>
+                    </router-link>
                 </template>
             </info-card>
         </div>

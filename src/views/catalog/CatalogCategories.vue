@@ -96,10 +96,6 @@
             sortable: false,
             align: 'center',
         },
-        // {
-        //     title: 'Contents amount',
-        //     key: 'contents_amount',
-        // },
         {
             title: 'Date',
             key: 'date_created',
