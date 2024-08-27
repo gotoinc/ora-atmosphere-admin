@@ -100,6 +100,22 @@
 
                                 <v-divider class="my-3"></v-divider>
 
+                                <p class="mb-5">
+                                    Please select language of the content
+                                </p>
+
+                                <v-select
+                                    v-model="videoLanguage"
+                                    label="Languages"
+                                    variant="outlined"
+                                    clearable
+                                    :error-messages="errors.language"
+                                    item-title="name"
+                                    :loading="isLanguagesLoading"
+                                    :items="languagesList"
+                                    return-object
+                                />
+
                                 <div
                                     class="mb-4 flex flex-wrap gap-x-10 gap-y-2"
                                 >
@@ -188,10 +204,17 @@
                 </drag-and-drop>
 
                 <div v-if="audios?.length" class="grid gap-2">
-                    <h4 class="mb-3 font-semibold">
+                    <h4 class="mb-2 font-semibold">
                         Uploaded files
                         {{ `(${audios.length})` }}
                     </h4>
+
+                    <p
+                        v-if="audioWithErrors.length > 0"
+                        class="fade-b mb-3 text-error"
+                    >
+                        Please select language for each files
+                    </p>
 
                     <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
                         <template v-if="!isAudiosLoading">
@@ -273,6 +296,19 @@
                                         {{ useFormatDuration(audio.duration) }}
                                     </p>
 
+                                    <p class="my-3">Please select language</p>
+
+                                    <v-select
+                                        v-model="audio.language"
+                                        label="Languages"
+                                        variant="outlined"
+                                        clearable
+                                        item-title="name"
+                                        :loading="isLanguagesLoading"
+                                        :items="languagesList"
+                                        return-object
+                                    />
+
                                     <v-btn
                                         type="submit"
                                         color="red"
@@ -331,24 +367,6 @@
             </div>
 
             <div>
-                <p class="mb-5">Please select language of the content</p>
-
-                <v-select
-                    v-model="languages"
-                    multiple
-                    label="Languages"
-                    variant="outlined"
-                    clearable
-                    :error-messages="errors.languages"
-                    item-title="name"
-                    :loading="isLanguagesLoading"
-                    :items="languagesList"
-                    return-object
-                >
-                </v-select>
-            </div>
-
-            <div>
                 <p class="mb-5">Tags</p>
 
                 <v-combobox
@@ -403,7 +421,7 @@
 </template>
 
 <script setup lang="ts">
-    import { onMounted, onUnmounted, ref, watch } from 'vue';
+    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
@@ -422,10 +440,7 @@
     import { getFile } from '@/api/files/get-file.api.ts';
     import acceptedAudios from '@/constants/accepted-audios.ts';
     import acceptedVideos from '@/constants/accepted-videos.ts';
-    import {
-        useCompareArrays,
-        useCompareObjects,
-    } from '@/hooks/useCompareObjects.ts';
+    import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
     import { useFormatFileSize } from '@/hooks/useFormatFile.ts';
@@ -507,12 +522,17 @@
     const [videoFile] = defineField('file');
     const [image] = defineField('preview_image');
     const [topic] = defineField('topic');
-    const [languages] = defineField('languages');
+    const [videoLanguage] = defineField('language');
     const [tags] = defineField('tags');
     const [audios] = defineField('audios');
     const [requiresAuth] = defineField('requires_auth');
     const [withAudio] = defineField('audio_enabled');
     const [withNarration] = defineField('narration_enabled');
+
+    const audioWithErrors = computed(() => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        return audios.value?.filter((audio) => !audio.language) ?? [];
+    });
 
     /*
      * Functions to manage audio
@@ -566,7 +586,6 @@
                 'date_created',
                 'tags',
                 'audios',
-                'languages',
             ])
         );
 
@@ -578,8 +597,8 @@
             imageSrc.value = props.content.preview_image;
         }
 
-        if (props.content?.languages) {
-            languages.value = props.content.languages;
+        if (props.content?.language) {
+            videoLanguage.value = props.content.language;
         }
 
         if (props.content?.tags) {
@@ -657,6 +676,7 @@
                         size: item.size,
                         duration: audio.duration,
                         file: item,
+                        language: languagesList.value[0],
                     });
                 });
             });
@@ -738,7 +758,7 @@
         emits('update');
     };
 
-    const getIds = (array: Identifiable[]) => array.map((item) => item.id);
+    // const getIds = (array: Identifiable[]) => array.map((item) => item.id);
 
     const getUpdatedContent = (body: ContentInput) => {
         if (props.content) {
@@ -756,6 +776,7 @@
             /**
              * Check changes in audios
              */
+            // updateBody.audios = values.audios;
             if (props.content.audios) {
                 const editedAudios = values.audios?.filter(
                     (audio) => !audio.hasOwnProperty('id')
@@ -773,13 +794,11 @@
             /**
              * Check changes in languages
              */
-            const isLanguagesChanged = useCompareArrays(
-                getIds(languages.value),
-                getIds(props.content.languages)
-            );
+            const isLanguagesChanged =
+                props.content.language.id !== videoLanguage.value.id;
 
             if (isLanguagesChanged) {
-                updateBody.languages = getIds(languages.value);
+                updateBody.language = videoLanguage.value.id;
             }
 
             /**
@@ -808,7 +827,7 @@
             ...values,
             file: videoFile.value as File,
             duration: Math.round(duration.value),
-            languages: getIds(languages.value),
+            language: videoLanguage.value.id,
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,

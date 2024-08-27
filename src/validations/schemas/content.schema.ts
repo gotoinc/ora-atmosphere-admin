@@ -14,9 +14,7 @@ export const createContentSchema: ObjectSchema<CreateContentSchema> = object({
     preview_image: fileSchema,
     description: string().nullable(),
     audios: array().of(audioSchema.required()),
-    languages: array()
-        .of(identifiableSchema.required('Please select language'))
-        .required('Please select a language'),
+    language: identifiableSchema.required('Please select language'),
     tags: array().of(string().required()),
     topic: identifiableSchema.required('Please select a theme'),
     requires_auth: boolean(),

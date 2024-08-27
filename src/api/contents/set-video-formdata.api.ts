@@ -16,7 +16,7 @@ export const setVideoFormdata = (
         preview_image: image,
         file,
         duration,
-        languages,
+        language: videoLanguage,
         requires_auth: isRequiresAuth,
         audio_enabled: isAudioEnabled,
         narration_enabled: isNarrationEnabled,
@@ -46,10 +46,8 @@ export const setVideoFormdata = (
         formData.append('topic', String(topic));
     }
 
-    if (languages?.length) {
-        languages.forEach((id) => {
-            formData.append('languages', id.toString());
-        });
+    if (videoLanguage) {
+        formData.append('language_id', String(videoLanguage));
     }
 
     if (audios) {
@@ -67,6 +65,7 @@ export const setVideoFormdata = (
                 formData.append('audio_names', audio.name);
                 formData.append('audio_durations', String(duration));
                 formData.append('audio_sizes', String(size));
+                formData.append('audio_languages', String(audio.language.id));
             });
         } else {
             formData.append('clear_audios', String(true));

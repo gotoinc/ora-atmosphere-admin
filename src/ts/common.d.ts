@@ -10,4 +10,5 @@ export interface Audio extends Identifiable {
     file: string;
     size: number;
     duration: number;
+    language: Identifiable;
 }

@@ -102,21 +102,26 @@
                 </p>
             </template>
 
-            <template #[`item.languages`]="{ item }">
+            <template #[`item.language`]="{ item }">
                 <div
-                    v-if="item.languages"
+                    v-if="item.language"
                     class="flex flex-wrap items-center gap-2 py-2"
                 >
                     <span
-                        v-for="lang in item.languages.slice(0, 2)"
+                        v-for="lang in getAllLanguages(item).slice(0, 2)"
                         :key="lang.id"
                         class="tag tag--lang tag--fill pointer-events-none capitalize"
                     >
                         {{ lang.name }}
                     </span>
 
-                    <span v-if="item.languages.length > 2" class="text-xs">
-                        + {{ item.languages.length - 2 }} more
+                    <span
+                        v-if="getAllLanguages(item).length > 2"
+                        class="text-xs"
+                    >
+                        +
+                        {{ getAllLanguages(item).length - 2 }}
+                        more
                     </span>
                 </div>
 
@@ -230,7 +235,7 @@
         },
         {
             title: 'Languages',
-            key: 'languages',
+            key: 'language',
         },
         {
             title: 'Tags',
@@ -260,6 +265,18 @@
                 }
             }
         }
+    };
+
+    const getAllLanguages = (video: VideoContent) => {
+        if (!video.audios) {
+            return [];
+        }
+
+        const audioLangs = video.audios
+            .map((audio) => audio.language)
+            .filter((item) => item.id !== video.language.id);
+
+        return [video.language, ...audioLangs];
     };
 
     onMounted(() => {

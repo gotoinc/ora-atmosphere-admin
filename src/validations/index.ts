@@ -57,16 +57,6 @@ export const fileSchema = mixed<File | string>()
         }
     });
 
-// Audio schema
-export const audioSchema: ObjectSchema<CreateAudio> = object({
-    name: string().required('Please enter the name'),
-    file: fileSchema.required('Please upload a file'),
-    duration: number().required('Please enter the duration'),
-    size: number()
-        .required('Please enter the size')
-        .max(fileSizeLimit, 'Size must be at most 50MB'),
-});
-
 // Common schema for catalog
 export const commonCatalogSchema = object({
     id: number().required('ID is required').typeError('ID must be a number'),
@@ -86,6 +76,19 @@ export const commonCatalogSchema = object({
 export const identifiableSchema = object({
     id: number().required('Please select').typeError('ID must be a number'),
     name: string().required('Please select').typeError('Name must be a string'),
+});
+
+// Audio schema
+export const audioSchema: ObjectSchema<CreateAudio> = object({
+    name: string().required('Please enter the name'),
+    file: fileSchema.required('Please upload a file'),
+    duration: number().required('Please enter the duration'),
+    language: identifiableSchema.required(
+        'Please select language for each audio'
+    ),
+    size: number()
+        .required('Please enter the size')
+        .max(fileSizeLimit, 'Size must be at most 50MB'),
 });
 
 // Group schema
