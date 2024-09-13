@@ -51,7 +51,7 @@
     </div>
 
     <router-link
-        class="text-white underline transition-colors hover:!text-primary-100"
+        class="mx-auto block w-fit text-white underline transition-colors hover:!text-primary-100"
         :to="{ name: 'signInView' }"
     >
         Go to Sign in
