@@ -3,6 +3,7 @@
         v-slot="{ dropZoneActive }"
         :class="{
             'bg-primary-100': files.length > 0 && !multiple,
+            'pointer-events-none opacity-20': disable,
         }"
         class="drop-area group w-full rounded bg-grey-200 p-3 text-center transition-colors"
         @files-dropped="checkFile"
@@ -83,6 +84,7 @@
         accept?: string[];
         fileToRemove?: File;
         sizeLimit?: number; // size in MB
+        disable?: boolean;
     }
 
     interface Emits {

@@ -2,6 +2,7 @@ import type { ObjectSchema } from 'yup';
 import { boolean, mixed, number, object, string } from 'yup';
 
 import { fileSizeLimit } from '@/constants/fileSizeLimit.ts';
+import type { VideoFile } from '@/ts/common';
 import { isFile } from '@/ts/guards/file.guard.ts';
 import type { CreateAudio } from '@/validations/types/content.validation';
 
@@ -80,7 +81,6 @@ export const identifiableSchema = object({
 
 // Audio schema
 export const audioSchema: ObjectSchema<CreateAudio> = object({
-    name: string().required('Please enter the name'),
     file: fileSchema.required('Please upload a file'),
     duration: number().required('Please enter the duration'),
     language: identifiableSchema.required(
@@ -89,6 +89,13 @@ export const audioSchema: ObjectSchema<CreateAudio> = object({
     size: number()
         .required('Please enter the size')
         .max(fileSizeLimit, 'Size must be at most 50MB'),
+});
+
+export const videoSchema: ObjectSchema<VideoFile> = object({
+    file: fileSchema.required('Please upload a file'),
+    language: identifiableSchema.required(
+        'Please select language for each video'
+    ),
 });
 
 // Group schema

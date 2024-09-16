@@ -5,11 +5,13 @@
                 <h3 class="mb-5 text-lg font-semibold">Upload video</h3>
 
                 <drag-and-drop
-                    v-if="!isContentSelected"
-                    :error="!!errors.file"
+                    :error="!!errors.video_files"
                     :accept="acceptedVideos"
-                    @upload="selectVideoFile"
-                    @remove="removeVideoFile"
+                    multiple
+                    :files-list="videoFiles"
+                    :file-to-remove="videoToRemove"
+                    class="mb-5"
+                    @upload="selectVideoFiles"
                 >
                     <template #icon>
                         <span class="mdi mdi-video-vintage text-6xl"></span>
@@ -17,171 +19,42 @@
                 </drag-and-drop>
 
                 <!-- Video block -->
-                <div
-                    v-else
-                    class="relative w-full flex-shrink-0 overflow-hidden rounded"
-                >
-                    <div class="mb-4 h-80 max-tab:h-[45vw]">
-                        <video
-                            v-if="videoSrc"
-                            ref="videoElement"
-                            class="h-full w-full rounded-lg object-cover"
-                            controls
-                            playsinline
-                            crossorigin="anonymous"
-                            @loadedmetadata="loadVideoInfo"
+                <div>
+                    <div v-if="videos.length > 0">
+                        <h4 class="mb-2 font-semibold">
+                            Uploaded files
+                            {{ `(${videos.length})` }}
+                        </h4>
+
+                        <p
+                            v-if="videoWithErrors.length > 0"
+                            class="fade-b mb-3 text-error"
                         >
-                            <source :src="videoSrc" />
-                        </video>
+                            Please select language for each files
+                        </p>
 
-                        <v-skeleton-loader
-                            v-else
-                            class="h-full"
-                        ></v-skeleton-loader>
-                    </div>
-
-                    <div class="flex flex-col">
-                        <v-skeleton-loader
-                            v-if="!isVideoLoaded"
-                            type="paragraph"
-                            class="mb-3"
-                        ></v-skeleton-loader>
-
-                        <!-- Video info -->
-                        <template v-else>
-                            <div>
-                                <div v-if="content" class="mb-5">
-                                    <span class="block text-sm">
-                                        Video link:
-                                    </span>
-
-                                    <a
-                                        target="_blank"
-                                        :href="content.file"
-                                        class="link"
-                                    >
-                                        {{ content.file }}
-                                    </a>
-                                </div>
-
-                                <template v-if="isFile(videoFile)">
-                                    <div class="mb-2">
-                                        <span class="text-sm">File name:</span>
-
-                                        <p class="block truncate font-semibold">
-                                            {{ getFileName(videoFile.name) }}
-                                        </p>
-                                    </div>
-
-                                    <div class="mb-2">
-                                        <span class="text-sm">File size:</span>
-
-                                        <p class="font-semibold">
-                                            {{
-                                                useFormatFileSize(
-                                                    videoFile.size
-                                                )
-                                            }}
-                                        </p>
-                                    </div>
-
-                                    <div class="mb-5">
-                                        <span class="text-sm">Duration:</span>
-
-                                        <p class="font-semibold">
-                                            {{ useFormatDuration(duration) }}
-                                        </p>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="mb-4">
-                                <h3 class="text-xl">Settings</h3>
-
-                                <v-divider class="my-3"></v-divider>
-
-                                <p class="mb-5">
-                                    Please select language of the content
-                                </p>
-
-                                <v-select
-                                    v-model="videoLanguage"
-                                    label="Languages"
-                                    variant="outlined"
-                                    clearable
-                                    :error-messages="errors.language"
-                                    item-title="name"
-                                    :loading="isLanguagesLoading"
-                                    :items="languagesList"
-                                    return-object
+                        <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
+                            <template v-if="!isVideosLoading">
+                                <file-source-card
+                                    v-for="(video, i) in videos"
+                                    :key="i"
+                                    :data="video"
+                                    :languages-list="languagesList"
+                                    :is-languages-loading="isLanguagesLoading"
+                                    @remove-video="removeVideoFile"
+                                    @change-language="updateVideoLanguage"
+                                    @duration-loaded="(num) => (duration = num)"
                                 />
+                            </template>
 
-                                <div
-                                    class="mb-4 flex flex-wrap gap-x-10 gap-y-2"
-                                >
-                                    <v-checkbox
-                                        v-model="requiresAuth"
-                                        hide-details
-                                        color="primary"
-                                        density="comfortable"
-                                        label="Disable for unregistered users"
-                                    ></v-checkbox>
-
-                                    <v-checkbox
-                                        v-model="withAudio"
-                                        hide-details
-                                        color="primary"
-                                        density="comfortable"
-                                        label="Sound enabled"
-                                    ></v-checkbox>
-
-                                    <v-checkbox
-                                        v-model="withNarration"
-                                        hide-details
-                                        color="primary"
-                                        density="comfortable"
-                                        label="Narration enabled"
-                                    ></v-checkbox>
-                                </div>
-
-                                <div class="mb-4 flex gap-3">
-                                    <v-btn
-                                        type="submit"
-                                        color="red"
-                                        class="text-none w-fit"
-                                        @click="changeVideo"
-                                    >
-                                        Change video
-                                    </v-btn>
-
-                                    <v-btn
-                                        v-if="
-                                            content &&
-                                            defaultContent?.id !== content.id
-                                        "
-                                        type="submit"
-                                        color="primary"
-                                        class="text-none w-fit"
-                                        @click="isDefaultContentDialog = true"
-                                    >
-                                        Set as default
-                                    </v-btn>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <catalog-image-upload
-                                    :background="imageSrc"
-                                    :name="title"
-                                    :error="errors.preview_image"
-                                    :show-card="isShowCard"
-                                    class="z-10"
-                                    label="Select a file of background"
-                                    @upload="selectPreviewImage"
-                                    @remove="removeImage"
+                            <template v-else>
+                                <v-skeleton-loader
+                                    v-for="i in videos.length"
+                                    :key="i"
+                                    class="h-64 w-full rounded"
                                 />
-                            </div>
-                        </template>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,20 +63,39 @@
             <div class="w-full rounded bg-grey-400 p-4">
                 <h3 class="mb-5 text-lg font-semibold">Upload audio</h3>
 
-                <drag-and-drop
-                    :accept="[...acceptedAudios, ...acceptedVideos]"
-                    multiple
-                    :file-to-remove="audioToRemove"
-                    :files-list="audioFiles"
-                    class="mb-5"
-                    @upload="selectAudioFiles"
+                <v-tooltip
+                    :open-on-hover="videos.length > 1"
+                    location="top center"
+                    origin="overlap"
                 >
-                    <template #icon>
-                        <span class="mdi mdi-music text-6xl"></span>
+                    <template #activator="{ props: tooltipProps }">
+                        <div v-bind="tooltipProps">
+                            <drag-and-drop
+                                :accept="acceptedAudios"
+                                multiple
+                                :file-to-remove="audioToRemove"
+                                :files-list="audioFiles"
+                                class="mb-5"
+                                :disable="videos.length > 1"
+                                @upload="selectAudioFiles"
+                            >
+                                <template #icon>
+                                    <span class="mdi mdi-music text-6xl"></span>
+                                </template>
+                            </drag-and-drop>
+                        </div>
                     </template>
-                </drag-and-drop>
 
-                <div v-if="audios?.length" class="grid gap-2">
+                    <span class="text-base">
+                        Audio files are unavailable if more than one video is
+                        uploaded
+                    </span>
+                </v-tooltip>
+
+                <div
+                    v-if="audios?.length && videos.length < 2"
+                    class="grid gap-2"
+                >
                     <h4 class="mb-2 font-semibold">
                         Uploaded files
                         {{ `(${audios.length})` }}
@@ -218,107 +110,15 @@
 
                     <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
                         <template v-if="!isAudiosLoading">
-                            <div
+                            <file-source-card
                                 v-for="(audio, i) in audios"
                                 :key="i"
-                                class="rounded bg-slate-600 p-4"
-                            >
-                                <audio
-                                    preload="metadata"
-                                    class="mb-2 w-full"
-                                    controls
-                                    :src="getSource(audio.file)"
-                                ></audio>
-
-                                <div class="space-y-4">
-                                    <p class="mb-2">
-                                        Audio name:
-                                        <span class="flex min-h-8 items-center">
-                                            <v-text-field
-                                                v-if="
-                                                    audioToEdit?.name ===
-                                                    audio.name
-                                                "
-                                                v-model="audioEditableName"
-                                                hide-details
-                                                density="compact"
-                                                variant="underlined"
-                                            />
-
-                                            <span v-else class="line-camp-1">
-                                                {{ audio.name }}
-                                            </span>
-
-                                            <span
-                                                v-ripple
-                                                class="edit-icon"
-                                                @click="
-                                                    handleRenameAudio(audio)
-                                                "
-                                            >
-                                                <v-icon
-                                                    size="18"
-                                                    :icon="
-                                                        audioToEdit?.name ===
-                                                        audio.name
-                                                            ? 'mdi-cancel'
-                                                            : 'mdi-pencil'
-                                                    "
-                                                />
-                                            </span>
-
-                                            <span
-                                                v-if="
-                                                    audioToEdit?.name ===
-                                                    audio.name
-                                                "
-                                                v-ripple
-                                                class="edit-icon"
-                                                @click="
-                                                    confirmAudioRename(audio)
-                                                "
-                                            >
-                                                <v-icon
-                                                    size="18"
-                                                    :icon="'mdi-check'"
-                                                />
-                                            </span>
-                                        </span>
-                                    </p>
-
-                                    <p>
-                                        File size:
-                                        {{ useFormatFileSize(audio.size) }}
-                                    </p>
-
-                                    <p>
-                                        File duration:
-                                        {{ useFormatDuration(audio.duration) }}
-                                    </p>
-
-                                    <p class="my-3">Please select language</p>
-
-                                    <v-select
-                                        v-model="audio.language"
-                                        label="Languages"
-                                        variant="outlined"
-                                        clearable
-                                        item-title="name"
-                                        :loading="isLanguagesLoading"
-                                        :items="languagesList"
-                                        return-object
-                                    />
-
-                                    <v-btn
-                                        type="submit"
-                                        color="red"
-                                        class="text-none w-fit"
-                                        @click="removeAudioFile(audio)"
-                                    >
-                                        Remove
-                                    </v-btn>
-                                </div>
-                            </div>
+                                :languages-list="languagesList"
+                                :is-languages-loading="isLanguagesLoading"
+                                :data="audio"
+                                @remove-audio="removeAudioFile"
+                                @change-language="updateAudioLanguage"
+                            />
                         </template>
 
                         <template v-else>
@@ -331,6 +131,63 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="mb-5">
+            <h3 class="text-xl">Settings</h3>
+
+            <v-divider class="my-3"></v-divider>
+
+            <div class="mb-4 flex flex-wrap gap-x-10 gap-y-2">
+                <v-checkbox
+                    v-model="requiresAuth"
+                    hide-details
+                    color="primary"
+                    density="comfortable"
+                    label="Disable for unregistered users"
+                ></v-checkbox>
+
+                <v-checkbox
+                    v-model="withAudio"
+                    hide-details
+                    color="primary"
+                    density="comfortable"
+                    label="Sound enabled"
+                ></v-checkbox>
+
+                <v-checkbox
+                    v-model="withNarration"
+                    hide-details
+                    color="primary"
+                    density="comfortable"
+                    label="Narration enabled"
+                ></v-checkbox>
+            </div>
+
+            <div class="mb-5">
+                <v-btn
+                    v-if="content && defaultContent?.id !== content.id"
+                    type="submit"
+                    color="primary"
+                    class="text-none w-fit"
+                    @click="isDefaultContentDialog = true"
+                >
+                    Set as default
+                </v-btn>
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <catalog-image-upload
+                :background="imageSrc"
+                :name="title"
+                :error="errors.preview_image"
+                :show-card="isShowCard"
+                class="z-10"
+                label="Select a file of background"
+                @upload="selectPreviewImage"
+                @remove="removeImage"
+            />
         </div>
 
         <!-- Form -->
@@ -391,7 +248,7 @@
             </div>
 
             <v-btn
-                :loading="isLoading || isAudiosLoading"
+                :loading="isLoading || isAudiosLoading || isVideosLoading"
                 type="submit"
                 color="primary"
                 class="text-none w-fit"
@@ -425,6 +282,7 @@
     import { useToast } from 'vue-toastification';
     import { useForm } from 'vee-validate';
 
+    import FileSourceCard from '@/components/cards/FileSourceCard.vue';
     import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue';
     import FeedbackDialog from '@/components/dialogs/FeedbackDialog.vue';
     import CatalogImageUpload from '@/components/drag-and-drop/CatalogImageUpload.vue';
@@ -442,9 +300,9 @@
     import acceptedVideos from '@/constants/accepted-videos.ts';
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
-    import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
-    import { useFormatFileSize } from '@/hooks/useFormatFile.ts';
-    import type { Audio, Identifiable } from '@/ts/common';
+    import { getSource } from '@/hooks/useGetSource.ts';
+    import { useThrowError } from '@/hooks/useThrowError.ts';
+    import type { Audio, Identifiable, VideoFile } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
@@ -467,8 +325,6 @@
 
     const toast = useToast();
 
-    const isContentSelected = ref(!!props.content);
-    const isVideoLoaded = ref(false);
     const isLoading = ref(false);
 
     const defaultContent = ref<VideoContent>();
@@ -477,11 +333,12 @@
     const isFeedbackOpen = ref(false);
     const isSuccess = ref(false);
 
-    const audioToEdit = ref<CreateAudio | null>(null);
-    const audioEditableName = ref('');
     const audioToRemove = ref<File>();
+    const videoToRemove = ref<File>();
     const audioFiles = ref<File[] | undefined>();
+    const videoFiles = ref<File[] | undefined>();
     const isAudiosLoading = ref(false);
+    const isVideosLoading = ref(false);
 
     const isShowCard = ref(false);
     const isChangesDetected = ref(false);
@@ -491,8 +348,6 @@
      */
     const imageSrc = ref('');
 
-    const videoElement = ref<HTMLVideoElement | null>(null);
-    const videoSrc = ref('');
     const duration = ref(0);
 
     const languagesList = ref<Identifiable[]>([]);
@@ -506,6 +361,7 @@
             validationSchema: createContentSchema,
             initialValues: {
                 audios: [],
+                video_files: [],
                 description: '',
                 title: '',
                 audio_enabled: false,
@@ -519,10 +375,9 @@
      */
     const [title] = defineField('title');
     const [description] = defineField('description');
-    const [videoFile] = defineField('file');
+    const [videos] = defineField('video_files');
     const [image] = defineField('preview_image');
     const [topic] = defineField('topic');
-    const [videoLanguage] = defineField('language');
     const [tags] = defineField('tags');
     const [audios] = defineField('audios');
     const [requiresAuth] = defineField('requires_auth');
@@ -531,7 +386,12 @@
 
     const audioWithErrors = computed(() => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        return audios.value?.filter((audio) => !audio.language) ?? [];
+        return audios.value?.filter((audio) => !audio.language.id) ?? [];
+    });
+
+    const videoWithErrors = computed(() => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        return videos.value.filter((video) => !video.language.id) ?? [];
     });
 
     /*
@@ -561,19 +421,18 @@
         }
     };
 
-    const confirmAudioRename = (audio: CreateAudio) => {
-        audio.name = audioEditableName.value;
-        audioToEdit.value = null;
+    const updateAudioLanguage = (
+        data: CreateAudio | VideoFile,
+        language: Identifiable
+    ) => {
+        if (audios.value) {
+            audios.value.forEach((item) => {
+                if (item.file === data.file) {
+                    item.language = { ...language };
+                }
+            });
+        }
     };
-
-    const handleRenameAudio = (audio: CreateAudio) => {
-        audioToEdit.value =
-            audioToEdit.value?.name === audio.name ? null : { ...audio };
-
-        audioEditableName.value = audio.name;
-    };
-
-    const getFileName = (name: string) => name.split('?')[0];
 
     /*
      * Fill existing data for content
@@ -589,39 +448,51 @@
             ])
         );
 
-        if (props.content?.file) {
-            videoSrc.value = props.content.file;
-        }
+        if (props.content) {
+            if (props.content.preview_image) {
+                imageSrc.value = props.content.preview_image;
+            }
 
-        if (props.content?.preview_image) {
-            imageSrc.value = props.content.preview_image;
-        }
+            if (props.content.tags) {
+                tags.value = props.content.tags.split(', ');
+            }
 
-        if (props.content?.language) {
-            videoLanguage.value = props.content.language;
-        }
+            if (props.content.video_files.length < 2 && props.content.audios) {
+                audios.value = [...props.content.audios];
 
-        if (props.content?.tags) {
-            tags.value = props.content.tags.split(', ');
-        }
+                await loadAudioFiles();
+            }
 
-        if (props.content?.audios) {
-            audios.value = [...props.content.audios];
+            videos.value = [...props.content.video_files];
 
-            await loadAudioFiles();
+            await loadVideoFiles();
         }
     };
-
-    const getSource = (file: File | string) =>
-        isFile(file) ? URL.createObjectURL(file) : file;
 
     /*
      * Functions to manage video
      */
-    const loadVideoInfo = () => {
-        if (videoElement.value) {
-            duration.value = videoElement.value.duration;
-            isVideoLoaded.value = true;
+    const loadVideoFiles = async () => {
+        if (props.content?.video_files) {
+            isVideosLoading.value = true;
+
+            videos.value = await Promise.all(
+                videos.value.map(async (video) => {
+                    if (!isFile(video.file)) {
+                        const file = await getFile(video.file);
+
+                        if (file) {
+                            video.file = file;
+                        }
+                    }
+
+                    return video;
+                })
+            );
+
+            videoFiles.value = videos.value.map((item) => item.file as File);
+
+            isVideosLoading.value = false;
         }
     };
 
@@ -631,9 +502,12 @@
         }
     };
 
-    const changeVideo = () => {
-        videoSrc.value = '';
-        isContentSelected.value = false;
+    const updateVideoLanguage = (data: VideoFile, language: Identifiable) => {
+        videos.value.forEach((item) => {
+            if (item.file === data.file) {
+                item.language = { ...language };
+            }
+        });
     };
 
     const setVideoAsDefault = async () => {
@@ -656,12 +530,14 @@
     /*
      * Functions for file selection
      */
-    const selectVideoFile = (file: File[] | File) => {
-        if (!Array.isArray(file)) {
-            videoFile.value = file;
-            videoSrc.value = getSource(file);
-
-            isContentSelected.value = true;
+    const selectVideoFiles = (files: File[] | File) => {
+        if (Array.isArray(files)) {
+            files.forEach((item) => {
+                videos.value.push({
+                    file: item,
+                    language: languagesList.value[0],
+                });
+            });
         }
     };
 
@@ -672,7 +548,6 @@
 
                 audio.addEventListener('loadedmetadata', () => {
                     audios.value?.push({
-                        name: item.name,
                         size: item.size,
                         duration: audio.duration,
                         file: item,
@@ -693,15 +568,18 @@
     /*
      * Remove operations
      */
-    const removeVideoFile = () => {
-        videoFile.value = '';
-        isContentSelected.value = false;
-    };
-
     const removeImage = () => {
         imageSrc.value = '';
         image.value = '';
         isShowCard.value = false;
+    };
+
+    const removeVideoFile = (video: VideoFile) => {
+        isWatching = false;
+
+        videoToRemove.value = video.file as File;
+
+        videos.value = videos.value.filter((item) => item.file !== video.file);
     };
 
     const removeAudioFile = (audio: CreateAudio | Audio) => {
@@ -710,6 +588,7 @@
         audioToRemove.value = audio.file as File;
 
         audios.value = audios.value?.filter((item) => item.file !== audio.file);
+
         audioFiles.value = audioFiles.value?.filter(
             (item) => isFile(audio.file) && item.name !== audio.file.name
         );
@@ -740,13 +619,12 @@
      */
     let isWatching = true;
 
-    // TODO: finish prevent reload functionality
     watch(values, (value) => {
         if (
             isWatching &&
             (value.audios?.length ||
                 value.description ||
-                value.file ||
+                value.video_files.length ||
                 value.title)
         ) {
             isChangesDetected.value = true;
@@ -758,12 +636,30 @@
         emits('update');
     };
 
-    // const getIds = (array: Identifiable[]) => array.map((item) => item.id);
+    const getSourceDiff = (
+        array1: Array<CreateAudio | VideoFile | Audio>,
+        array2: Array<CreateAudio | VideoFile | Audio>
+    ) => {
+        const editedValues = array1.filter(
+            (audio) => !audio.hasOwnProperty('id')
+        );
+
+        const differences = array1.filter(
+            (item1) =>
+                !array2.some((item2) => item1.language.id === item2.language.id)
+        );
+
+        return (
+            editedValues.length ||
+            array1.length !== array2.length ||
+            differences.length > 0
+        );
+    };
 
     const getUpdatedContent = (body: ContentInput) => {
         if (props.content) {
             /**
-             * Check changes in form except of: audios, languages
+             * Check changes in form except of: audios, videos
              */
             const updateBody: ContentInput = useCompareObjects(
                 {
@@ -776,36 +672,25 @@
             /**
              * Check changes in audios
              */
-            // updateBody.audios = values.audios;
-            if (props.content.audios) {
-                const editedAudios = values.audios?.filter(
-                    (audio) => !audio.hasOwnProperty('id')
-                );
-
-                if (
-                    (values.audios &&
-                        values.audios.length !== props.content.audios.length) ||
-                    editedAudios?.length
-                ) {
+            if (
+                props.content.audios &&
+                values.audios &&
+                values.video_files.length < 2
+            ) {
+                if (getSourceDiff(props.content.audios, values.audios)) {
                     updateBody.audios = values.audios;
                 }
             }
 
             /**
-             * Check changes in languages
+             * Check changes in videos
              */
-            const isLanguagesChanged =
-                props.content.language.id !== videoLanguage.value.id;
-
-            if (isLanguagesChanged) {
-                updateBody.language = videoLanguage.value.id;
-            }
-
-            /**
-             * Check changes in video file
-             */
-            if (isFile(values.file)) {
-                updateBody.file = values.file;
+            if (props.content.video_files.length) {
+                if (
+                    getSourceDiff(props.content.video_files, values.video_files)
+                ) {
+                    updateBody.video_files = values.video_files;
+                }
             }
 
             /**
@@ -825,14 +710,15 @@
     const onSubmit = handleSubmit(async (values) => {
         const body = {
             ...values,
-            file: videoFile.value as File,
             duration: Math.round(duration.value),
-            language: videoLanguage.value.id,
             tags: tags.value?.join(', '),
             topic: topic.value.id,
             preview_image: image.value as File,
-            audios: audios.value,
         };
+
+        if (values.video_files.length < 2) {
+            body.audios = audios.value;
+        }
 
         try {
             if (props.content) {
@@ -868,6 +754,8 @@
             } else {
                 toast.error('Content was not uploaded');
             }
+
+            useThrowError(e);
         } finally {
             isLoading.value = false;
         }

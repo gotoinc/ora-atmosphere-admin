@@ -1,4 +1,4 @@
-import type { Audio, Identifiable } from '@/ts/common';
+import type { Audio, Identifiable, VideoFile } from '@/ts/common';
 import type { VideoContent } from '@/ts/contents';
 
 type BooleanValues = Pick<
@@ -15,9 +15,8 @@ type EditableValues = Pick<
  * Types for creating category
  */
 export interface ContentInput extends EditableValues, Partial<BooleanValues> {
-    file: File;
+    video_files: VideoFile[];
     preview_image: File;
-    language: number;
     audios?: CreateAudio[];
     topic: number;
     image?: string;
@@ -27,16 +26,14 @@ export interface CreateContentSchema
     extends Partial<BooleanValues>,
         Pick<VideoContent, 'topic'> {
     title: string;
-    file: File | string;
+    video_files: VideoFile[];
     preview_image?: File | string;
     description?: string | null;
     audios?: CreateAudio[];
-    language: Identifiable;
     tags?: string[];
 }
 
-export interface CreateAudio
-    extends Omit<Audio, 'id' | 'video' | 'file' | 'language'> {
+export interface CreateAudio extends Pick<Audio, 'duration' | 'size'> {
     file: File | string;
     language: Identifiable;
 }

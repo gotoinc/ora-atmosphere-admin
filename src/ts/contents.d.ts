@@ -1,10 +1,10 @@
-import type { Audio, Identifiable } from '@/ts/common';
+import type { Audio, Identifiable, VideoFile } from '@/ts/common';
 
 export interface VideoContent {
     id: number;
     title: string;
     description?: string | null;
-    file: string;
+    video_files: VideoFile[];
     requires_auth: boolean;
     preview_image: string;
     audio_enabled: boolean;
