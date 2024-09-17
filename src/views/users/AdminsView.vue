@@ -11,10 +11,11 @@
     ></v-text-field>
 
     <v-data-table
+        :loading="isLoading"
         :search="search"
         class="!rounded-lg"
         :headers="headers"
-        :items="users"
+        :items="admins"
     >
         <template #[`item.actions`]="{ item }">
             <action-buttons
@@ -34,7 +35,7 @@
             <create-user-form
                 :admin="selectedUser as UserProfile"
                 @close="isEditOpen = false"
-                @update="loadUsers"
+                @update="usersStore.loadAdmins"
             />
         </full-screen-dialog>
 
@@ -58,9 +59,9 @@
 
     import { storeToRefs } from 'pinia';
     import { useAuthStore } from '@/stores/auth.store.ts';
+    import { useUsersStore } from '@/stores/users.store.ts';
 
     import { deleteAdmin } from '@/api/users/delete-admin.api.ts';
-    import { getAdminUsers } from '@/api/users/get-admin-users.api.ts';
     import type { UserProfile } from '@/ts/users';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
@@ -69,13 +70,15 @@
     const isEditOpen = ref(false);
     const isDeleteOpen = ref(false);
     const isDeleteLoading = ref(false);
-    const isLoading = ref(false);
     const selectedUser = ref<UserProfile | null>(null);
 
     const search = ref('');
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { profile } = storeToRefs(useAuthStore());
+
+    const usersStore = useUsersStore();
+    const { admins, isLoading } = storeToRefs(usersStore);
 
     const userName = computed(
         () =>
@@ -114,8 +117,6 @@
         },
     ]);
 
-    const users = ref<UserProfile[]>([]);
-
     const handleEdit = (user: UserProfile) => {
         selectedUser.value = user;
 
@@ -140,7 +141,7 @@
 
             isDeleteOpen.value = false;
 
-            void loadUsers();
+            void usersStore.loadAdmins();
         } catch (e) {
             toast.error('User was not deleted');
         } finally {
@@ -149,17 +150,7 @@
         }
     };
 
-    const loadUsers = async () => {
-        isLoading.value = true;
-
-        try {
-            users.value = (await getAdminUsers()) ?? [];
-        } finally {
-            isLoading.value = false;
-        }
-    };
-
-    void loadUsers();
+    void usersStore.loadAdmins();
 </script>
 
 <style scoped></style>

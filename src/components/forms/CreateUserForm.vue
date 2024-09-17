@@ -45,10 +45,14 @@
                     v-model="password"
                     name="password"
                     variant="outlined"
-                    type="password"
                     label="Password"
                     placeholder="Set your password"
                     :error-messages="errors.password"
+                    :append-inner-icon="
+                        showPassword ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    :type="showPassword ? 'text' : 'password'"
+                    @click:append-inner="showPassword = !showPassword"
                 />
             </div>
 
@@ -109,6 +113,7 @@
     const [lastName] = defineField('last_name');
 
     const isLoading = ref(false);
+    const showPassword = ref(false);
 
     const onSubmit = handleSubmit(async (values) => {
         isLoading.value = true;

@@ -19,9 +19,11 @@ export const useAuthStore = defineStore(
     () => {
         const isEmailConfirmed = ref(false);
         const isAuthenticated = ref(!!Cookies.get('ora_admin'));
-        const isSuperAdmin = ref(true);
+        const isSuperAdmin = computed(
+            () => profile.value?.role === 'super-admin'
+        );
 
-        const profile = ref<AdminUser>();
+        const profile = ref<AdminUser | null>();
 
         const profileName = computed(
             () => `${profile.value?.first_name} ${profile.value?.last_name}`
@@ -30,6 +32,7 @@ export const useAuthStore = defineStore(
         const clearAuth = () => {
             Cookies.remove('ora_admin');
             isAuthenticated.value = false;
+            profile.value = null;
         };
 
         const getProfileInfo = async () => {

@@ -661,9 +661,17 @@
             /**
              * Check changes in form except of: audios, videos
              */
+            const excluded = useExcludeProperties({ ...props.content }, [
+                'duration',
+                'audio_enabled',
+                'requires_auth',
+                'narration_enabled',
+                'title',
+            ]);
+
             const updateBody: ContentInput = useCompareObjects(
                 {
-                    ...props.content,
+                    ...excluded,
                     topic: props.content.topic.id,
                 },
                 body

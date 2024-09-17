@@ -15,7 +15,7 @@
         :loading="isLoading"
         class="!rounded-lg"
         :headers="headers"
-        :items="users"
+        :items="regularUsers"
     >
         <template #[`item.actions`]="{ item }">
             <action-buttons
@@ -34,7 +34,7 @@
         <edit-user-form
             :user="selectedUser as UserProfile"
             @close="isEditOpen = false"
-            @update="loadUsers"
+            @update="usersStore.loadRegularUsers"
         />
     </full-screen-dialog>
 
@@ -57,9 +57,9 @@
 
     import { storeToRefs } from 'pinia';
     import { useAuthStore } from '@/stores/auth.store.ts';
+    import { useUsersStore } from '@/stores/users.store.ts';
 
     import { deleteUser } from '@/api/users/delete-user.api.ts';
-    import { getRegularUsers } from '@/api/users/get-regular-users.api.ts';
     import type { UserProfile } from '@/ts/users';
     import type { ReadonlyHeaders } from '@/ts/vuetify';
 
@@ -67,6 +67,9 @@
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { profile } = storeToRefs(useAuthStore());
+
+    const usersStore = useUsersStore();
+    const { regularUsers, isLoading } = storeToRefs(usersStore);
 
     const userName = computed(
         () =>
@@ -77,7 +80,6 @@
     const isDeleteOpen = ref(false);
     const isDeleteLoading = ref(false);
     const selectedUser = ref<UserProfile | null>(null);
-    const isLoading = ref(false);
 
     const search = ref('');
 
@@ -112,8 +114,6 @@
         },
     ]);
 
-    const users = ref<UserProfile[]>([]);
-
     const handleEdit = (user: UserProfile) => {
         selectedUser.value = user;
 
@@ -138,7 +138,7 @@
 
             isDeleteOpen.value = false;
 
-            void loadUsers();
+            void usersStore.loadRegularUsers();
         } catch (e) {
             toast.error('User is not deleted');
         } finally {
@@ -147,17 +147,7 @@
         }
     };
 
-    const loadUsers = async () => {
-        isLoading.value = true;
-
-        try {
-            users.value = (await getRegularUsers()) ?? [];
-        } finally {
-            isLoading.value = false;
-        }
-    };
-
-    void loadUsers();
+    void usersStore.loadRegularUsers();
 </script>
 
 <style scoped></style>
