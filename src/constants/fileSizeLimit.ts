@@ -1,1 +1,1 @@
-export const fileSizeLimit = 500 * 1024 * 1024;
+export const fileSizeLimit = 1500 * 1024 * 1024;
