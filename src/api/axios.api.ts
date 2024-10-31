@@ -18,7 +18,7 @@ axios.interceptors.request.use(function (config) {
     return config;
 });
 
-axios.defaults.baseURL = 'https://api-staging.atmosphere.space';
+axios.defaults.baseURL = 'https://api.ora.vision';
 
 export const clenAxios = axios.create();
 
