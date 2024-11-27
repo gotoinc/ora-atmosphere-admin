@@ -19,6 +19,8 @@ export const setVideoFormdata = (
         requires_auth: isRequiresAuth,
         audio_enabled: isAudioEnabled,
         narration_enabled: isNarrationEnabled,
+        new_video_files: newVideos,
+        video_files_to_delete: videosToDelete,
     } = body;
 
     if (title) {
@@ -54,7 +56,7 @@ export const setVideoFormdata = (
 
                 const name = isFile(audio.file) ? audio.file.name : '';
 
-                formData.append('audios', audio.file);
+                formData.append('audio_files', audio.file);
                 formData.append('audio_names', name);
                 formData.append('audio_durations', String(duration));
                 formData.append('audio_sizes', String(size));
@@ -69,6 +71,22 @@ export const setVideoFormdata = (
         videos.forEach((video) => {
             formData.append('video_files', video.file);
             formData.append('video_file_languages', String(video.language.id));
+        });
+    }
+
+    if (newVideos?.length) {
+        newVideos.forEach((video) => {
+            formData.append(`new_video_files`, video.file);
+            formData.append(
+                `new_video_file_languages`,
+                String(video.language.id)
+            );
+        });
+    }
+
+    if (videosToDelete?.length) {
+        videosToDelete.forEach((id) => {
+            formData.append(`video_files_to_delete`, String(id));
         });
     }
 

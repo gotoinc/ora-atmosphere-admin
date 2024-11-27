@@ -16,6 +16,8 @@ type EditableValues = Pick<
  */
 export interface ContentInput extends EditableValues, Partial<BooleanValues> {
     video_files: VideoFile[];
+    new_video_files?: VideoFile[];
+    video_files_to_delete?: number[];
     preview_image: File;
     audios?: CreateAudio[];
     topic: number;
@@ -35,5 +37,6 @@ export interface CreateContentSchema
 
 export interface CreateAudio extends Pick<Audio, 'duration' | 'size'> {
     file: File | string;
+    id?: number;
     language: Identifiable;
 }

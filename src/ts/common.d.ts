@@ -16,5 +16,6 @@ export interface Audio {
 
 export interface VideoFile {
     file: File | string;
+    id?: number;
     language: Identifiable;
 }
