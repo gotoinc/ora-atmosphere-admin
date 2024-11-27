@@ -1,7 +1,7 @@
 <template>
-    <div class="rounded bg-slate-600 p-4">
+    <div class="flex flex-col rounded bg-slate-600 p-4">
         <audio
-            v-if="!getVideo(data)"
+            v-if="mediaType === 'audio'"
             ref="audioElement"
             preload="metadata"
             class="w-full"
@@ -19,12 +19,10 @@
             crossorigin="anonymous"
             @loadedmetadata="loadVideoMetadata"
         >
-            <source
-                :src="isFile(data.file) ? getSource(data.file) : data.file"
-            />
+            <source :src="getVideoSrc(data.file)" />
         </video>
 
-        <div class="mt-4 space-y-4">
+        <div class="mt-4 flex-grow space-y-4">
             <template v-if="isFile(data.file)">
                 <div>
                     <span> File name:</span>
@@ -38,49 +36,59 @@
                     File size:
                     {{ useFormatFileSize(data.file.size) }}
                 </p>
-
-                <p>
-                    File duration:
-                    {{ useFormatDuration(duration) }}
-                </p>
             </template>
 
             <p v-else>
-                Video link:
+                <span class="capitalize">{{ mediaType }}</span> link:
 
                 <a target="_blank" :href="data.file" class="link">
                     {{ data.file }}
                 </a>
             </p>
 
-            <p class="my-3">Please select language</p>
+            <p>
+                File duration:
+                {{ useFormatDuration(duration) }}
+            </p>
 
-            <v-select
-                v-model="language"
-                label="Languages"
+            <template v-if="isFile(data.file)">
+                <p class="my-3">Please select language</p>
+
+                <v-select
+                    v-model="language"
+                    label="Languages"
+                    variant="outlined"
+                    clearable
+                    item-title="name"
+                    :loading="isLanguagesLoading"
+                    :items="languagesList"
+                    return-object
+                    @update:model-value="updateLanguage"
+                />
+            </template>
+
+            <v-text-field
+                v-else
+                label="Language"
+                :model-value="language.name"
                 variant="outlined"
-                clearable
-                item-title="name"
-                :loading="isLanguagesLoading"
-                :items="languagesList"
-                return-object
-                @update:model-value="updateLanguage"
+                :readonly="!isFile(data.file)"
             />
-
-            <v-btn
-                type="submit"
-                color="red"
-                class="text-none w-fit"
-                @click="removeFile(data)"
-            >
-                Remove
-            </v-btn>
         </div>
+
+        <v-btn
+            type="submit"
+            color="red"
+            class="text-none w-fit"
+            @click="removeFile(data)"
+        >
+            Remove
+        </v-btn>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { ref, watch } from 'vue';
 
     import { useFormatDuration } from '@/hooks/useFormatDuration.ts';
     import { getFileName, useFormatFileSize } from '@/hooks/useFormatFile.ts';
@@ -100,6 +108,7 @@
 
     const props = defineProps<{
         data: SourceData;
+        mediaType: 'audio' | 'video';
         languagesList: Identifiable[];
         isLanguagesLoading?: boolean;
     }>();
@@ -113,16 +122,11 @@
     const duration = ref(0);
     const isVideoLoaded = ref(false);
 
-    const getVideo = (source: SourceData) => {
-        if (isFile(source.file) && source.file.type.startsWith('video/')) {
-            return source as VideoFile;
-        }
-
-        return;
-    };
+    const getVideoSrc = (src: string | File) =>
+        isFile(src) ? getSource(src) : src;
 
     const removeFile = (data: SourceData) => {
-        getVideo(data)
+        props.mediaType === 'video'
             ? emits('remove-video', data)
             : emits('remove-audio', data as CreateAudio);
     };
@@ -145,6 +149,23 @@
     const updateLanguage = (language: Identifiable) => {
         emits('change-language', props.data, language);
     };
+
+    watch(
+        () => props.data,
+        (value) => {
+            if (videoElement.value) {
+                videoElement.value.src = getVideoSrc(value.file);
+            }
+        }
+    );
 </script>
 
-<style scoped></style>
+<style scoped lang="postcss">
+    .link {
+        @apply block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100;
+    }
+
+    .edit-icon {
+        @apply ml-2 flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-grey-200;
+    }
+</style>

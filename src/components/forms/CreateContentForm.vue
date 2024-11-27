@@ -39,6 +39,7 @@
                                     v-for="(video, i) in videos"
                                     :key="i"
                                     :data="video"
+                                    media-type="video"
                                     :languages-list="languagesList"
                                     :is-languages-loading="isLanguagesLoading"
                                     @remove-video="removeVideoFile"
@@ -113,6 +114,7 @@
                             <file-source-card
                                 v-for="(audio, i) in audios"
                                 :key="i"
+                                media-type="audio"
                                 :languages-list="languagesList"
                                 :is-languages-loading="isLanguagesLoading"
                                 :data="audio"
@@ -295,7 +297,6 @@
     import { postVideo } from '@/api/contents/post-video.api.ts';
     import { setDefaultContent } from '@/api/contents/set-default-content.api.ts';
     import { updateVideo } from '@/api/contents/update-video.api.ts';
-    import { getFile } from '@/api/files/get-file.api.ts';
     import acceptedAudios from '@/constants/accepted-audios.ts';
     import acceptedVideos from '@/constants/accepted-videos.ts';
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
@@ -335,6 +336,7 @@
 
     const audioToRemove = ref<File>();
     const videoToRemove = ref<File>();
+    const videoIdsToRemove = ref<number[]>([]);
     const audioFiles = ref<File[] | undefined>();
     const videoFiles = ref<File[] | undefined>();
     const isAudiosLoading = ref(false);
@@ -397,30 +399,6 @@
     /*
      * Functions to manage audio
      */
-    const loadAudioFiles = async () => {
-        if (props.content?.audios && audios.value) {
-            isAudiosLoading.value = true;
-
-            audios.value = await Promise.all(
-                audios.value.map(async (audio) => {
-                    if (!isFile(audio.file)) {
-                        const file = await getFile(audio.file);
-
-                        if (file) {
-                            audio.file = file;
-                        }
-                    }
-
-                    return audio;
-                })
-            );
-
-            audioFiles.value = audios.value.map((item) => item.file as File);
-
-            isAudiosLoading.value = false;
-        }
-    };
-
     const updateAudioLanguage = (
         data: CreateAudio | VideoFile,
         language: Identifiable
@@ -437,7 +415,7 @@
     /*
      * Fill existing data for content
      */
-    const setExistingContent = async () => {
+    const setExistingContent = () => {
         // Set existing values to form
         setValues(
             useExcludeProperties({ ...props.content }, [
@@ -459,43 +437,15 @@
 
             if (props.content.video_files.length < 2 && props.content.audios) {
                 audios.value = [...props.content.audios];
-
-                await loadAudioFiles();
             }
 
             videos.value = [...props.content.video_files];
-
-            await loadVideoFiles();
         }
     };
 
     /*
      * Functions to manage video
      */
-    const loadVideoFiles = async () => {
-        if (props.content?.video_files) {
-            isVideosLoading.value = true;
-
-            videos.value = await Promise.all(
-                videos.value.map(async (video) => {
-                    if (!isFile(video.file)) {
-                        const file = await getFile(video.file);
-
-                        if (file) {
-                            video.file = file;
-                        }
-                    }
-
-                    return video;
-                })
-            );
-
-            videoFiles.value = videos.value.map((item) => item.file as File);
-
-            isVideosLoading.value = false;
-        }
-    };
-
     const loadDefaultContent = async () => {
         if (props.content) {
             defaultContent.value = await getDefaultContent();
@@ -577,9 +527,16 @@
     const removeVideoFile = (video: VideoFile) => {
         isWatching = false;
 
-        videoToRemove.value = video.file as File;
+        if (video.id) videoIdsToRemove.value.push(video.id);
 
-        videos.value = videos.value.filter((item) => item.file !== video.file);
+        videoToRemove.value = video.file as File;
+        videos.value = videos.value.filter((item) =>
+            video.id ? video.id !== item.id : item.file !== video.file
+        );
+
+        if (videos.value.length < 2 && props.content?.audios) {
+            audios.value = [...props.content.audios];
+        }
     };
 
     const removeAudioFile = (audio: CreateAudio | Audio) => {
@@ -636,26 +593,6 @@
         emits('update');
     };
 
-    const getSourceDiff = (
-        array1: Array<CreateAudio | VideoFile | Audio>,
-        array2: Array<CreateAudio | VideoFile | Audio>
-    ) => {
-        const editedValues = array1.filter(
-            (audio) => !audio.hasOwnProperty('id')
-        );
-
-        const differences = array1.filter(
-            (item1) =>
-                !array2.some((item2) => item1.language.id === item2.language.id)
-        );
-
-        return (
-            editedValues.length ||
-            array1.length !== array2.length ||
-            differences.length > 0
-        );
-    };
-
     const getUpdatedContent = (body: ContentInput) => {
         if (props.content) {
             /**
@@ -680,25 +617,19 @@
             /**
              * Check changes in audios
              */
-            if (
-                props.content.audios &&
-                values.audios &&
-                values.video_files.length < 2
-            ) {
-                if (getSourceDiff(props.content.audios, values.audios)) {
-                    updateBody.audios = values.audios;
-                }
-            }
+            const newAudios = values.audios?.filter((audio) => !audio.id);
+
+            if (newAudios?.length) updateBody.audios = newAudios;
 
             /**
              * Check changes in videos
              */
-            if (props.content.video_files.length) {
-                if (
-                    getSourceDiff(props.content.video_files, values.video_files)
-                ) {
-                    updateBody.video_files = values.video_files;
-                }
+            const newVideos = values.video_files.filter((video) => !video.id);
+
+            if (newVideos.length > 0) updateBody.new_video_files = newVideos;
+
+            if (videoIdsToRemove.value.length > 0) {
+                updateBody.video_files_to_delete = videoIdsToRemove.value;
             }
 
             /**
@@ -782,7 +713,7 @@
         await loadDefaultContent();
 
         if (props.content) {
-            await setExistingContent();
+            setExistingContent();
         }
     });
 
@@ -791,12 +722,4 @@
     });
 </script>
 
-<style scoped lang="postcss">
-    .link {
-        @apply block truncate text-sm font-semibold text-primary-50 underline transition-colors hover:text-primary-100;
-    }
-
-    .edit-icon {
-        @apply ml-2 flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-grey-200;
-    }
-</style>
+<style scoped lang="postcss"></style>

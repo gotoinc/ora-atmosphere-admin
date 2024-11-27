@@ -10,7 +10,12 @@ export const updateVideo = async (
     try {
         const res = await axios.patch<ContentInput>(
             `/admin/videos/${id}/update_video/`,
-            setVideoFormdata(body)
+            setVideoFormdata(body),
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
         );
 
         return res.data;

@@ -81,6 +81,7 @@ export const identifiableSchema = object({
 
 // Audio schema
 export const audioSchema: ObjectSchema<CreateAudio> = object({
+    id: number().typeError('ID must be a number'),
     file: fileSchema.required('Please upload a file'),
     duration: number().required('Please enter the duration'),
     language: identifiableSchema.required(
@@ -92,6 +93,7 @@ export const audioSchema: ObjectSchema<CreateAudio> = object({
 });
 
 export const videoSchema: ObjectSchema<VideoFile> = object({
+    id: number().typeError('ID must be a number'),
     file: fileSchema.required('Please upload a file'),
     language: identifiableSchema.required(
         'Please select language for each video'
