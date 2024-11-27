@@ -246,7 +246,33 @@
             <div class="mb-10">
                 <p class="mb-5">Please enter a description (optional)</p>
 
-                <content-editor v-model="description" />
+                <v-tabs
+                    v-model="tabDescription"
+                    class="mb-5 border-b border-white"
+                >
+                    <v-tab rounded class="text-none" color="white" :value="1">
+                        Editor
+                    </v-tab>
+
+                    <v-tab rounded class="text-none" color="white" :value="2">
+                        Plain HTML
+                    </v-tab>
+                </v-tabs>
+
+                <content-editor
+                    v-if="tabDescription === 1"
+                    v-model="description"
+                />
+
+                <v-textarea
+                    v-if="tabDescription === 2"
+                    v-model="descriptionHTML"
+                    name="description"
+                    label="Paste HTML"
+                    auto-grow
+                    type="name"
+                    variant="outlined"
+                />
             </div>
 
             <v-btn
@@ -327,6 +353,9 @@
     const toast = useToast();
 
     const isLoading = ref(false);
+
+    const tabDescription = ref(1);
+    const descriptionHTML = ref('');
 
     const defaultContent = ref<VideoContent>();
     const isConfirmLoading = ref(false);
@@ -654,6 +683,10 @@
             topic: topic.value.id,
             preview_image: image.value as File,
         };
+
+        if (tabDescription.value === 2) {
+            body.description = descriptionHTML.value;
+        }
 
         if (values.video_files.length < 2) {
             body.audios = audios.value;
