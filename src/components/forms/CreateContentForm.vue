@@ -233,6 +233,7 @@
                     multiple
                     label="Tags"
                     variant="outlined"
+                    @update:model-value="splitTags"
                 >
                     <template #selection="{ item }">
                         <span class="tag tag--fill">
@@ -424,6 +425,10 @@
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         return videos.value.filter((video) => !video.language.id) ?? [];
     });
+
+    const splitTags = (items: string[]) => {
+        tags.value = items.map((tag) => tag.split(',')).flat();
+    };
 
     /*
      * Functions to manage audio
