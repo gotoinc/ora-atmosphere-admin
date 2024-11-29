@@ -638,6 +638,8 @@
                 'requires_auth',
                 'narration_enabled',
                 'title',
+                'description',
+                'tags',
             ]);
 
             const updateBody: ContentInput = useCompareObjects(

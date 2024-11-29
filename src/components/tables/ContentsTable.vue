@@ -12,6 +12,7 @@
             class="!rounded-lg"
             :headers="headers"
             :items="items"
+            :filter-keys="['description', 'title']"
         >
             <template #[`item.title`]="{ item }">
                 <p class="min-w-28">

@@ -55,12 +55,13 @@
                 />
             </template>
 
-            <v-select
+            <v-autocomplete
                 v-model="filters.topic"
                 label="Theme"
                 density="compact"
                 variant="outlined"
                 clearable
+                no-data-text="No themes found"
                 hide-details
                 :items="topics"
                 item-title="name"
@@ -217,12 +218,14 @@
             const items = (await getTopics()) ?? [];
 
             if (items.length > 0) {
-                topics.value = items.map((item) => {
-                    return {
-                        name: item.name,
-                        id: item.id,
-                    };
-                });
+                topics.value = items
+                    .map((item) => {
+                        return {
+                            name: item.name,
+                            id: item.id,
+                        };
+                    })
+                    .sort((a, b) => a.name.localeCompare(b.name));
             }
         } finally {
             isTopicsLoading.value = false;
