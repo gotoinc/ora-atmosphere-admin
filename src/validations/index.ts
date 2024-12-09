@@ -47,8 +47,8 @@ export const phoneValidation = string()
 
 // File schema
 export const fileSchema = mixed<File | string>()
-    .test('value', 'Field is required', (value) => {
-        return isFile(value) || (typeof value === 'string' && !!value);
+    .test('value', 'Field must be a file', (value) => {
+        return isFile(value) || typeof value === 'string';
     })
     .test('fileSize', 'File size is too large', (value) => {
         if (value && isFile(value)) {

@@ -33,6 +33,7 @@ export const useAuthStore = defineStore(
             Cookies.remove('ora_admin');
             isAuthenticated.value = false;
             profile.value = null;
+            toast.clear();
         };
 
         const getProfileInfo = async () => {

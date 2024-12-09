@@ -3,7 +3,7 @@ import type { VideoContent } from '@/ts/contents';
 
 type BooleanValues = Pick<
     VideoContent,
-    'requires_auth' | 'narration_enabled' | 'audio_enabled'
+    'requires_auth' | 'narration_enabled' | 'audio_enabled' | 'is_realtime'
 >;
 
 type EditableValues = Pick<

@@ -15,10 +15,7 @@ import type { CreateContentSchema } from '@/validations/types/content.validation
  */
 export const createContentSchema: ObjectSchema<CreateContentSchema> = object({
     title: string().required('Please enter the title'),
-    video_files: array()
-        .of(videoSchema.required())
-        .min(1, 'Please upload at least 1 video')
-        .required(),
+    video_files: array().of(videoSchema).required(),
     preview_image: fileSchema,
     description: string().nullable(),
     audios: array().of(audioSchema.required()),
@@ -27,4 +24,5 @@ export const createContentSchema: ObjectSchema<CreateContentSchema> = object({
     requires_auth: boolean(),
     narration_enabled: boolean(),
     audio_enabled: boolean(),
+    is_realtime: boolean(),
 });

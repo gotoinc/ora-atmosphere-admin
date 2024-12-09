@@ -23,14 +23,6 @@
         @apply !right-0 text-white;
     }
 
-    .v-tooltip > .v-overlay__content {
-        @apply !bg-white font-semibold;
-    }
-
-    .v-table > .v-table__wrapper > table {
-        min-width: 550px;
-    }
-
     .line-camp-1 {
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
@@ -92,6 +84,10 @@
             margin: 0;
         }
     }
+}
+
+.v-tooltip > .v-overlay__content {
+    @apply !bg-white font-semibold;
 }
 
 .v-overlay__scrim {
