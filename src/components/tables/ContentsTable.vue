@@ -34,7 +34,7 @@
                     ></v-img>
                 </v-card>
 
-                <div v-else>No preview</div>
+                <div v-else class="my-2">No preview</div>
             </template>
 
             <template #[`item.description`]="{ item }">
@@ -56,35 +56,42 @@
             </template>
 
             <template #[`item.audio_enabled`]="{ item }">
-                <img
-                    v-if="item.audio_enabled"
-                    src="@img/volume-on.svg"
-                    class="h-10 w-10 object-contain"
-                    alt=""
-                />
+                <div class="flex min-w-[100px] items-center gap-0.5">
+                    <img
+                        v-if="item.audio_enabled"
+                        src="@img/volume-on.svg"
+                        class="h-8 w-8 object-contain"
+                        alt=""
+                    />
 
-                <img
-                    v-else
-                    src="@img/volume-off.svg"
-                    class="h-10 w-10 object-contain opacity-30"
-                    alt=""
-                />
-            </template>
+                    <img
+                        v-else
+                        src="@img/volume-off.svg"
+                        class="h-8 w-8 object-contain opacity-30"
+                        alt=""
+                    />
 
-            <template #[`item.narration_enabled`]="{ item }">
-                <img
-                    v-if="item.narration_enabled"
-                    src="@img/narration-on.svg"
-                    class="h-10 w-10 object-contain"
-                    alt=""
-                />
+                    <img
+                        v-if="item.narration_enabled"
+                        src="@img/narration-on.svg"
+                        class="h-8 w-8 object-contain"
+                        alt=""
+                    />
 
-                <img
-                    v-else
-                    src="@img/narration-off.svg"
-                    class="h-10 w-10 object-contain opacity-30"
-                    alt=""
-                />
+                    <img
+                        v-else
+                        src="@img/narration-off.svg"
+                        class="h-8 w-8 object-contain opacity-30"
+                        alt=""
+                    />
+
+                    <img
+                        v-if="item.is_realtime"
+                        src="@img/stream.svg"
+                        class="h-7 w-7 object-contain"
+                        alt=""
+                    />
+                </div>
             </template>
 
             <template #[`item.date_created`]="{ item }">
@@ -155,7 +162,7 @@
 
             <template v-if="editable" #[`item.actions`]="{ item }">
                 <table-action-buttons
-                    class="max-desktop-xl:flex-col"
+                    class="my-2 max-desktop-xl:flex-col"
                     @edit="emits('edit', item)"
                     @delete="emits('delete', item)"
                 />
@@ -221,22 +228,17 @@
             sortable: false,
         },
         {
-            title: 'Sound',
-            key: 'audio_enabled',
-            sortable: false,
-        },
-        {
-            title: 'Narration',
-            key: 'narration_enabled',
-            sortable: false,
-        },
-        {
             title: 'Date',
             key: 'date_created',
         },
         {
             title: 'Languages',
             key: 'language',
+        },
+        {
+            title: 'Settings',
+            key: 'audio_enabled',
+            sortable: false,
         },
         {
             title: 'Tags',

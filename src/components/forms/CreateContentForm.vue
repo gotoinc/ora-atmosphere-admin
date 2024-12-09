@@ -164,11 +164,19 @@
                     density="comfortable"
                     label="Narration enabled"
                 ></v-checkbox>
+
+                <v-checkbox
+                    v-model="isRealtime"
+                    hide-details
+                    color="primary"
+                    density="comfortable"
+                    label="Is Realtime"
+                ></v-checkbox>
             </div>
 
-            <div class="mb-5">
+            <div v-if="false" class="mb-5">
                 <v-btn
-                    v-if="content && defaultContent?.id !== content.id"
+                    v-if="content && defaultContent?.id !== content?.id"
                     type="submit"
                     color="primary"
                     class="text-none w-fit"
@@ -288,6 +296,7 @@
 
         <!-- Dialog for confirm -->
         <confirm-dialog
+            v-if="false"
             v-model="isDefaultContentDialog"
             :loading="isConfirmLoading"
             title="Are you sure you want to set current video as default?"
@@ -329,6 +338,7 @@
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import { getSource } from '@/hooks/useGetSource.ts';
+    import { useSortByName } from '@/hooks/useSortByName.ts';
     import { useThrowError } from '@/hooks/useThrowError.ts';
     import type { Audio, Identifiable, VideoFile } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
@@ -396,6 +406,7 @@
                 video_files: [],
                 description: '',
                 title: '',
+                preview_image: '',
                 audio_enabled: false,
                 narration_enabled: false,
                 requires_auth: false,
@@ -415,6 +426,7 @@
     const [requiresAuth] = defineField('requires_auth');
     const [withAudio] = defineField('audio_enabled');
     const [withNarration] = defineField('narration_enabled');
+    const [isRealtime] = defineField('is_realtime');
 
     const audioWithErrors = computed(() => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -457,13 +469,13 @@
                 'date_created',
                 'tags',
                 'audios',
+                'preview_image',
             ])
         );
 
         if (props.content) {
-            if (props.content.preview_image) {
-                imageSrc.value = props.content.preview_image;
-            }
+            imageSrc.value = props.content.preview_image ?? '';
+            image.value = props.content.preview_image ?? '';
 
             if (props.content.tags) {
                 tags.value = props.content.tags.split(', ');
@@ -593,12 +605,7 @@
             const items = (await getLanguages()) ?? [];
 
             if (items.length > 0) {
-                languagesList.value = items.map((item) => {
-                    return {
-                        name: item.name,
-                        id: item.id,
-                    };
-                });
+                languagesList.value = useSortByName(items);
             }
         } finally {
             isLanguagesLoading.value = false;
@@ -637,6 +644,7 @@
                 'audio_enabled',
                 'requires_auth',
                 'narration_enabled',
+                'is_realtime',
                 'title',
                 'description',
                 'tags',
@@ -688,7 +696,7 @@
             duration: Math.round(duration.value),
             tags: tags.value?.join(', '),
             topic: topic.value.id,
-            preview_image: image.value as File,
+            preview_image: image.value ?? '',
         };
 
         if (tabDescription.value === 2) {
@@ -701,7 +709,7 @@
 
         try {
             if (props.content) {
-                const updatedBody = getUpdatedContent(body);
+                const updatedBody = getUpdatedContent(body as ContentInput);
 
                 if (updatedBody && Object.keys(updatedBody).length > 0) {
                     isFeedbackOpen.value = true;
@@ -716,7 +724,7 @@
                 isLoading.value = true;
 
                 await postVideo({
-                    ...body,
+                    ...(body as ContentInput),
                     date_created: new Date().toISOString(),
                 });
 

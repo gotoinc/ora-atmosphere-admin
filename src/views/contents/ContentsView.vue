@@ -132,6 +132,7 @@
     import { getTopics } from '@/api/catalog/topics/get-topics.api.ts';
     import { deleteContent } from '@/api/contents/delete-content.api.ts';
     import { getContents } from '@/api/contents/get-contents.api.ts';
+    import { useSortByName } from '@/hooks/useSortByName.ts';
     import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams.ts';
     import type { Identifiable } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
@@ -218,14 +219,7 @@
             const items = (await getTopics()) ?? [];
 
             if (items.length > 0) {
-                topics.value = items
-                    .map((item) => {
-                        return {
-                            name: item.name,
-                            id: item.id,
-                        };
-                    })
-                    .sort((a, b) => a.name.localeCompare(b.name));
+                topics.value = useSortByName(items);
             }
         } finally {
             isTopicsLoading.value = false;
