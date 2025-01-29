@@ -1,12 +1,12 @@
 import { computed, ref } from 'vue';
 import { useToast } from 'vue-toastification';
-import Cookies from 'js-cookie';
 
 import { defineStore } from 'pinia';
 
 import { authLogin } from '@/api/auth/auth-login.api.ts';
 import { authLogout } from '@/api/auth/auth-logout.api.ts';
 import { getProfile } from '@/api/auth/get-profile.api.ts';
+import { getAuthToken, removeAuthToken, setAuthToken } from '@/api/cookies.ts';
 import { useThrowError } from '@/hooks/useThrowError.ts';
 import router from '@/router';
 import type { AdminUser } from '@/ts/users';
@@ -18,7 +18,7 @@ export const useAuthStore = defineStore(
     'auth',
     () => {
         const isEmailConfirmed = ref(false);
-        const isAuthenticated = ref(!!Cookies.get('ora_admin'));
+        const isAuthenticated = ref(!!getAuthToken());
         const isSuperAdmin = computed(
             () => profile.value?.role === 'super-admin'
         );
@@ -30,7 +30,7 @@ export const useAuthStore = defineStore(
         );
 
         const clearAuth = () => {
-            Cookies.remove('ora_admin');
+            removeAuthToken();
             isAuthenticated.value = false;
             profile.value = null;
             toast.clear();
@@ -59,7 +59,6 @@ export const useAuthStore = defineStore(
 
                 if (res) {
                     clearAuth();
-
                     toast.success(res.detail);
                 }
             } catch (e) {
@@ -73,11 +72,7 @@ export const useAuthStore = defineStore(
                 const res = await authLogin(body);
 
                 if (res) {
-                    Cookies.set('ora_admin', res.token, {
-                        expires: remember ? 14 : 1 / 48,
-                        sameSite: 'Strict',
-                        secure: true,
-                    });
+                    setAuthToken(res.token, remember);
 
                     toast.success('Login success');
 
