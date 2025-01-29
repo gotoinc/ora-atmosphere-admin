@@ -1,24 +1,24 @@
+import type { AxiosStatic } from 'axios';
 import axios from 'axios';
-import Cookies from 'js-cookie';
 
-axios.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+import { getAuthToken } from '@/api/cookies.ts';
 
-axios.interceptors.request.use(function (config) {
-    const token = Cookies.get('ora_admin');
+export const setupAxios = (axiosObject: AxiosStatic) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    axiosObject.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
+    axiosObject.interceptors.request.use(
+        (config) => {
+            const token = getAuthToken();
 
-    if (token) {
-        config.headers.Authorization = `Token ${token}`;
-    }
+            if (token) {
+                config.headers.Authorization = `Token ${token}`;
+            }
 
-    return config;
-});
-
-axios.defaults.baseURL = 'https://api.ora.vision';
+            return config;
+        },
+        async (error) => await Promise.reject(error)
+    );
+};
 
 export const clenAxios = axios.create();
 
