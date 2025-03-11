@@ -6,6 +6,8 @@ export interface DetailResponse {
 
 export interface Identifiable extends Pick<CommonCatalogTypes, 'id' | 'name'> {}
 
+export type MediaType = 'image' | 'video';
+
 export interface Audio {
     id: number;
     file: string;
@@ -17,5 +19,6 @@ export interface Audio {
 export interface VideoFile {
     file: File | string;
     id?: number;
+    media_type: MediaType;
     language: Identifiable;
 }

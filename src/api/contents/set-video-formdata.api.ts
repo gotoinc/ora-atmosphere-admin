@@ -18,10 +18,12 @@ export const setVideoFormdata = (
     const appendMediaFiles = (
         files: VideoFile[],
         fileKey: string,
+        mediaTypeKey: string,
         langKey: string
     ) => {
         files.forEach((file) => {
             formData.append(fileKey, file.file);
+            formData.append(mediaTypeKey, file.media_type);
             formData.append(langKey, String(file.language.id));
         });
     };
@@ -83,10 +85,16 @@ export const setVideoFormdata = (
     });
 
     // Append video files
-    appendMediaFiles(videos ?? [], 'video_files', 'video_file_languages');
+    appendMediaFiles(
+        videos ?? [],
+        'video_files',
+        'video_file_media_types',
+        'video_file_languages'
+    );
     appendMediaFiles(
         newVideos ?? [],
         'new_video_files',
+        'new_video_file_media_types',
         'new_video_file_languages'
     );
 

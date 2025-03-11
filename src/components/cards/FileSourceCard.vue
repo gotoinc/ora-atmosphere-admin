@@ -11,7 +11,7 @@
         ></audio>
 
         <video
-            v-else
+            v-else-if="mediaType === 'video'"
             ref="videoElement"
             class="h-48 w-full rounded-lg object-cover"
             controls
@@ -22,7 +22,14 @@
             <source :src="getVideoSrc(data.file)" />
         </video>
 
-        <div class="mt-4 flex-grow space-y-4">
+        <img
+            v-else
+            class="rounded-lg"
+            :src="getVideoSrc(data.file)"
+            alt="Content image"
+        />
+
+        <div class="my-4 flex-grow space-y-4">
             <template v-if="isFile(data.file)">
                 <div>
                     <span> File name:</span>
@@ -46,34 +53,36 @@
                 </a>
             </p>
 
-            <p>
+            <p v-if="mediaType !== 'image'">
                 File duration:
                 {{ useFormatDuration(duration) }}
             </p>
 
-            <template v-if="isFile(data.file)">
-                <p class="my-3">Please select language</p>
+            <template v-if="mediaType !== 'image'">
+                <template v-if="isFile(data.file)">
+                    <p class="my-3">Please select language</p>
 
-                <v-select
-                    v-model="language"
-                    label="Languages"
+                    <v-select
+                        v-model="language"
+                        label="Languages"
+                        variant="outlined"
+                        clearable
+                        item-title="name"
+                        :loading="isLanguagesLoading"
+                        :items="languagesList"
+                        return-object
+                        @update:model-value="updateLanguage"
+                    />
+                </template>
+
+                <v-text-field
+                    v-else
+                    label="Language"
+                    :model-value="language.name"
                     variant="outlined"
-                    clearable
-                    item-title="name"
-                    :loading="isLanguagesLoading"
-                    :items="languagesList"
-                    return-object
-                    @update:model-value="updateLanguage"
+                    :readonly="!isFile(data.file)"
                 />
             </template>
-
-            <v-text-field
-                v-else
-                label="Language"
-                :model-value="language.name"
-                variant="outlined"
-                :readonly="!isFile(data.file)"
-            />
         </div>
 
         <v-btn
@@ -101,14 +110,14 @@
 
     interface Emits {
         (e: 'remove-audio', value: CreateAudio): void;
-        (e: 'remove-video', value: VideoFile): void;
+        (e: 'remove-content', value: VideoFile): void;
         (e: 'duration-loaded', value: number): void;
         (e: 'change-language', value: SourceData, language: Identifiable): void;
     }
 
     const props = defineProps<{
         data: SourceData;
-        mediaType: 'audio' | 'video';
+        mediaType: 'audio' | 'video' | 'image';
         languagesList: Identifiable[];
         isLanguagesLoading?: boolean;
     }>();
@@ -126,8 +135,8 @@
         isFile(src) ? getSource(src) : src;
 
     const removeFile = (data: SourceData) => {
-        props.mediaType === 'video'
-            ? emits('remove-video', data)
+        props.mediaType === 'video' || props.mediaType === 'image'
+            ? emits('remove-content', data as VideoFile)
             : emits('remove-audio', data as CreateAudio);
     };
 

@@ -13,7 +13,11 @@ import type { CreateAudio } from '@/validations/types/content.validation';
 // Email
 export const emailValidation = string()
     .email('Please enter a valid email')
-    .required('Please enter email');
+    .matches(
+        /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/,
+        'Please enter a valid email'
+    )
+    .required('Email is required');
 
 // Password
 export const passwordValidation = string()
@@ -94,6 +98,9 @@ export const audioSchema: ObjectSchema<CreateAudio> = object({
 
 export const videoSchema: ObjectSchema<VideoFile> = object({
     id: number().typeError('ID must be a number'),
+    media_type: string()
+        .oneOf(['image', 'video'] as const)
+        .required(),
     file: fileSchema.required('Please upload a file'),
     language: identifiableSchema.required(
         'Please select language for each video'

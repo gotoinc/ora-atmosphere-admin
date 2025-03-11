@@ -2,16 +2,16 @@
     <div class="h-full pb-12">
         <div class="mb-5 w-full gap-4">
             <div class="mb-5 w-full rounded bg-grey-400 p-4">
-                <h3 class="mb-5 text-lg font-semibold">Upload video</h3>
+                <h3 class="mb-5 text-lg font-semibold">Upload files</h3>
 
                 <drag-and-drop
                     :error="!!errors.video_files"
-                    :accept="acceptedVideos"
+                    :accept="[...acceptedVideos, ...acceptedImages]"
                     multiple
                     :files-list="videoFiles"
                     :file-to-remove="videoToRemove"
                     class="mb-5"
-                    @upload="selectVideoFiles"
+                    @upload="selectContentFiles"
                 >
                     <template #icon>
                         <span class="mdi mdi-video-vintage text-6xl"></span>
@@ -20,10 +20,10 @@
 
                 <!-- Video block -->
                 <div>
-                    <div v-if="videos.length > 0">
+                    <div v-if="contentFiles.length > 0">
                         <h4 class="mb-2 font-semibold">
                             Uploaded files
-                            {{ `(${videos.length})` }}
+                            {{ `(${contentFiles.length})` }}
                         </h4>
 
                         <p
@@ -36,13 +36,13 @@
                         <div class="grid grid-cols-3 gap-3 max-tab:grid-cols-1">
                             <template v-if="!isVideosLoading">
                                 <file-source-card
-                                    v-for="(video, i) in videos"
+                                    v-for="(item, i) in contentFiles"
                                     :key="i"
-                                    :data="video"
-                                    media-type="video"
+                                    :data="item"
+                                    :media-type="item.media_type"
                                     :languages-list="languagesList"
                                     :is-languages-loading="isLanguagesLoading"
-                                    @remove-video="removeVideoFile"
+                                    @remove-content="removeContentFile"
                                     @change-language="updateVideoLanguage"
                                     @duration-loaded="(num) => (duration = num)"
                                 />
@@ -50,7 +50,7 @@
 
                             <template v-else>
                                 <v-skeleton-loader
-                                    v-for="i in videos.length"
+                                    v-for="i in contentFiles.length"
                                     :key="i"
                                     class="h-64 w-full rounded"
                                 />
@@ -65,7 +65,7 @@
                 <h3 class="mb-5 text-lg font-semibold">Upload audio</h3>
 
                 <v-tooltip
-                    :open-on-hover="videos.length > 1"
+                    :open-on-hover="contentFiles.length > 1"
                     location="top center"
                     origin="overlap"
                 >
@@ -77,7 +77,7 @@
                                 :file-to-remove="audioToRemove"
                                 :files-list="audioFiles"
                                 class="mb-5"
-                                :disable="videos.length > 1"
+                                :disable="contentFiles.length > 1"
                                 @upload="selectAudioFiles"
                             >
                                 <template #icon>
@@ -94,7 +94,7 @@
                 </v-tooltip>
 
                 <div
-                    v-if="audios?.length && videos.length < 2"
+                    v-if="audios?.length && contentFiles.length < 2"
                     class="grid gap-2"
                 >
                     <h4 class="mb-2 font-semibold">
@@ -334,13 +334,19 @@
     import { setDefaultContent } from '@/api/contents/set-default-content.api.ts';
     import { updateVideo } from '@/api/contents/update-video.api.ts';
     import acceptedAudios from '@/constants/accepted-audios.ts';
+    import acceptedImages from '@/constants/accepted-images.ts';
     import acceptedVideos from '@/constants/accepted-videos.ts';
     import { useCompareObjects } from '@/hooks/useCompareObjects.ts';
     import { useExcludeProperties } from '@/hooks/useExcludeProperties.ts';
     import { getSource } from '@/hooks/useGetSource.ts';
     import { useSortByName } from '@/hooks/useSortByName.ts';
     import { useThrowError } from '@/hooks/useThrowError.ts';
-    import type { Audio, Identifiable, VideoFile } from '@/ts/common';
+    import type {
+        Audio,
+        Identifiable,
+        MediaType,
+        VideoFile,
+    } from '@/ts/common';
     import type { VideoContent } from '@/ts/contents';
     import { isFile } from '@/ts/guards/file.guard.ts';
     import { createContentSchema } from '@/validations/schemas/content.schema.ts';
@@ -418,7 +424,7 @@
      */
     const [title] = defineField('title');
     const [description] = defineField('description');
-    const [videos] = defineField('video_files');
+    const [contentFiles] = defineField('video_files');
     const [image] = defineField('preview_image');
     const [topic] = defineField('topic');
     const [tags] = defineField('tags');
@@ -435,7 +441,7 @@
 
     const videoWithErrors = computed(() => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        return videos.value.filter((video) => !video.language.id) ?? [];
+        return contentFiles.value.filter((video) => !video.language?.id) ?? [];
     });
 
     const splitTags = (items: string[]) => {
@@ -488,7 +494,7 @@
                 audios.value = [...props.content.audios];
             }
 
-            videos.value = [...props.content.video_files];
+            contentFiles.value = [...props.content.video_files];
         }
     };
 
@@ -501,8 +507,11 @@
         }
     };
 
-    const updateVideoLanguage = (data: VideoFile, language: Identifiable) => {
-        videos.value.forEach((item) => {
+    const updateVideoLanguage = (
+        data: CreateAudio | VideoFile,
+        language: Identifiable
+    ) => {
+        contentFiles.value.forEach((item) => {
             if (item.file === data.file) {
                 item.language = { ...language };
             }
@@ -529,11 +538,12 @@
     /*
      * Functions for file selection
      */
-    const selectVideoFiles = (files: File[] | File) => {
+    const selectContentFiles = (files: File[] | File) => {
         if (Array.isArray(files)) {
             files.forEach((item) => {
-                videos.value.push({
+                contentFiles.value.push({
                     file: item,
+                    media_type: item.type.split('/')[0] as MediaType,
                     language: languagesList.value[0],
                 });
             });
@@ -573,17 +583,17 @@
         isShowCard.value = false;
     };
 
-    const removeVideoFile = (video: VideoFile) => {
+    const removeContentFile = (video: VideoFile) => {
         isWatching = false;
 
         if (video.id) videoIdsToRemove.value.push(video.id);
 
         videoToRemove.value = video.file as File;
-        videos.value = videos.value.filter((item) =>
+        contentFiles.value = contentFiles.value.filter((item) =>
             video.id ? video.id !== item.id : item.file !== video.file
         );
 
-        if (videos.value.length < 2 && props.content?.audios) {
+        if (contentFiles.value.length < 2 && props.content?.audios) {
             audios.value = [...props.content.audios];
         }
     };
@@ -640,7 +650,7 @@
     const getUpdatedContent = (body: ContentInput) => {
         if (props.content) {
             /**
-             * Check changes in form except of: audios, videos
+             * Check changes in form except of: audios, content files
              */
             const excluded = useExcludeProperties({ ...props.content }, [
                 'duration',
@@ -669,7 +679,7 @@
             if (newAudios?.length) updateBody.audios = newAudios;
 
             /**
-             * Check changes in videos
+             * Check changes in content files
              */
             const newVideos = values.video_files.filter((video) => !video.id);
 
